@@ -8,7 +8,7 @@ use_plugin("python.coverage")
 use_plugin("python.distutils")
 use_plugin("python.pycharm")
 
-name = "grapes"
+name = "grapple"
 version = "0.0.1"
 default_task = ["clean", "analyze", "publish"]
 
