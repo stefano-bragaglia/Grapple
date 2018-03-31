@@ -15,7 +15,7 @@ class Container(object):
     def get_properties(self, keys: List[str] = None) -> Dict[str, Value]:
         if keys is None:
             keys = list(self._properties.keys())
-        return {key: self._properties[key] for key in keys}
+        return {key: self._properties[key] for key in keys if key in self._properties}
 
     def has_property(self, key: str) -> bool:
         return key in self._properties

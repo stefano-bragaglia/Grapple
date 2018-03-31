@@ -20,6 +20,9 @@ def set_properties(project):
     project.set_property("flake8_break_build", True)  # default is False
     project.set_property("flake8_verbose_output", True)  # default is False
     project.set_property("coverage_break_build", True)  # default is False
+
+    project.set_property("coverage_allow_non_imported_modules", False)  # default is True
+
     project.set_property("flake8_radon_max", 10)  # default is None
     project.set_property_if_unset("flake8_max_complexity", 10)  # default is None
     # Complexity: <= 10 is easy, <= 20 is complex, <= 50 great difficulty, > 50 unmaintainable
