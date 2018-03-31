@@ -15,7 +15,11 @@ class Graph(object):
 
     @property
     def nodes(self) -> List['Node']:
-        return list(self._nodes)
+        return list(self._nodes.values())
+
+    @property
+    def relations(self) -> List['Relation']:
+        return list(self._relations.values())
 
     def create_node(self) -> 'Node':
         ident = self.next_ident()
