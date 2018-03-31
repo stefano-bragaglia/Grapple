@@ -15,6 +15,8 @@ default_task = ["clean", "analyze", "publish"]
 
 @init
 def set_properties(project):
+    project.depends_on('assertpy')
+
     project.set_property("flake8_break_build", True)  # default is False
     project.set_property("flake8_verbose_output", True)  # default is False
     project.set_property("coverage_break_build", True)  # default is False
@@ -24,5 +26,4 @@ def set_properties(project):
 
     project.set_property("dir_source_unittest_python", "src/test/python")
 
-    project.depends_on("assertpy")
     project.depends_on_requirements("requirements.txt")

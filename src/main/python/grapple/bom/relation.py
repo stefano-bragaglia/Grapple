@@ -2,6 +2,7 @@ from typing import Optional
 
 
 class Relation(object):
+
     def __init__(self, graph: 'Graph', ident: int, tail: 'Node', head: 'Node') -> None:
         self._graph = graph
         self._ident = ident
