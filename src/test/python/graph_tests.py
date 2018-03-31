@@ -28,4 +28,33 @@ class TestGraph(TestCase):
         assert_that(graph.next_ident()).is_equal_to(2)
         node_c = graph.create_node()
         assert_that(graph.next_ident()).is_equal_to(3)
-        node_a
+        node_a.delete()
+        assert_that(graph.next_ident()).is_equal_to(0)
+        node_c.delete()
+        assert_that(graph.next_ident()).is_equal_to(0)
+        node_c = graph.create_node()
+        assert_that(graph.next_ident()).is_equal_to(2)
+        node_a = graph.create_node()
+        assert_that(graph.next_ident()).is_equal_to(3)
+        node_d = graph.create_node()
+        assert_that(graph.next_ident()).is_equal_to(4)
+
+    def test__when__releasing_ident__given__ident__then__next_ident(self):
+        graph = Graph()
+        graph.release_ident(5)
+
+        assert_that(graph.next_ident()).is_equal_to(5)
+
+    def test__when__locking_ident__given__non_existing_ident__then__nothing_changes(self):
+        graph = Graph()
+        graph.release_ident(5)
+        graph.lock_ident(7)
+
+        assert_that(graph.next_ident()).is_equal_to(5)
+
+    def test__when__locking_ident__given__existing_ident__then__ident_released(self):
+        graph = Graph()
+        graph.release_ident(5)
+        graph.lock_ident(5)
+
+        assert_that(graph.next_ident()).is_equal_to(0)
