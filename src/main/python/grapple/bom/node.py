@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 
 from grapple.bom.relation import Relation
 
@@ -17,6 +17,10 @@ class Node(object):
     @property
     def ident(self) -> int:
         return self._ident
+
+    @property
+    def relations(self) -> List['Relation']:
+        return list(self._relations.values())
 
     # noinspection PyProtectedMember
     def create_relation_to(self, node: 'Node') -> 'Relation':
