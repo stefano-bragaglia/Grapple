@@ -9,9 +9,6 @@ class Relation(object):
         self._tail = tail
         self._head = head
 
-    def __repr__(self) -> str:
-        return '%s-[#%d]->%s' % (self.tail, self._ident, self._head)
-
     @property
     def graph(self) -> Optional['Graph']:
         return self._graph

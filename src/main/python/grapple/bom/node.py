@@ -10,9 +10,6 @@ class Node(object):
         self._ident = ident
         self._relations = {}
 
-    def __repr__(self) -> str:
-        return '(#%d)' % self._ident
-
     @property
     def graph(self) -> Optional['Graph']:
         return self._graph
