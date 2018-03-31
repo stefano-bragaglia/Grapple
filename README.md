@@ -1,7 +1,5 @@
-Grapple
+![**Grapple** logo](https://github.com/stefano-bragaglia/Grapple/blob/master/docs/logo.png "**Grapple**") Grapple
 =======
-
-![**Grapple** logo](https://github.com/stefano-bragaglia/Grapple/blob/master/docs/logo.png "**Grapple**")
 
 (GRAP)h-based (P)roduction-rules (L)anguage and (E)ngine
 --------------------------------------------------------

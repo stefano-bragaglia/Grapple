@@ -1,6 +1,6 @@
 from typing import Optional
 
-from grapes.bom.relation import Relation
+from grapple.bom.relation import Relation
 
 
 class Node(object):
@@ -25,8 +25,9 @@ class Node(object):
     def create_relation_to(self, node: 'Node') -> 'Relation':
         if node.graph != self._graph:
             raise ValueError("'node' is invalid: <%s>" % node)
-        ident = self._graph._next_ident()
+        ident = self._graph.next_ident()
         relation = Relation(self._graph, ident, self, node)
+        self._graph.lock_ident(ident)
         self._graph._relations[ident] = relation
         self._relations[ident] = relation
         node._relations[ident] = relation
@@ -37,5 +38,5 @@ class Node(object):
         if self._relations:
             raise Exception('Node not empty')
         self._graph._nodes.pop(self._ident)
-        self._graph._pool.append(self._ident)
+        self._graph.release_ident(self._ident)
         self._graph = None

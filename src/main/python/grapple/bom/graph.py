@@ -1,6 +1,6 @@
 from typing import List
 
-from grapes.bom.node import Node
+from grapple.bom.node import Node
 
 
 class Graph(object):
@@ -18,14 +18,22 @@ class Graph(object):
         return list(self._nodes)
 
     def create_node(self) -> 'Node':
-        ident = self._next_ident()
+        ident = self.next_ident()
         self._nodes[ident] = Node(self, ident)
+        self.lock_ident(ident)
         return self._nodes[ident]
 
-    def _next_ident(self) -> int:
+    def next_ident(self) -> int:
         if self._pool:
-            return self._pool.pop(0)
+            return self._pool[0]
         return len(self._nodes) + len(self._relations)
+
+    def lock_ident(self, ident: int) -> None:
+        if ident in self._pool:
+            self._pool.remove(ident)
+
+    def release_ident(self, ident: int) -> None:
+        self._pool.append(ident)
 
 
 if __name__ == '__main__':

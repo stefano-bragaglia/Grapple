@@ -28,13 +28,13 @@
 # DO NOT RUN MANUALLY
 #
 
+import glob
 import os
+import shutil
 import subprocess
 import sys
-import glob
-import shutil
-
 from sys import version_info
+
 py3 = version_info[0] == 3
 py2 = not py3
 if py2:
@@ -53,7 +53,7 @@ except FileNotFoundError as e:
     else:
         raise
 except subprocess.CalledProcessError as e:
-        sys.exit(e.returncode)
+    sys.exit(e.returncode)
 
 try:
     subprocess.check_call(["pyb", "clean", "install_build_dependencies", "package", "-o"])
