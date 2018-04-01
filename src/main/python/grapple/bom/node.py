@@ -8,6 +8,7 @@ class Node(object):
     def __init__(self, graph: 'Graph', ident: int) -> None:
         self._graph = graph
         self._ident = ident
+        self._labels = []
         self._relations = {}
 
     @property
@@ -19,8 +20,22 @@ class Node(object):
         return self._ident
 
     @property
+    def labels(self) -> List[str]:
+        return self._labels
+
+    @property
     def relations(self) -> List['Relation']:
         return list(self._relations.values())
+
+    def add_labels(self, *labels: str) -> None:
+        for label in labels:
+            if str(label) not in self._labels:
+                self._labels.append(str(label))
+
+    def remove_labels(self, *labels: str) -> None:
+        for label in labels:
+            if str(label) in self._labels:
+                self._labels.remove(str(label))
 
     # noinspection PyProtectedMember
     def create_relation_to(self, node: 'Node') -> 'Relation':
