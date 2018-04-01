@@ -29,6 +29,7 @@ class TestRelation(TestCase):
         assert_that(relation.ident).is_equal_to(ident)
         assert_that(relation.tail).is_equal_to(tail)
         assert_that(relation.head).is_equal_to(head)
+        assert_that(relation.types).is_empty()
 
     def test__when__other__given__tail__then__head(self):
         graph = Graph()
@@ -83,3 +84,22 @@ class TestRelation(TestCase):
 
         assert_that(relation.graph).is_none()
         assert_that(graph.next_ident()).is_equal_to(ident)
+
+    def test__when__add_types__given__types__then__types(self):
+        graph = Graph()
+        tail = graph.create_node()
+        head = graph.create_node()
+        relation = tail.create_relation_to(head)
+        relation.add_types('type1', 'type2', 'type1')
+
+        assert_that(relation.types).contains_only('type1', 'type2')
+
+    def test__when__remove_types__given__types_and_outlier__then__remaining_types(self):
+        graph = Graph()
+        tail = graph.create_node()
+        head = graph.create_node()
+        relation = tail.create_relation_to(head)
+        relation.add_types('type1', 'type2')
+        relation.remove_types('type2', 'type3')
+
+        assert_that(relation.types).contains_only('type1')

@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 
 
 class Relation(object):
@@ -8,6 +8,7 @@ class Relation(object):
         self._ident = ident
         self._tail = tail
         self._head = head
+        self._types = []
 
     @property
     def graph(self) -> Optional['Graph']:
@@ -25,6 +26,10 @@ class Relation(object):
     def head(self) -> 'Node':
         return self._head
 
+    @property
+    def types(self) -> List[str]:
+        return self._types
+
     def other(self, node: 'Node') -> 'Node':
         if node == self._tail:
             return self._head
@@ -32,6 +37,16 @@ class Relation(object):
             return self._tail
         else:
             raise ValueError("'node' is invalid: <%s>" % node)
+
+    def add_types(self, *types: str) -> None:
+        for type_ in types:
+            if str(type_) not in self._types:
+                self._types.append(str(type_))
+
+    def remove_types(self, *types: str) -> None:
+        for type_ in types:
+            if str(type_) in self._types:
+                self._types.remove(str(type_))
 
     # noinspection PyProtectedMember
     def delete(self) -> None:

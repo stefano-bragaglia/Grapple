@@ -14,6 +14,7 @@ class TestNode(TestCase):
 
         assert_that(node.graph).is_equal_to(graph)
         assert_that(node.ident).is_equal_to(ident)
+        assert_that(node.labels).is_empty()
 
     def test__when__relations__given__nothing__then__relations(self):
         graph = Graph()
@@ -41,3 +42,18 @@ class TestNode(TestCase):
             .raises(Exception) \
             .when_called_with() \
             .is_equal_to('Node not empty')
+
+    def test__when__add_labels__given__labels__then__labels(self):
+        graph = Graph()
+        node = graph.create_node()
+        node.add_labels('label1', 'label2', 'label1')
+
+        assert_that(node.labels).contains_only('label1', 'label2')
+
+    def test__when__remove_labels__given__labels_and_outlier__then__remaining_labels(self):
+        graph = Graph()
+        node = graph.create_node()
+        node.add_labels('label1', 'label2')
+        node.remove_labels('label2', 'label3')
+
+        assert_that(node.labels).contains_only('label1')
