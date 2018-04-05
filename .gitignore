@@ -1,0 +1,15 @@
+.env
+.venv
+.venv.leave
+
+.idea/
+
+.coverage
+build/
+docs/_build/
+target/
+
+*.py[cod]
+*$py.class
+*.so
+__pycache__/
