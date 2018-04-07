@@ -103,8 +103,9 @@ def base():
 
 
 if __name__ == '__main__':
-    data = 'MATCH ( $var :lab1 :lab2 {"key1": "value", "key2": 0, "key3": 0.0, "key4": true, "key5": null, "key6": [], "key7": [1, 2, 3], ' \
-           '"key8": {}, "key9": {"key0": null}} )-[$r:type{"time":"str"}]->(); /* skip me */'
+    data = 'MATCH ( $var :lab1 :lab2 {"key1": "value", "key2": 0, "key3": 0.0, "key4": true, "key5": null, ' \
+           '"key6": [], "key7": [1, 2, 3], "key8": {}, "key9": {"key0": null}} )-[$r:type{"time":"str"}]->(); ' \
+           '/* skip me */'
     parser = ParserPython(base, comment, debug=True)
     tree = parser.parse(data)
     print('Done.')

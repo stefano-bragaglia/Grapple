@@ -22,11 +22,13 @@ class Graph(object):
         ident = self.next_ident()
         self._nodes[ident] = Node(self, ident)
         self.lock_ident(ident)
+
         return self._nodes[ident]
 
     def next_ident(self) -> int:
         if self._pool:
             return self._pool[0]
+
         return len(self._nodes) + len(self._relations)
 
     def lock_ident(self, ident: int) -> None:
