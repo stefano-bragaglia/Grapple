@@ -17,5 +17,5 @@ class Rule(object):
     def action(self) -> 'Action':
         return self._action
 
-    def apply(self, params: 'Params') -> 'Record':
-        return self._action.apply(params)
+    def apply(self, params: 'Params', graph: 'Graph') -> 'Record':
+        return self._action.apply(params, graph)

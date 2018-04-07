@@ -12,5 +12,5 @@ class Action(object):
     def pattern(self) -> 'Pattern':
         return self._pattern
 
-    def apply(self, params: Params) -> Record:
-        raise NotImplementedError()
+    def apply(self, params: Params, graph: 'Graph') -> Record:
+        raise NotImplementedError('To be implemented')
