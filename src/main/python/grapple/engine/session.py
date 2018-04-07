@@ -16,11 +16,8 @@ class Session(object):
     def insert(self, entity: 'Entity'):
         raise NotImplementedError('To be implemented...')
 
-    def delete(self, entity: 'Entity'):
+    def delete(self, entity: 'Entity', label: str = None, rel_type: str = None, key: str = None, value: str = None):
         raise NotImplementedError('To be implemented...')
-
-    # TODO  def modify(self, entity: 'Entity'):
-    # TODO      raise NotImplementedError('To be implemented...')
 
     def run(self) -> Optional['Record']:
         activation = self._agenda.extract()
