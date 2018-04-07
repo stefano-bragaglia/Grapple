@@ -1,6 +1,6 @@
-from typing import Dict, List, Union
+from grapple.engine.activation import Params
 
-from grapple.bom.container import Value
+Record = Params
 
 
 class Action(object):
@@ -12,5 +12,5 @@ class Action(object):
     def pattern(self) -> 'Pattern':
         return self._pattern
 
-    def apply(self, rule: 'Rule', params: Dict[str, 'Entity']) -> List[Dict[str, Union[None, Value, 'Entity']]]:
+    def apply(self, params: Params) -> Record:
         raise NotImplementedError()
