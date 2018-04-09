@@ -1,39 +1,43 @@
 from valid_model import Object
-from valid_model.descriptors import String, List, Dict, EmbeddedObject, Bool, Integer
+from valid_model.descriptors import String, List, Dict, EmbeddedObject
 
 
-class EntityDescriptor(Object):
+class RelationDesc(Object):
+    variable = String()
+    types = List(value=String(nullable=False))
+    properties = Dict(key=String(nullable=False))
+
+
+class NodeDesc(Object):
     variable = String()
     labels = List(value=String(nullable=False))
     properties = Dict(key=String(nullable=False))
 
 
-class PathDescriptor(Object):
-    variable = String()
-    entities = List(value=EmbeddedObject(EntityDescriptor))
+class StepDesc(Object):
+    relation = EmbeddedObject(RelationDesc)
+    node = EmbeddedObject(NodeDesc)
 
 
-class PatternDescriptor(Object):
-    paths = List(value=EmbeddedObject(PathDescriptor))
+class PathDesc(Object):
+    source = EmbeddedObject(NodeDesc)
+    steps = List(value=EmbeddedObject(StepDesc))
 
 
-class RecordDescriptor(Object):
+class RecordDesc(Object):
     variable = String(nullable=False)
     property = String()
-    name = String()
+    title = String()
 
 
-class OrderDescriptor(Object):
-    variable = String()
-    property = String()
-    name = String()
-    asc = Bool(default=True)
+class ReturnDesc(Object):
+    records = List(value=EmbeddedObject(RecordDesc))
 
 
-class ReturnDescriptor(Object):
-    records = List(value=EmbeddedObject(RecordDescriptor(nullable=False)))
-    ordering = List(value=EmbeddedObject(OrderDescriptor(nullable=False)))
-    limit = Integer(default=-1)
+class RuleDesc(Object):
+    pattern = List(value=EmbeddedObject(PathDesc))
+    result = EmbeddedObject(ReturnDesc)
 
 
-if __name__ == '__main__':
+class BaseDesc(Object):
+    rules = List(value=EmbeddedObject(RuleDesc))

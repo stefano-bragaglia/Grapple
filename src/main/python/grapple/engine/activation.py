@@ -7,6 +7,7 @@ Params = Dict[str, Union[None, Value, Entity]]
 
 
 class Activation(object):
+    # TODO Replace Rule with just Action?
 
     def __init__(self, rule: 'Rule', params: 'Params'):
         self._rule = rule

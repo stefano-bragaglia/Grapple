@@ -38,15 +38,13 @@ class Root(object):
 
 class Alpha(object):
 
-    def __init__(self, condition: 'Condition' = None, variable: str = None):
-        self._children = []
+    def __init__(self, condition: 'Condition', parent: 'Node', variable: str = None):
         self._condition = condition
         self._memory = []
+        self._children = []
         self._variable = variable
 
-    @property
-    def children(self) -> List['Node']:
-        return self._children
+        parent.register(self)
 
     @property
     def condition(self) -> Optional['Condition']:
@@ -55,6 +53,10 @@ class Alpha(object):
     @property
     def memory(self) -> List[Payload]:
         return self._memory
+
+    @property
+    def children(self) -> List['Node']:
+        return self._children
 
     @property
     def variable(self) -> str:
@@ -77,14 +79,33 @@ class Alpha(object):
             for child in self._children:
                 child.notify(payload, params)
 
-    def hook(self, parent: 'Node'):
-        parent.register(self)
-
 
 class Beta(object):
 
-    def __init__(self):
+    def __init__(self, condition: 'Condition', parent_sx: 'Node', parent_dx: 'Node', variable: str = None):
+        self._condition = condition
         self._memory = []
+        self._children = []
+        self._variable = variable
+
+        parent_sx.register(self)
+        parent_dx.register(self)
+
+    @property
+    def condition(self) -> Optional['Condition']:
+        return self._condition
+
+    @property
+    def memory(self) -> List[Payload]:
+        return self._memory
+
+    @property
+    def children(self) -> List['Node']:
+        return self._children
+
+    @property
+    def variable(self) -> str:
+        return self._variable
 
     def purge(self, entity: 'Entity'):
         for payload in self._memory:
@@ -94,22 +115,24 @@ class Beta(object):
 
 class Leaf(object):
 
-    def __init__(self, agenda: 'Agenda', rule: 'Rule'):
-        self._agenda = agenda
-        self._rule = rule
+    def __init__(self, parent: 'Node', rule: 'Rule', agenda: 'Agenda'):
         self._memory = []
+        self._rule = rule
+        self._agenda = agenda
+
+        parent.register(self)
 
     @property
-    def agenda(self) -> 'Agenda':
-        return self._agenda
+    def memory(self) -> List[Payload]:
+        return self._memory
 
     @property
     def rule(self) -> 'Rule':
         return self._rule
 
     @property
-    def memory(self) -> List[Payload]:
-        return self._memory
+    def agenda(self) -> 'Agenda':
+        return self._agenda
 
     def purge(self, entity: 'Entity'):
         for payload in self._memory:
@@ -122,6 +145,3 @@ class Leaf(object):
 
         activation = Activation(self._rule, params)
         self._agenda.append(activation)
-
-    def hook(self, parent: 'Node'):
-        parent.register(self)
