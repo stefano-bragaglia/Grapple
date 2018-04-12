@@ -85,6 +85,8 @@ class Beta(object):
         self._memory = []
         self._children = []
         self._variable = variable
+        self._parent_sx = parent_sx
+        self._parent_dx = parent_dx
 
         parent_sx.register(self)
         parent_dx.register(self)
@@ -109,6 +111,39 @@ class Beta(object):
         for payload in self._memory:
             if entity in payload:
                 self._memory.remove(payload)
+
+    def register(self, node: 'Node'):
+        if node not in self._children:
+            self._children.append(node)
+
+    def notify(self, payload: 'Payload', params: 'Params' = {}, source: 'Parent' = None):
+        # TODO Should probably change Entity to Payload in condition.*
+        if source == self._parent_sx:
+            for other in self._parent_dx.memory:
+                if self._condition and self._condition.passes(payload, other):
+                    if other not in payload:
+                        temp = payload + other
+                    else:
+                        temp = payload
+                    if temp not in self._memory:
+                        self._memory.append(temp)
+
+                    for child in self._children:
+                        child.notify(temp, params, self)
+        elif source == self._parent_dx:
+            for other in self._parent_sx.memory:
+                if self._condition and self._condition.passes(other, payload):
+                    if payload not in other:
+                        temp = other + payload
+                    else:
+                        temp = other
+                    if temp not in self._memory:
+                        self._memory.append(temp)
+
+                    for child in self._children:
+                        child.notify(temp, params, self)
+        else:
+            raise ValueError('Unexpected source: <%s>' % source)
 
 
 class Leaf(object):

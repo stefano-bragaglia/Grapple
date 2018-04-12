@@ -1,6 +1,6 @@
 from typing import List
 
-from grapple.engine.condition import IsNode, Condition, HasLabel, HasProperty, IsRelation, HasType
+from grapple.engine.condition import IsNode, HasLabel, HasProperty, IsRelation, HasType, Condition
 from grapple.engine.descriptors import BaseDesc, RuleDesc, PathDesc, NodeDesc, RecordDesc, ReturnDesc, RelationDesc
 from grapple.engine.rete import Root, Alpha, Beta
 
@@ -24,12 +24,12 @@ def node_conditions(node: NodeDesc) -> List[Condition]:
 def relation_conditions(relation: RelationDesc) -> List[Condition]:
     conditions = [IsRelation()]
 
-    for type in node.types:
+    for type in relation.types:
         condition = HasType(type)
         if condition not in conditions:
             conditions.append(condition)
 
-    for key, value in node.properties.items():
+    for key, value in relation.properties.items():
         condition = HasProperty(key, value)
         if condition not in conditions:
             conditions.append(condition)
@@ -59,15 +59,10 @@ def something(*bases: 'BaseDesc'):
                     else:
                         current = alpha
 
-
-                    if current:
-                    else:
-                        current = alpha
-
                 for label in path.source.labels:
                     HasLabel(label)
 
-                path.source
+                # path.source
 
                 print(path)
 

@@ -111,4 +111,4 @@ class AreEqual(Condition):
         return '=='
 
     def is_valid(self, payload: Payload, other: Payload = None) -> bool:
-        return payload and other and payload == other
+        return payload and other and payload[-1] == other[-1]
