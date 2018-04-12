@@ -2,8 +2,6 @@ from typing import List, Optional
 
 from grapple.engine.activation import Activation
 
-Payload = List['Entity']
-
 
 class Root(object):
 
@@ -16,7 +14,7 @@ class Root(object):
         return self._children
 
     @property
-    def memory(self) -> List[Payload]:
+    def memory(self) -> List['Payload']:
         return self._memory
 
     def purge(self, entity: 'Entity'):
@@ -28,7 +26,7 @@ class Root(object):
         if node not in self._children:
             self._children.append(node)
 
-    def notify(self, payload: Payload, params: 'Params' = {}, source: 'Parent' = None):
+    def notify(self, payload: 'Payload', params: 'Params' = {}, source: 'Parent' = None):
         if payload not in self._memory:
             self._memory.append(payload)
 
@@ -51,7 +49,7 @@ class Alpha(object):
         return self._condition
 
     @property
-    def memory(self) -> List[Payload]:
+    def memory(self) -> List['Payload']:
         return self._memory
 
     @property
@@ -71,7 +69,7 @@ class Alpha(object):
         if node not in self._children:
             self._children.append(node)
 
-    def notify(self, payload: Payload, params: 'Params' = {}, source: 'Parent' = None):
+    def notify(self, payload: 'Payload', params: 'Params' = {}, source: 'Parent' = None):
         if self._condition and self._condition.passes(payload):
             if payload not in self._memory:
                 self._memory.append(payload)
@@ -96,7 +94,7 @@ class Beta(object):
         return self._condition
 
     @property
-    def memory(self) -> List[Payload]:
+    def memory(self) -> List['Payload']:
         return self._memory
 
     @property
@@ -123,7 +121,7 @@ class Leaf(object):
         parent.register(self)
 
     @property
-    def memory(self) -> List[Payload]:
+    def memory(self) -> List['Payload']:
         return self._memory
 
     @property
@@ -139,7 +137,7 @@ class Leaf(object):
             if entity in payload:
                 self._memory.remove(payload)
 
-    def notify(self, payload: Payload, params: 'Params' = {}, source: 'Parent' = None):
+    def notify(self, payload: 'Payload', params: 'Params' = {}, source: 'Parent' = None):
         if payload not in self._memory:
             self._memory.append(payload)
 
