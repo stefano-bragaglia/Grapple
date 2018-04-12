@@ -10,7 +10,7 @@ class Condition(object):
     def signature(self) -> str:
         raise NotImplementedError('To be overridden in implementing classes')
 
-    def is_valid(self, entity: 'Entity', **kwargs) -> bool:
+    def is_valid(self, entity: 'Entity', other: 'Entity' = None) -> bool:
         raise NotImplementedError('To be overridden in implementing classes')
 
 
@@ -19,7 +19,7 @@ class IsNode(Condition):
     def signature(self) -> str:
         return '()'
 
-    def is_valid(self, entity: 'Entity', **kwargs) -> bool:
+    def is_valid(self, entity: 'Entity', other: 'Entity' = None) -> bool:
         return isinstance(entity, Node)
 
 
@@ -35,7 +35,7 @@ class HasLabel(Condition):
     def label(self) -> str:
         return self._label
 
-    def is_valid(self, entity: 'Entity', **kwargs) -> bool:
+    def is_valid(self, entity: 'Entity', other: 'Entity' = None) -> bool:
         return self._label in entity.labels
 
 
@@ -44,7 +44,7 @@ class IsRelation(Condition):
     def signature(self) -> str:
         return '[]'
 
-    def is_valid(self, entity: 'Entity', **kwargs) -> bool:
+    def is_valid(self, entity: 'Entity', other: 'Entity' = None) -> bool:
         return isinstance(entity, Relation)
 
 
@@ -60,7 +60,7 @@ class HasType(Condition):
     def type(self) -> str:
         return self._type
 
-    def is_valid(self, entity: 'Entity', **kwargs) -> bool:
+    def is_valid(self, entity: 'Entity', other: 'Entity' = None) -> bool:
         return self._type in entity.types
 
 
@@ -81,5 +81,15 @@ class HasProperty(Condition):
     def value(self) -> 'Value':
         return self._value
 
-    def is_valid(self, entity: 'Entity', **kwargs) -> bool:
+    def is_valid(self, entity: 'Entity', other: 'Entity' = None) -> bool:
         return entity.get_property(self._key) == self._value
+
+
+class IsEqual(Condition):
+
+    @property
+    def signature(self) -> str:
+        return '=='
+
+    def is_valid(self, entity: 'Entity', other: 'Entity' = None) -> bool:
+        return other is not None and entity == other

@@ -1,11 +1,11 @@
 from typing import List
 
-from grapple.engine.condition import IsNode, Condition, HasLabel, HasProperty, IsRelation, HasType
+from grapple.engine.condition import IsNode, AlphaCondition, HasLabel, HasProperty, IsRelation, HasType
 from grapple.engine.descriptors import BaseDesc, RuleDesc, PathDesc, NodeDesc, RecordDesc, ReturnDesc, RelationDesc
 from grapple.engine.rete import Root, Alpha, Beta
 
 
-def node_conditions(node: NodeDesc) -> List[Condition]:
+def node_conditions(node: NodeDesc) -> List[AlphaCondition]:
     conditions = [IsNode()]
 
     for label in node.labels:
@@ -21,7 +21,7 @@ def node_conditions(node: NodeDesc) -> List[Condition]:
     return conditions
 
 
-def relation_conditions(relation: RelationDesc) -> List[Condition]:
+def relation_conditions(relation: RelationDesc) -> List[AlphaCondition]:
     conditions = [IsRelation()]
 
     for type in node.types:
