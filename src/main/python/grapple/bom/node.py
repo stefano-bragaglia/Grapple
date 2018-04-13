@@ -1,13 +1,13 @@
 from typing import Optional, List
 
+from grapple.bom.entity import Entity
 from grapple.bom.relation import Relation
 
 
-class Node(object):
+class Node(Entity):
 
     def __init__(self, graph: 'Graph', ident: int):
-        self._graph = graph
-        self._ident = ident
+        super().__init__(graph, ident)
         self._labels = []
         self._relations = {}
 
