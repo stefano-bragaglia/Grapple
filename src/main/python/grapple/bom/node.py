@@ -1,3 +1,4 @@
+import json
 from typing import Optional, List, Dict
 
 from grapple.bom.container import Value
@@ -12,6 +13,16 @@ class Node(Entity):
         super().__init__(graph, ident)
         self._labels = []
         self._relations = {}
+
+    def __repr__(self) -> str:
+        content = '#%d' % self._ident
+        if self._labels:
+            content += ' :%s' % ':'.join(self._labels)
+        if self._properties:
+            content += ' {%s}' % ', '.join('%s: %s' % (json.dumps(i[0]), json.dumps(i[1]))
+                                           for i in self._properties.items())
+
+        return '(%s)' % content
 
     def __eq__(self, other):
         if not isinstance(other, Node):

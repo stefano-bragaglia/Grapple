@@ -1,3 +1,4 @@
+import json
 from typing import Optional, List
 
 from grapple.bom.entity import Entity
@@ -10,6 +11,16 @@ class Relation(Entity):
         self._tail = tail
         self._head = head
         self._types = []
+
+    def __repr__(self) -> str:
+        content = '#%d' % self._ident
+        if self._types:
+            content += ' :%s' % ':'.join(self._types)
+        if self._properties:
+            content += ' {%s}' % ', '.join('%s: %s' % (json.dumps(i[0]), json.dumps(i[1]))
+                                           for i in self._properties.items())
+
+        return '-[%s]-' % content
 
     @property
     def graph(self) -> Optional['Graph']:
