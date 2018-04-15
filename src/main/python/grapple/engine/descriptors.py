@@ -1,9 +1,18 @@
+from enum import Enum
+
 from valid_model import Object
-from valid_model.descriptors import String, List, Dict, EmbeddedObject
+from valid_model.descriptors import Dict, EmbeddedObject, Integer, List, String
+
+
+class Direction(Enum):
+    INCOMING = 1,
+    OUTGOING = 2,
+    ANY = 0
 
 
 class RelationDesc(Object):
     variable = String()
+    direction = Integer(default=Direction.ANY, nullable=False)
     types = List(value=String(nullable=False))
     properties = Dict(key=String(nullable=False))
 

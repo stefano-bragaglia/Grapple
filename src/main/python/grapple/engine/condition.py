@@ -40,7 +40,7 @@ class HasLabel(Condition):
         return self._label
 
     def is_valid(self, payload: Payload, other: Payload = None) -> bool:
-        return payload and self._label in payload[-1].labels
+        return payload and type(payload[-1]) is Node and self._label in payload[-1].labels
 
 
 class IsRelation(Condition):
@@ -65,7 +65,7 @@ class HasType(Condition):
         return self._type
 
     def is_valid(self, payload: Payload, other: Payload = None) -> bool:
-        return payload and self._type in payload[-1].types
+        return payload and type(payload[-1]) is Relation and self._type in payload[-1].types
 
 
 class HasKey(Condition):
@@ -112,3 +112,7 @@ class AreEqual(Condition):
 
     def is_valid(self, payload: Payload, other: Payload = None) -> bool:
         return payload and other and payload[-1] == other[-1]
+
+
+def temp(rel: Relation, nod: Node) -> bool:
+    pass

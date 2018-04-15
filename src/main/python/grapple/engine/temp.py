@@ -1,8 +1,10 @@
 from typing import List
 
-from grapple.engine.condition import IsNode, HasLabel, HasProperty, IsRelation, HasType, Condition
-from grapple.engine.descriptors import BaseDesc, RuleDesc, PathDesc, NodeDesc, RecordDesc, ReturnDesc, RelationDesc
-from grapple.engine.rete import Root, Alpha, Beta
+from grapple.engine.agenda import Agenda
+from grapple.engine.condition import IsNode, HasLabel, HasProperty, IsRelation, HasType, Condition, AreEqual
+from grapple.engine.descriptors import BaseDesc, RuleDesc, PathDesc, NodeDesc, RecordDesc, ReturnDesc, RelationDesc, \
+    Direction
+from grapple.engine.rete import Root, Alpha, Beta, Leaf
 
 
 def node_conditions(node: NodeDesc) -> List[Condition]:
@@ -23,6 +25,10 @@ def node_conditions(node: NodeDesc) -> List[Condition]:
 
 def relation_conditions(relation: RelationDesc) -> List[Condition]:
     conditions = [IsRelation()]
+    if relation.direction == Direction.OUTGOING:
+        conditions.append(IsOutgoing())
+    elif relation.direction == Direction.OUTGOING:
+        conditions.append(IsIncoming())
 
     for type in relation.types:
         condition = HasType(type)
@@ -38,6 +44,7 @@ def relation_conditions(relation: RelationDesc) -> List[Condition]:
 
 
 def something(*bases: 'BaseDesc'):
+    agenda = Agenda()
     alphas = {}
 
     root = Root()
@@ -45,26 +52,30 @@ def something(*bases: 'BaseDesc'):
         for rule in base.rules:
             for path in rule.pattern:
                 current = None
-
-                conditions = node_conditions(path.source)
-
-                for condition in conditions:
+                for condition in node_conditions(path.source):
                     alpha = alphas.setdefault(condition.signature, Alpha(condition, root))
-                    if current:
-                        beta = Beta()
-                        beta.hook(current)
-                        beta.hook(alpha)
-                        current = beta
+                    current = Beta(AreEqual(), current, alpha) if current else alpha
 
-                    else:
-                        current = alpha
+                for step in path.steps:
+                    relation = None
+                    for condition in relation_conditions(step.relation):
+                        alpha = alphas.setdefault(condition.signature, Alpha(condition, root))
+                        relation = Beta(AreEqual(), relation, alpha) if relation else alpha
 
-                for label in path.source.labels:
-                    HasLabel(label)
+                    current = Beta(None, current, relation)
 
-                # path.source
+                    node = None
+                    for condition in node_conditions(step.node):
+                        alpha = alphas.setdefault(condition.signature, Alpha(condition, root))
+                        node = Beta(AreEqual(), node, alpha) if node else alpha
 
-                print(path)
+                    current = Beta(None, current, node)
+
+                    # Relation is FWD, RWD, ANY
+                    # Relation HasTail Current
+                    # Relation HasHead Current
+
+                current = Leaf(current, rule, agenda)
 
 
 if __name__ == '__main__':

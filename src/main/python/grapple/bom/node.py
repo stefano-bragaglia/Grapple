@@ -11,6 +11,19 @@ class Node(Entity):
         self._labels = []
         self._relations = {}
 
+    def __eq__(self, other):
+        if not isinstance(other, Node):
+            return NotImplemented
+        elif self is other:
+            return True
+        else:
+            same_graph = self._graph is other._graph
+            same_ident = self._ident == other._ident
+            return same_graph and same_ident
+
+    def __hash__(self):
+        return self._graph.hash() ^ self._ident
+
     @property
     def graph(self) -> Optional['Graph']:
         return self._graph
