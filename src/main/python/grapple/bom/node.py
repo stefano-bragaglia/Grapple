@@ -1,7 +1,9 @@
-from typing import Optional, List
+from typing import Optional, List, Dict
 
+from grapple.bom.container import Value
 from grapple.bom.entity import Entity
 from grapple.bom.relation import Relation
+from grapple.engine.descriptors import Direction
 
 
 class Node(Entity):
@@ -72,3 +74,27 @@ class Node(Entity):
         self._graph._nodes.pop(self._ident)
         self._graph.release_ident(self._ident)
         self._graph = None
+
+    def has_relations(self, *types: str, properties: Dict[str, Value] = None) -> bool:
+        pass
+
+    def find_relations(self, *types: str, direction: Direction = Direction.ANY, properties: Dict[str, Value] = None) -> \
+            List['Relation']:
+        types = [type_ for type_ in types]
+        items = (properties if properties else {}).items()
+
+        relations = []
+        for relation in self._relations.values():
+            if direction == Direction.OUTGOING:
+                has_direction = relation.tail == self
+            elif direction == Direction.INCOMING:
+                has_direction = relation.head == self
+            else:
+                has_direction = True
+            has_types = types <= relation.types
+            has_items = items <= relation.get_properties().items()
+            is_new = relation not in relations
+            if has_direction and has_types and has_items and is_new:
+                relations.append(relation)
+
+        return relations

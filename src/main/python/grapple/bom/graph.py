@@ -1,5 +1,6 @@
-from typing import List
+from typing import List, Dict
 
+from grapple.bom.container import Value
 from grapple.bom.node import Node
 
 
@@ -37,3 +38,18 @@ class Graph(object):
 
     def release_ident(self, ident: int) -> None:
         self._pool.append(ident)
+
+    def find_nodes(self, *labels: str, properties: Dict[str, Value] = None) -> List['Node']:
+        labels = [label for label in labels]
+        items = (properties if properties else {}).items()
+
+        nodes = []
+        for node in self.nodes:
+            has_labels = labels <= node.labels
+            has_items = items <= node.get_properties().items()
+            is_new = node not in nodes
+            if has_labels and has_items and is_new:
+                nodes.append(node)
+
+        return nodes
+
