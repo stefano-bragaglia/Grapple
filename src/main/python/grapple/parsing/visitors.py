@@ -1,3 +1,5 @@
+import json
+
 from arpeggio import PTNodeVisitor, visit_parse_tree
 
 from grapple.parsing.grammar import *
@@ -110,4 +112,4 @@ if __name__ == '__main__':
     parser = ParserPython(part_return, comment)
     parse_tree = parser.parse(content)
     result = visit_parse_tree(parse_tree, GrammarVisitor())
-    print(result['value'])
+    print(json.dumps(result['value'], indent=4))
