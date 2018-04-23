@@ -1,20 +1,19 @@
 from arpeggio import EOF, Optional, ParserPython, RegExMatch, ZeroOrMore
 
 
-def comment(): return [RegExMatch(r"/\*.*\*/"), RegExMatch(r"//.*")]
-
 def base(): Optional(rules), EOF
 
 def rules(): return rule, ZeroOrMore(rule)
 def rule(): return part_return, ";"
 
-def part_return(): return key_return, selectors()
+def part_return(): return key_return, selectors
 def selectors(): return selector, ZeroOrMore(",", selector)
 def selector(): return content, synonym
-def content(): return [json_value, labels, types, ident, accessor]
+def content(): return [value, labels, types, ident, accessor]
+def value(): return json_value()
 def labels(): return key_labels, "(", variable, ")"
 def types(): return key_types, "(", variable, ")"
-def ident(): return key_id(), "(", variable, ")"
+def ident(): return key_id, "(", variable, ")"
 def accessor(): return variable, Optional(".", identifier)
 def synonym(): return Optional(key_as, identifier)
 
@@ -38,3 +37,5 @@ def key_null(): return RegExMatch(r"NULL", ignore_case=True)
 def key_return(): return RegExMatch(r"RETURN", ignore_case=True)
 def key_true(): return RegExMatch(r"TRUE", ignore_case=True)
 def key_types(): return RegExMatch(r"TYPES", ignore_case=True)
+
+def comment(): return [RegExMatch(r"/\*.*\*/"), RegExMatch(r"//.*")]
