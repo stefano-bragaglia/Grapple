@@ -1,6 +1,7 @@
 from arpeggio import ParserPython, visit_parse_tree
 
 from grapple.parsing.grammar import base, comment
+from grapple.parsing.visitors import GrammarVisitor
 
 
 class Builder(object):
@@ -10,5 +11,5 @@ class Builder(object):
             content = file.read()
             parser = ParserPython(base, comment)
             parse_tree = parser.parse(content)
-            for query in visit_parse_tree(parse_tree, GrammarVisitor()):
-                pass
+            resource = visit_parse_tree(parse_tree, GrammarVisitor())
+

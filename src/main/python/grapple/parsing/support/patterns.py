@@ -10,11 +10,6 @@ class Pattern(object):
 
 class NodePattern(Pattern):
     def __init__(self, element: Dict[str, object]):
-        if 'type' not in element:
-            raise ValueError("'element' is missing the type")
-        if element['type'] != 'node':
-            raise ValueError("'element' is not a node")
-
         self._var = str(element['variable']) if 'variable' in element and element['variable'] else None
         self._labels = element['flags'] if 'flags' in element and element['flags'] else []
         self._attributes = element['attributes'] if 'attributes' in element and element['attributes'] else {}
@@ -40,11 +35,6 @@ class NodePattern(Pattern):
 
 class RelationPattern(Pattern):
     def __init__(self, element: Dict[str, object]):
-        if 'type' not in element:
-            raise ValueError("'element' is missing the type")
-        if element['type'] != 'relation':
-            raise ValueError("'element' is not a relation")
-
         if 'direction' not in element:
             self._dir = Direction.ANY
         elif element['direction'] == Direction.OUTGOING.value:
@@ -82,6 +72,7 @@ class RelationPattern(Pattern):
 
 class PathPattern(Pattern):
     def __init__(self, elements: List[Dict[str, object]]):
+        self._pos = None
         self._elements = []
         for element in elements:
             if 'type' not in element:
@@ -91,14 +82,19 @@ class PathPattern(Pattern):
                 self._elements.append(NodePattern(element))
             elif element['type'] == 'relation':
                 self._elements.append(RelationPattern(element))
+            else:
+                raise ValueError("'element' has an unknown type: %s" % element['type'])
+
         if len(self._elements) % 2 != 1:
             raise ValueError("'elements' should contain an odd number of alternated nodes and relations: %s" % elements)
 
     def __iter__(self):
-        self._pos = 0
         return self
 
     def __next__(self):
+        if self._pos is None:
+            self._pos = 0
+
         if self._pos >= len(self._elements):
             raise StopIteration
 
