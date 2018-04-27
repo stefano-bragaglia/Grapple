@@ -3,7 +3,7 @@ from arpeggio import EOF, Optional, ParserPython, RegExMatch, ZeroOrMore, OneOrM
 
 def resource(): return ZeroOrMore(statement), EOF
 
-def statement(): return part_rule, part_match, part_return, ";"
+def statement(): return part_rule, Optional(part_match), part_return, ";"
 
 def part_rule(): return description, Optional(salience)
 def description(): return key_rule, Optional(json_string)
