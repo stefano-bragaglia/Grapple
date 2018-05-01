@@ -6,10 +6,10 @@ def resource():
 
 
 def statement():
-    return single_query, ";"
+    return query, ";"
 
 
-def single_query():
+def query():
     return ZeroOrMore(match_body), return_body
 
 
@@ -90,7 +90,11 @@ def tags():
 
 # ----------------------------------------------------------------------------------------------------------------------
 def return_body():
-    return _(r"RETURN"), Optional(_(r"DISTINCT")), return_items, Optional(order), Optional(skip), Optional(limit)
+    return _(r"RETURN"), Optional(distinct), return_items, Optional(order), Optional(skip), Optional(limit)
+
+
+def distinct():
+    return _(r"DISTINCT")
 
 
 def limit():
@@ -110,15 +114,23 @@ def order_items():
 
 
 def order_item():
-    return variable, Optional(".", key), Optional(ordering)
+    return [order_selector, identifier], Optional(order_ordering)
 
 
-def ordering():
+def order_selector():
+    return variable, Optional(".", key)
+
+
+def order_ordering():
     return [_(r"ASC"), _(r"ASCENDING"), _(r"DESC"), _(r"DESCENDING")]
 
 
 def return_items():
-    return [return_all, return_item], ZeroOrMore(return_item)
+    return return_first, ZeroOrMore(",", return_item)
+
+
+def return_first():
+    return [return_all, return_item]
 
 
 def return_all():
@@ -233,19 +245,20 @@ def null():
 
 # ----------------------------------------------------------------------------------------------------------------------
 def identifier():
-    return RegExMatch(r"[A-Za-z_][A-Za-z_0-9]")
+    return RegExMatch(r"[A-Za-z_][A-Za-z_0-9]*")
 
 
-def parameter():
-    return RegExMatch(r"\$[A-Za-z_][A-Za-z_0-9]")
+# def parameter():
+#     return RegExMatch(r"\$[A-Za-z_][A-Za-z_0-9]*")
 
 
 def tag():
-    return RegExMatch(r":[A-Za-z_][A-Za-z_0-9]")
+    return RegExMatch(r":[A-Za-z_][A-Za-z_0-9]*")
 
 
 def variable():
-    return RegExMatch(r"[A-Za-z_][A-Za-z_0-9]")
+    return RegExMatch(r"\$[A-Za-z_][A-Za-z_0-9]*")
+    # return RegExMatch(r"[A-Za-z_][A-Za-z_0-9]*")
 
 
 # ----------------------------------------------------------------------------------------------------------------------
