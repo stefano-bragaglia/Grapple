@@ -1,39 +1,56 @@
 from arpeggio import EOF, OneOrMore, Optional, RegExMatch, ZeroOrMore
 
 
-def resource():
-    return ZeroOrMore(statement), EOF
+def knowledge():
+    return Optional(clause_list), Optional(";"), EOF
 
 
-def statement():
-    return query, ";"
+def clause_list():
+    return clause, ZeroOrMore(";", clause)
 
 
-def query():
-    return ZeroOrMore(match_body), return_body
+def clause():
+    # return [clause_reading, clause_updating]
+    return clause_reading
 
 
-# def single_query():
-#     return [reading_clause, updating_clause]
+def clause_reading():
+    return rule_part, ZeroOrMore(reading_part), return_part
 
 
-# def reading_clause():
-#     return ZeroOrMore(reading_body), return_body
+# def clause_updating():
+#     return rule_part, ZeroOrMore(reading_part), OneOrMore(updating_part), Optional(return_part)
 
 
-# def updating_clause():
-#     return ZeroOrMore(reading_body), OneOrMore(updating_body), Optional(return_body)
-
-
-# def updating_body():
+# def updating_part():
 #     return [create, merge, delete, set_, remove]
 
 
-# def reading_body():
-#     return [match, unwind, in_query_call]
+def reading_part():
+    # return [match, unwind, in_query_call]
+    return match_part
+
+
 # ----------------------------------------------------------------------------------------------------------------------
-def match_body():
-    return Optional(_(r"OPTIONAL")), _(r"MATCH"), pattern_list  # , Optional(where)
+def rule_part():
+    return _(r"RULE"), Optional(json_key), Optional(salience)
+
+
+def salience():
+    return _(r"SALIENCE"), json_integer
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+def match_part():
+    return Optional(optional), match  # , Optional(where)
+
+
+def optional():
+    return _(r"OPTIONAL")
+
+
+def match():
+    return _(r"MATCH"), pattern_list
 
 
 def pattern_list():
@@ -41,11 +58,15 @@ def pattern_list():
 
 
 def pattern():
-    return Optional(variable, "="), anonymous_pattern
+    return Optional(variable, "="), pattern_anonymous
 
 
-def anonymous_pattern():
-    return node_pattern, Optional(pattern_chain)
+def pattern_anonymous():
+    return pattern_start, Optional(pattern_chain)
+
+
+def pattern_start():
+    return node_pattern
 
 
 def pattern_chain():
@@ -57,75 +78,59 @@ def pattern_next():
 
 
 def node_pattern():
-    return "(", Optional(variable), Optional(tags), Optional(properties), ")"
+    return "(", Optional(variable), Optional(labels), Optional(properties), ")"
 
 
 def relation_pattern():
-    return [relation_both_pattern, relation_back_pattern, relation_next_pattern, relation_none_pattern]
+    return [relation_pattern_both, relation_pattern_back, relation_pattern_next, relation_pattern_none]
 
 
-def relation_both_pattern():
+def relation_pattern_both():
     return "<-", Optional(relation_details), "->"
 
 
-def relation_back_pattern():
+def relation_pattern_back():
     return "<-", Optional(relation_details), "-"
 
 
-def relation_next_pattern():
+def relation_pattern_next():
     return "-", Optional(relation_details), "->"
 
 
-def relation_none_pattern():
+def relation_pattern_none():
     return "-", Optional(relation_details), "-"
 
 
 def relation_details():
-    return "[", Optional(variable), Optional(tags), Optional(properties), "]"
+    return "[", Optional(variable), Optional(types), Optional(properties), "]"
 
 
-def tags():
+def labels():
+    return tag_list
+
+
+def types():
+    return tag_list
+
+
+def tag_list():
     return OneOrMore(tag)
 
 
+def properties():
+    return json_properties
+
+
 # ----------------------------------------------------------------------------------------------------------------------
-def return_body():
-    return _(r"RETURN"), Optional(distinct), return_items, Optional(order), Optional(skip), Optional(limit)
+def return_part():
+    return _(r"RETURN"), Optional(distinct), return_item_list, Optional(order), Optional(skip), Optional(limit)
 
 
 def distinct():
     return _(r"DISTINCT")
 
 
-def limit():
-    return _(r"LIMIT"), integer
-
-
-def skip():
-    return _(r"SKIP"), integer
-
-
-def order():
-    return _(r"ORDER"), _(r"BY"), order_items
-
-
-def order_items():
-    return order_item, ZeroOrMore(",", order_item)
-
-
-def order_item():
-    return [order_selector, identifier], Optional(order_ordering)
-
-
-def order_selector():
-    return variable, Optional(".", key)
-
-
-def order_ordering():
-    return [_(r"ASC"), _(r"ASCENDING"), _(r"DESC"), _(r"DESCENDING")]
-
-
-def return_items():
+def return_item_list():
     return return_first, ZeroOrMore(",", return_item)
 
 
@@ -143,7 +148,7 @@ def return_item():
 
 
 def return_coalesce():
-    return _(r"COALESCE"), "(", variable, ".", key, ",", value, ")", Optional(_(r"AS"), identifier)
+    return _(r"COALESCE"), "(", variable, ".", json_key, ",", json_value, ")", Optional(_(r"AS"), identifier)
 
 
 def return_keys():
@@ -175,62 +180,91 @@ def return_head():
 
 
 def return_selector():
-    return variable, Optional(".", key), Optional(_(r"AS"), identifier)
+    return variable, Optional(".", json_key), Optional(_(r"AS"), identifier)
 
 
 def return_value():
-    return value, Optional(_(r"AS"), identifier)
+    return json_value, Optional(_(r"AS"), identifier)
+
+
+def order():
+    return _(r"ORDER"), _(r"BY"), order_item_list
+
+
+def order_item_list():
+    return order_item, ZeroOrMore(",", order_item)
+
+
+def order_item():
+    return [selector, identifier], Optional(ordering)
+
+
+def selector():
+    return variable, Optional(".", json_key)
+
+
+def ordering():
+    return [_(r"ASC"), _(r"ASCENDING"), _(r"DESC"), _(r"DESCENDING")]
+
+
+def limit():
+    return _(r"LIMIT"), json_integer
+
+
+def skip():
+    return _(r"SKIP"), json_integer
 
 
 # ----------------------------------------------------------------------------------------------------------------------
-def properties():
-    return "{", Optional(members), "}"
+def json_properties():
+    return "{", Optional(json_member_list), "}"
 
 
-def members():
-    return member, ZeroOrMore(",", member)
+def json_member_list():
+    return json_member, ZeroOrMore(",", json_member)
 
 
-def member():
-    return key, ":", value
+def json_member():
+    return json_key, ":", json_value
 
 
-def key():
-    return [identifier, single, double]
+def json_key():
+    return [identifier, json_string_single, json_string_double]
 
 
-def value():
-    return [string, integer, real, properties, array, true, false, null]
+def json_value():
+    return [json_string, json_real, json_integer, json_properties, json_array, true, false, null]
 
 
-def string():
-    return [single, double]
+def json_string():
+    return [json_string_single, json_string_double]
 
 
-def single():
+def json_string_single():
     return '"', RegExMatch(r'[^"]*'), '"'
 
 
-def double():
+def json_string_double():
     return "'", RegExMatch(r"[^']*"), "'"
 
 
-def integer():
+def json_integer():
     return RegExMatch(r"-?\d+")
 
 
-def real():
-    return RegExMatch(r"-?\d*\.\d+"), Optional(RegExMatch(r"E-?\d+"))
+def json_real():
+    return RegExMatch(r"-?\d*\.\d+(E-?\d+)?")
 
 
-def array():
-    return "[", Optional(elements), "]"
+def json_array():
+    return "[", Optional(json_element_list), "]"
 
 
-def elements():
-    return value, ZeroOrMore(",", value)
+def json_element_list():
+    return json_value, ZeroOrMore(",", json_value)
 
 
+# ----------------------------------------------------------------------------------------------------------------------
 def true():
     return RegExMatch(r"TRUE", ignore_case=True)
 
@@ -262,10 +296,8 @@ def variable():
 
 
 # ----------------------------------------------------------------------------------------------------------------------
-
-
-# ----------------------------------------------------------------------------------------------------------------------
-def comment(): return [RegExMatch(r"//.*"), RegExMatch(r"/\*.*\*/", multiline=True)]
+def comment():
+    return [RegExMatch(r"//.*"), RegExMatch(r"/\*.*\*/", multiline=True)]
 
 
 # ----------------------------------------------------------------------------------------------------------------------
