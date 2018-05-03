@@ -148,43 +148,87 @@ def return_item():
 
 
 def return_coalesce():
-    return _(r"COALESCE"), "(", variable, ".", json_key, ",", json_value, ")", Optional(_(r"AS"), identifier)
+    return function_coalesce, "(", variable, field, ",", value, ")", Optional(synonym)
+
+
+def function_coalesce():
+    return _(r"COALESCE")
 
 
 def return_keys():
-    return _(r"KEYS"), "(", variable, ")", Optional(_(r"AS"), identifier)
+    return function_keys, "(", variable, ")", Optional(synonym)
+
+
+def function_keys():
+    return _(r"KEYS")
 
 
 def return_properties():
-    return _(r"PROPERTIES"), "(", variable, ")", Optional(_(r"AS"), identifier)
+    return function_properties, "(", variable, ")", Optional(synonym)
+
+
+def function_properties():
+    return _(r"PROPERTIES")
 
 
 def return_id():
-    return _(r"ID"), "(", variable, ")", Optional(_(r"AS"), identifier)
+    return function_id, "(", variable, ")", Optional(synonym)
+
+
+def function_id():
+    return _(r"ID")
 
 
 def return_labels():
-    return _(r"LABELS"), "(", variable, ")", Optional(_(r"AS"), identifier)
+    return function_labels, "(", variable, ")", Optional(synonym)
+
+
+def function_labels():
+    return _(r"LABELS")
 
 
 def return_types():
-    return _(r"TYPES"), "(", variable, ")", Optional(_(r"AS"), identifier)
+    return function_types, "(", variable, ")", Optional(synonym)
+
+
+def function_types():
+    return _(r"TYPES")
 
 
 def return_tail():
-    return _(r"TAIL"), "(", variable, ")", Optional(_(r"AS"), identifier)
+    return function_tail, "(", variable, ")", Optional(synonym)
+
+
+def function_tail():
+    return _(r"TAIL")
 
 
 def return_head():
-    return _(r"HEAD"), "(", variable, ")", Optional(_(r"AS"), identifier)
+    return function_head, "(", variable, ")", Optional(synonym)
+
+
+def function_head():
+    return _(r"HEAD")
 
 
 def return_selector():
-    return variable, Optional(".", json_key), Optional(_(r"AS"), identifier)
+    return variable, Optional(field), Optional(synonym)
+
+
+def field():
+    return '.', json_key
 
 
 def return_value():
-    return json_value, Optional(_(r"AS"), identifier)
+    return value, Optional(synonym)
+
+
+def value():
+    return json_value
+
+
+def synonym():
+    return _(r"AS"), identifier
 
 
 def order():
@@ -200,7 +244,11 @@ def order_item():
 
 
 def selector():
-    return variable, Optional(".", json_key)
+    return variable, Optional(field)
+
+
+# def name():
+#     return identifier
 
 
 def ordering():
@@ -282,8 +330,8 @@ def identifier():
     return RegExMatch(r"[A-Za-z_][A-Za-z_0-9]*")
 
 
-# def parameter():
-#     return RegExMatch(r"\$[A-Za-z_][A-Za-z_0-9]*")
+def parameter():
+    return RegExMatch(r"\$[A-Za-z_][A-Za-z_0-9]*")
 
 
 def tag():
@@ -291,8 +339,7 @@ def tag():
 
 
 def variable():
-    return RegExMatch(r"\$[A-Za-z_][A-Za-z_0-9]*")
-    # return RegExMatch(r"[A-Za-z_][A-Za-z_0-9]*")
+    return RegExMatch(r"[A-Za-z_][A-Za-z_0-9]*")
 
 
 # ----------------------------------------------------------------------------------------------------------------------

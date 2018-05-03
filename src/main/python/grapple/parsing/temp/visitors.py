@@ -22,158 +22,231 @@ class GrammarVisitor(PTNodeVisitor):
     def visit_reading_part(self, node, children):
         result = {}
         for child in children:
-            result.update(child['value'])
+            result.update(child["value"])
 
         return {"value": result}
 
     # ----------------------------------------------------------------------------------------------------------------------
     def visit_rule_part(self, node, children):
-        result = {'description': children[1]['value']}
+        result = {"description": children[1]["value"]}
         for child in children[2:]:
-            result.update(child['value'])
+            result.update(child["value"])
 
         return {"value": result}
 
     def visit_salience(self, node, children):
-        return {"value": {'salience': children[1]['value']}}
+        return {"value": {"salience": children[1]["value"]}}
 
     # ----------------------------------------------------------------------------------------------------------------------
     def visit_match_part(self, node, children):
         return {"value": None}
 
     def visit_optional(self, node, children):
-        return {'value': {'optional': True}}
+        return {"value": {"optional": True}}
 
     def visit_match(self, node, children):
-        return {"value": {'match': children[1]['value']}}
+        return {"value": {"match": children[1]["value"]}}
 
     def visit_pattern_list(self, node, children):
-        return {"value": [child['value'] for child in children]}
+        return {"value": [child["value"] for child in children]}
 
     def visit_pattern(self, node, children):
         result = {}
         for child in children:
-            result.update(child['value'])
+            result.update(child["value"])
 
-        return {"value": {'pattern': result}}
+        return {"value": {"pattern": result}}
 
     def visit_pattern_anonymous(self, node, children):
         result = {}
         for child in children:
-            result.update(child['value'])
+            result.update(child["value"])
 
-        return {"value": {'pattern': result}}
+        return {"value": {"pattern": result}}
 
     def visit_pattern_start(self, node, children):
-        return {"value": {'start': children[0]['value']}}
+        return {"value": {"start": children[0]["value"]}}
 
     def visit_pattern_chain(self, node, children):
-        return {"value": {'chain': [child['value'] for child in children]}}
+        return {"value": {"chain": [child["value"] for child in children]}}
 
     def visit_pattern_next(self, node, children):
-        return {"value": {'relation': children[0]['value'], 'node': children[1]['value']}}
+        return {"value": {"relation": children[0]["value"], "node": children[1]["value"]}}
 
     def visit_node_pattern(self, node, children):
         result = {}
         for child in children:
-            result.update(child['value'])
+            result.update(child["value"])
 
         return {"value": result}
 
     def visit_relation_pattern(self, node, children):
-        return {"value": children[0]['value']}
+        return {"value": children[0]["value"]}
 
     def visit_relation_pattern_both(self, node, children):
-        result = children[0]['value']
-        result['direction'] = Direction.ANY.value
+        result = children[0]["value"]
+        result["direction"] = Direction.ANY.value
 
         return {"value": result}
 
     def visit_relation_pattern_back(self, node, children):
-        result = children[0]['value']
-        result['direction'] = Direction.INCOMING.value
+        result = children[0]["value"]
+        result["direction"] = Direction.INCOMING.value
 
         return {"value": result}
 
     def visit_relation_pattern_next(self, node, children):
-        result = children[0]['value']
-        result['direction'] = Direction.OUTGOING.value
+        result = children[0]["value"]
+        result["direction"] = Direction.OUTGOING.value
 
         return {"value": result}
 
     def visit_relation_pattern_none(self, node, children):
-        result = children[0]['value']
-        result['direction'] = Direction.ANY.value
+        result = children[0]["value"]
+        result["direction"] = Direction.ANY.value
 
         return {"value": result}
 
     def visit_relation_details(self, node, children):
         result = {}
         for child in children:
-            result.update(child['value'])
+            result.update(child["value"])
 
         return {"value": result}
 
     def visit_labels(self, node, children):
-        return {"value": {'labels': [child['value'] for child in children]}}
+        return {"value": {"labels": [child["value"] for child in children]}}
 
     def visit_types(self, node, children):
-        return {"value": {'types': [child['value'] for child in children]}}
+        return {"value": {"types": [child["value"] for child in children]}}
 
     def visit_tag_list(self, node, children):
-        return {"value": [child['value'] for child in children]}
+        return {"value": [child["value"] for child in children]}
 
     def visit_properties(self, node, children):
-        return {"value": {'properties': children[0]['value']}}
+        return {"value": {"properties": children[0]["value"]}}
 
     # ----------------------------------------------------------------------------------------------------------------------
     def visit_return_part(self, node, children):
         return {"value": None}
 
     def visit_distinct(self, node, children):
-        return {"value": None}
+        return {"value": {"distinct": True}}
 
     def visit_return_item_list(self, node, children):
-        return {"value": None}
+        return {"value": [child["value"] for child in children]}
 
     def visit_return_first(self, node, children):
-        return {"value": None}
+        return {"value": children[0]["value"]}
 
     def visit_return_all(self, node, children):
-        return {"value": None}
+        return {"value": {"function": "*"}}
 
     def visit_return_item(self, node, children):
-        return {"value": None}
+        return {"value": children[0]["value"]}
 
     def visit_return_coalesce(self, node, children):
-        return {"value": None}
+        result = {}
+        for child in children:
+            result.update(child["value"])
+
+        return {"value": result}
+
+    def visit_function_coalesce(self, node, children):
+        return {"value": {"function": "coalesce"}}
 
     def visit_return_keys(self, node, children):
-        return {"value": None}
+        result = {}
+        for child in children:
+            result.update(child["value"])
+
+        return {"value": result}
+
+    def visit_function_keys(self, node, children):
+        return {"value": {"function": "keys"}}
 
     def visit_return_properties(self, node, children):
-        return {"value": None}
+        result = {}
+        for child in children:
+            result.update(child["value"])
+
+        return {"value": result}
+
+    def visit_function_properties(self, node, children):
+        return {"value": {"function": "properties"}}
 
     def visit_return_id(self, node, children):
-        return {"value": None}
+        result = {}
+        for child in children:
+            result.update(child["value"])
+
+        return {"value": result}
+
+    def visit_function_id(self, node, children):
+        return {"value": {"function": "id"}}
 
     def visit_return_labels(self, node, children):
-        return {"value": None}
+        result = {}
+        for child in children:
+            result.update(child["value"])
+
+        return {"value": result}
+
+    def visit_function_labels(self, node, children):
+        return {"value": {"function": "labels"}}
 
     def visit_return_types(self, node, children):
-        return {"value": None}
+        result = {}
+        for child in children:
+            result.update(child["value"])
+
+        return {"value": result}
+
+    def visit_function_types(self, node, children):
+        return {"value": {"function": "types"}}
 
     def visit_return_tail(self, node, children):
-        return {"value": None}
+        result = {}
+        for child in children:
+            result.update(child["value"])
+
+        return {"value": result}
+
+    def visit_function_tail(self, node, children):
+        return {"value": {"function": "tail"}}
 
     def visit_return_head(self, node, children):
-        return {"value": None}
+        result = {}
+        for child in children:
+            result.update(child["value"])
+
+        return {"value": result}
+
+    def visit_function_head(self, node, children):
+        return {"value": {"function": "head"}}
 
     def visit_return_selector(self, node, children):
-        return {"value": None}
+        result = {}
+        for child in children:
+            result.update(child["value"])
+
+        return {"value": result}
+
+    def visit_field(self, node, children):
+        return {"value": {"key": children[0]["value"]}}
 
     def visit_return_value(self, node, children):
-        return {"value": None}
+        result = {}
+        for child in children:
+            result.update(child["value"])
+
+        return {"value": result}
+
+    def visit_value(self, node, children):
+        return {"value": {"value": children[0]["value"]}}
+
+    def visit_synonym(self, node, children):
+        return {"value": {"as": children[1]["value"]}}
 
     def visit_order(self, node, children):
         return {"value": None}
@@ -182,10 +255,18 @@ class GrammarVisitor(PTNodeVisitor):
         return {"value": None}
 
     def visit_order_item(self, node, children):
-        return {"value": None}
+        result = {}
+        for child in children:
+            result.update(child["value"])
+
+        return {"value": result}
 
     def visit_selector(self, node, children):
-        return {"value": None}
+        result = {}
+        for child in children:
+            result.update(child["value"])
+
+        return {"value": result}
 
     def visit_ordering(self, node, children):
         return {"value": None}
@@ -198,26 +279,26 @@ class GrammarVisitor(PTNodeVisitor):
 
     # ----------------------------------------------------------------------------------------------------------------------
     def visit_json_properties(self, node, children):
-        return {"value": children[0]['value']}
+        return {"value": children[0]["value"]}
 
     def visit_json_member_list(self, node, children):
         result = {}
         for child in children:
-            result.update(child['value'])
+            result.update(child["value"])
 
         return {"value": result}
 
     def visit_json_member(self, node, children):
-        return {"value": {children[0]['value']: children[1]['value']}}
+        return {"value": {children[0]["value"]: children[1]["value"]}}
 
     def visit_json_key(self, node, children):
-        return {"value": children[0]['value']}
+        return {"value": children[0]["value"]}
 
     def visit_json_value(self, node, children):
-        return {"value": children[0]['value']}
+        return {"value": children[0]["value"]}
 
     def visit_json_string(self, node, children):
-        return {"value": children[0]['value']}
+        return {"value": children[0]["value"]}
 
     def visit_json_string_single(self, node, children):
         return {"value": children[0]}
@@ -232,10 +313,10 @@ class GrammarVisitor(PTNodeVisitor):
         return {"value": float(node.value)}
 
     def visit_json_array(self, node, children):
-        return {"value": None}
+        return {"value": children[0]["value"]}
 
     def visit_json_element_list(self, node, children):
-        return {"value": None}
+        return {"value": [child["value"] for child in children]}
 
     # ----------------------------------------------------------------------------------------------------------------------
     def visit_true(self, node, children):
@@ -255,30 +336,34 @@ class GrammarVisitor(PTNodeVisitor):
         return {"value": node.value[1:]}
 
     def visit_variable(self, node, children):
-        return {"value": {'variable': node.value[1:]}}
+        return {"value": node.value[1:]}
 
     # ----------------------------------------------------------------------------------------------------------------------
     def visit_comment(self, node, children):
         return {"value": None}
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     content = """
         /* Multi-line comment
          * ****************** */
         RULE rule_name
         SALIENCE 5
         OPTIONAL MATCH $a = ($b :main:node {k1: "value", "k2": 5})-[$c :link {key: "value"}]->($d :other {key: null}), 
-                       $e = ($f :main:node {"key": -1})-[$g :link {'key': 0.5E-2}]->($h :other {key: True})
+                       $e = ($f :main:node {"key": -1})-[$g :link {"key": 0.5E-2}]->($h :other {key: True})
         // Single-line comment
         RETURN DISTINCT *, 
+                        coalesce($a.key, ["v1", "v2"]) AS s_01,
                         id($a) AS s_02, 
                         keys($a) AS s_03, 
                         properties($a) AS s_04, 
                         labels($a) AS s_05, 
                         types($a) AS s_06, 
                         tail($a) AS s_07, 
-                        head($a) AS s_08 
+                        head($a) AS s_08,
+                        $a AS s_09,
+                        $a.key AS s_10,
+                        True AS s_11 
         ORDER BY $a, $a.key, name, $b DESC, $b.key DESC, surname DESC 
         SKIP 5 
         LIMIT 10;
@@ -290,4 +375,4 @@ if __name__ == '__main__':
     # print(json.dumps(parse_tree, indent=4))
     result = visit_parse_tree(parse_tree, GrammarVisitor())
     print(result)
-    # print(json.dumps(result['value'], indent=4))
+    # print(json.dumps(result["value"], indent=4))
