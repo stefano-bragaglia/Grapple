@@ -1,18 +1,88 @@
-knowledge <- clause_list? ';'? EOF
-clause_list <- clause (';' clause)*
+knowledge <- clauses? ';'? EOF
+
+clauses <- clause (';' clause)*
+// clause <- clause_reading / clause updating
+clause <- clause_reading
+clause_reading <- rule_part reading_part* return_part
+// clause_updating <- rule_part reading_part* updating_part+ return_part?
+
+// reading_part <- match_part / unwind_part / in_query_call_part
+reading_part <- match_part
+
+// updating_part <- create / merge / delete / set / remove
+
+rule_part <- r'[Rr][Uu][Ll][Ee]' description? salience?
+
+description = json_key
+salience = r'[Ss][Aa][Ll][Ii][Ee][Nn][Cc][Ee]' json_integer
 
 // ----
 
-order <- r'[Oo][Rr][Dd][Ee][Rr]' r'[Bb][Yy]' order_item_list
-order_item_list <- order_item (',' order_item)*
-order_item <- order_item_variable / order_item_placeholder
-order_item_variable <- variable field? ordering?
-order_item_placeholder <- placeholder ordering?
+match_part <- optional? m_a_t_c_h match_patterns // match_where?
+match_patterns <- match_pattern (',' match_pattern)*
+match_pattern <- (variable '=')? match_anonymous
+match_anonymous <- match_start match_chain*
+match_start <- match_node
+match_chain <- match_relation match_node
+match_node <- '(' variable? match_labels? match_properties? ')'
+match_relation <- match_both / match_back / match_next / match_none
+match_both <- '<-' match_details? '->'
+match_back <- '<-' match_details? '-'
+match_next <- '-' match_details? '->'
+match_none <- '-' match_details? '-'
+match_details <- '[' variable? match_types? match_properties? ']' // repetitions?
+match_labels <- (':' identifier)+
+match_types <- (':' identifier)+
+match_properties <- json_properties
+
+return_part <- r'[Rr][Ee][Tt][Uu][Rr][Nn] distinct? return_items return_order? return_skip? return_limit?
+return_items <- return_first (',' return_item)*
+return_first <- return_all / return_item
+return_item <- return_coalesce / return_keys / return_properties / return_id / return_labels / return_types / return_tail, return_head / return_selector / return_value
+return_coalesce <- coalesce '(' variable '.' field ',' value ')' return_synonym?
+return_keys <- keys '(' variable ')' return_synonym?
+return_properties <- properties '(' variable ')' return_synonym?
+return_id <- id '(' variable ')' return_synonym?
+return_labels <- labels '(' variable ')' return_synonym?
+return_types <- types '(' variable ')' return_synonym?
+return_tail <- tail '(' variable ')' return_synonym?
+return_head <- head '(' variable ')' return_synonym?
+return_selector <- variable ('.' field)? return_synonym?
+return_value <- value return_synonym?
+
+return_synonym <- r'[Aa][Ss]', identifier
+
+return_order <- r'[Oo][Rr][Dd][Ee][Rr]' r'[Bb][Yy]' return_order_items
+return_order_items <- return_order_item (',' return_order_item)*
+return_order_item <- return_order_item_variable / return_order_item_placeholder
+return_order_item_variable <- variable field? return_ordering?
+return_order_item_placeholder <- placeholder return_ordering?
+
+return_skip <- r'[Ss][Kk][Ii][Pp]' json_integer
+
+return_limit <- r'[Ll][Ii][Mm][Ii][Tt]' json_integer
+
+// --------
+
+optional <- r'[Oo][Pp][Tt][Ii][Oo][Nn][Aa][Ll]'
+
+distinct <- r'[Dd][Ii][Ss][Tt][Ii][Nn][Cc][Tt]'
+coalesce <- r'[Cc][Oo][Aa][Ll][Ee][Ss][Cc][Ee]'
+keys <- r'[Kk][Ee][Yy][Ss]'
+properties <- r'[Pp][Rr][Oo][Pp][Ee][Rr][Tt][Ii][Ee][Ss]'
+id <- r'[Ii][Dd]'
+labels <- r'[Ll][Aa][Bb][Ee][Ll][Ss]'
+types <- r'[Tt][Yy][Pp][Ee][Ss]'
+tail <- r'[Tt][Aa][Ii][Ll]'
+head <- r'[Hh][Ee][Aa][Dd]'
 
 variable <- identifier
-field <- '.' json_key
+field <- json_key
+value <- json_value
 placeholder <- parameter
-ordering <- r'[Aa][Ss][Cc]([Ee][Nn][Dd][Ii][Nn][Gg])?' / r'[Dd][Ee][Ss][Cc]([Ee][Nn][Dd][Ii][Nn][Gg])?'
+return_ordering <- ascending / descending
+ascending <- r'[Aa][Ss][Cc]([Ee][Nn][Dd][Ii][Nn][Gg])?'
+descending <- r'[Dd][Ee][Ss][Cc]([Ee][Nn][Dd][Ii][Nn][Gg])?'
 
 identifier <- r'[A-Za-z_][A-Za-z_0-9]*'
 parameter <- r'\$[A-Za-z_][A-Za-z_0-9]*'
