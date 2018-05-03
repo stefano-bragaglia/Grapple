@@ -1,0 +1,38 @@
+knowledge <- clause_list? ';'? EOF
+clause_list <- clause (';' clause)*
+
+// ----
+
+order <- r'[Oo][Rr][Dd][Ee][Rr]' r'[Bb][Yy]' order_item_list
+order_item_list <- order_item (',' order_item)*
+order_item <- order_item_variable / order_item_placeholder
+order_item_variable <- variable field? ordering?
+order_item_placeholder <- placeholder ordering?
+
+variable <- identifier
+field <- '.' json_key
+placeholder <- parameter
+ordering <- r'[Aa][Ss][Cc]([Ee][Nn][Dd][Ii][Nn][Gg])?' / r'[Dd][Ee][Ss][Cc]([Ee][Nn][Dd][Ii][Nn][Gg])?'
+
+identifier <- r'[A-Za-z_][A-Za-z_0-9]*'
+parameter <- r'\$[A-Za-z_][A-Za-z_0-9]*'
+tag <- r':[A-Za-z_][A-Za-z_0-9]*'
+
+json_properties <- '{' json_member_list? '}'
+json_member_list <- json_member (',' json_member)*
+json_member <- json_key ':' json_value
+json_key <- identifier / json_string_single / json_string_double
+json_value <- parameter / json_string / json_real / json_integer / json_properties / json_array / json_true / json_false / json_null
+json_string <- json_string_single / json_string_double
+json_string_single <- '\'' r'[^\']*' '\''
+json_string_double <- '"' r'[^"]*' '"'
+json_integer <- r'-?\d+'
+json_real <- r'-?\d*\.\d+([Ee]-?\d+)?'
+json_array <- '[' json_element_list? ']'
+json_element_list <- json_value (',' json_value)*
+json_true <- r'[Tt][Rr][Uu][Ee]'
+json_false <- r'[Ff][Aa][Ll][Ss][Ee]'
+json_null <- r'[Nn][Uu][Ll][Ll]'
+
+
+comment <- r'//.*' / r'/\*.*\*/'
