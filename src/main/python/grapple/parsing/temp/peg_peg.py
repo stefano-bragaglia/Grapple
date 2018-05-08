@@ -14,13 +14,35 @@
 from __future__ import unicode_literals
 
 import os
+
 from arpeggio import *
 from arpeggio.export import PMDOTExporter
 from arpeggio.peg import PEGVisitor, ParserPEG
 
 
-def main(debug=False):
+def parser() -> ParserPEG:
+    path = os.path.dirname(__file__)
+    filename = os.path.join(path, 'peg.peg')
+    with open(filename, 'r') as file:
+        grammar = file.read()
+        return ParserPEG(grammar, 'peggrammar', 'comment')
 
+
+def gen2(filename: str, scope: str, comment: str = None) -> str:
+    with open(filename, 'r') as file:
+        grammar = file.read()
+        tree = parser().parse(grammar)
+
+    print("from arpeggio import PTNodeVisitor\n\n")
+    print("# noinspection PyMethodMayBeStatic")
+    print("class %sVisitor(PTNodeVisitor):" % re.sub(r'\s+', '', re.sub(r'\W+', ' ', scope)).title())
+    for item in tree:
+        if type(item) == NonTerminal:
+            print("\tdef visit_%s(self, node, children) -> Dict[str, object]:\n\t\treturn {'value': None}\n" % item[
+                0].value.lower())
+
+
+def main(debug=False):
     current_dir = os.path.dirname(__file__)
     peg_grammar = open(os.path.join(current_dir, 'peg.peg')).read()
 
@@ -56,6 +78,10 @@ def main(debug=False):
     parser.parser_model = parser_model
     parser.parse(peg_grammar)
 
-if __name__ == '__main__':
-    main(debug=True)
 
+if __name__ == '__main__':
+    path = os.path.dirname(__file__)
+    name = os.path.join(path, 'temp.peg')
+    gen(name, 'knowledge', 'comment')
+
+    # main(debug=False)
