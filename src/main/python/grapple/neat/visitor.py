@@ -7,11 +7,6 @@ Node = Union[Terminal, NonTerminal]
 
 # noinspection PyMethodMayBeStatic
 class KnowledgeVisitor(PTNodeVisitor):
-    """
-    def knowledge():
-        return Optional(clauses), Optional(';'), EOF
-    """
-
     def visit_knowledge(self, node: Node, children: List) -> object:
         if children and children[0] != ';':
             content = children[0]['value']
