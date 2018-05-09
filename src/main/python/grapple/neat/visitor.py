@@ -23,7 +23,7 @@ class KnowledgeVisitor(PTNodeVisitor):
         for child in children:
             content.update(child['value'])
 
-        return {'value': {'rule': content}}
+        return {'value': content}
 
     def visit_rule_part(self, node: Node, children: List) -> object:
         content = {'salience': 0}

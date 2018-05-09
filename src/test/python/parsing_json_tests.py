@@ -3,9 +3,9 @@ from unittest import TestCase
 from arpeggio import NoMatch, ParserPython, visit_parse_tree
 from assertpy import assert_that
 
-from grammar import json_array, json_elements, json_false, json_integer, json_key, json_member, \
+from grapple.neat.grammar import json_array, json_elements, json_false, json_integer, json_key, json_member, \
     json_members, json_null, json_object, json_real, json_string, json_true
-from visitor import KnowledgeVisitor
+from grapple.neat.visitor import KnowledgeVisitor
 
 
 class TestGrammarVisitor(TestCase):

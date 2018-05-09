@@ -3,8 +3,8 @@ from unittest import TestCase
 from arpeggio import NoMatch, ParserPython, SemanticError, visit_parse_tree
 from assertpy import assert_that
 
-from grammar import clause, knowledge, rule_description, rule_part, rule_salience
-from visitor import KnowledgeVisitor
+from grapple.neat.grammar import clause, knowledge, rule_description, rule_part, rule_salience
+from grapple.neat.visitor import KnowledgeVisitor
 
 
 class TestGrammarVisitor(TestCase):
@@ -39,16 +39,16 @@ class TestGrammarVisitor(TestCase):
     def test_knowledge_3(self):
         assert_that(self.process(knowledge, 'RULE RETURN True AS _bool')) \
             .contains_only('value') \
-            .contains_entry({'value': [{'rule': {'description': None,
-                                                 'return': {'distinct': False,
-                                                            'items': [{'value': True, 'as': '_bool'}]}}}]})
+            .contains_entry({'value': [{'description': None,
+                                        'return': {'distinct': False,
+                                                   'items': [{'value': True, 'as': '_bool'}]}}]})
 
     def test_knowledge_4(self):
         assert_that(self.process(knowledge, 'RULE RETURN True AS _bool;')) \
             .contains_only('value') \
-            .contains_entry({'value': [{'rule': {'description': None,
-                                                 'return': {'distinct': False,
-                                                            'items': [{'value': True, 'as': '_bool'}]}}}]})
+            .contains_entry({'value': [{'description': None,
+                                        'return': {'distinct': False,
+                                                   'items': [{'value': True, 'as': '_bool'}]}}]})
 
     def test_knowledge_5(self):
         assert_that(self.process(knowledge, 'RULE RETURN True AS _bool; '
@@ -61,33 +61,33 @@ class TestGrammarVisitor(TestCase):
                                             'SKIP 1 '
                                             'LIMIT 5')) \
             .contains_only('value') \
-            .contains_entry({'value': [{'rule': {'description': None,
-                                                 'return': {'distinct': False,
-                                                            'items': [{'value': True, 'as': '_bool'}]}}},
-                                       {'rule': {'description': None,
-                                                 'return': {'distinct': False,
-                                                            'items': [{'value': True, 'as': '_bool'}],
-                                                            'order': [{'ascending': True, 'name': '_bool'}],
-                                                            'skip': 5,
-                                                            'limit': 1}}},
-                                       {'rule': {'description': 'description',
-                                                 'salience': 5,
-                                                 'match': {'optional': True,
-                                                           'pattern': [{'pattern': {
-                                                               'start': {'node': {'parameter': '$n',
-                                                                                  'labels': ['main', 'person'],
-                                                                                  'properties': {'text': 'Stefano'}}},
-                                                               'chain': [{'relation': {'direction': 'any',
-                                                                                       'types': ['knows']},
-                                                                          'node': {'parameter': '$f',
-                                                                                   'labels': ['person']}}]}}]},
-                                                 'return': {'distinct': False,
-                                                            'items': [{'parameter': '$f',
-                                                                       'property': 'text',
-                                                                       'as': 'name'}],
-                                                            'order': [{'ascending': True, 'name': 'name'}],
-                                                            'skip': 1,
-                                                            'limit': 5}}}]})
+            .contains_entry({'value': [{'description': None,
+                                        'return': {'distinct': False,
+                                                   'items': [{'value': True, 'as': '_bool'}]}},
+                                       {'description': None,
+                                        'return': {'distinct': False,
+                                                   'items': [{'value': True, 'as': '_bool'}],
+                                                   'order': [{'ascending': True, 'name': '_bool'}],
+                                                   'skip': 5,
+                                                   'limit': 1}},
+                                       {'description': 'description',
+                                        'salience': 5,
+                                        'match': {'optional': True,
+                                                  'pattern': [{'pattern': {
+                                                      'start': {'node': {'parameter': '$n',
+                                                                         'labels': ['main', 'person'],
+                                                                         'properties': {'text': 'Stefano'}}},
+                                                      'chain': [{'relation': {'direction': 'any',
+                                                                              'types': ['knows']},
+                                                                 'node': {'parameter': '$f',
+                                                                          'labels': ['person']}}]}}]},
+                                        'return': {'distinct': False,
+                                                   'items': [{'parameter': '$f',
+                                                              'property': 'text',
+                                                              'as': 'name'}],
+                                                   'order': [{'ascending': True, 'name': 'name'}],
+                                                   'skip': 1,
+                                                   'limit': 5}}]})
 
     def test_knowledge_6(self):
         assert_that(self.process(knowledge, 'RULE "description" '
@@ -98,7 +98,7 @@ class TestGrammarVisitor(TestCase):
                                             'SKIP 1 '
                                             'LIMIT 5')) \
             .contains_only('value') \
-            .contains_entry({'value': [{'rule': {'description': 'description',
+            .contains_entry({'value': [{'description': 'description',
                                                  'salience': 5,
                                                  'match': {'optional': True,
                                                            'pattern': [{'pattern': {
@@ -116,7 +116,7 @@ class TestGrammarVisitor(TestCase):
                                                             'order': [{'ascending': True,
                                                                        'name': 'name'}],
                                                             'skip': 1,
-                                                            'limit': 5}}}]})
+                                                            'limit': 5}}]})
 
     def test_clause_0(self):
         assert_that(TestGrammarVisitor.process) \
@@ -127,19 +127,19 @@ class TestGrammarVisitor(TestCase):
     def test_clause_1(self):
         assert_that(self.process(clause, 'RULE RETURN True AS _bool')) \
             .contains_only('value') \
-            .contains_entry({'value': {'rule': {'description': None,
-                                                'return': {'distinct': False,
-                                                           'items': [{'value': True, 'as': '_bool'}]}}}})
+            .contains_entry({'value': {'description': None,
+                                       'return': {'distinct': False,
+                                                  'items': [{'value': True, 'as': '_bool'}]}}})
 
     def test_clause_2(self):
         assert_that(self.process(clause, 'RULE RETURN True AS _bool ORDER BY _bool SKIP 5 LIMIT 1')) \
             .contains_only('value') \
-            .contains_entry({'value': {'rule': {'description': None,
-                                                'return': {'distinct': False,
-                                                           'items': [{'value': True, 'as': '_bool'}],
-                                                           'order': [{'name': '_bool', 'ascending': True}],
-                                                           'skip': 5,
-                                                           'limit': 1}}}})
+            .contains_entry({'value': {'description': None,
+                                       'return': {'distinct': False,
+                                                  'items': [{'value': True, 'as': '_bool'}],
+                                                  'order': [{'name': '_bool', 'ascending': True}],
+                                                  'skip': 5,
+                                                  'limit': 1}}})
 
     def test_clause_3(self):
         assert_that(self.process(clause, 'RULE "description" '
@@ -150,25 +150,25 @@ class TestGrammarVisitor(TestCase):
                                          'SKIP 1 '
                                          'LIMIT 5')) \
             .contains_only('value') \
-            .contains_entry({'value': {'rule': {'description': 'description',
-                                                'salience': 5,
-                                                'match': {'optional': True,
-                                                          'pattern': [{'pattern': {
-                                                              'start': {'node': {'parameter': '$n',
-                                                                                 'labels': ['main', 'person'],
-                                                                                 'properties': {'text': 'Stefano'}}},
-                                                              'chain': [{'relation': {'direction': 'any',
-                                                                                      'types': ['knows']},
-                                                                         'node': {'parameter': '$f',
-                                                                                  'labels': ['person']}}]}}]},
-                                                'return': {'distinct': False,
-                                                           'items': [{'parameter': '$f',
-                                                                      'property': 'text',
-                                                                      'as': 'name'}],
-                                                           'order': [{'ascending': True,
-                                                                      'name': 'name'}],
-                                                           'skip': 1,
-                                                           'limit': 5}}}})
+            .contains_entry({'value': {'description': 'description',
+                                       'salience': 5,
+                                       'match': {'optional': True,
+                                                 'pattern': [{'pattern': {
+                                                     'start': {'node': {'parameter': '$n',
+                                                                        'labels': ['main', 'person'],
+                                                                        'properties': {'text': 'Stefano'}}},
+                                                     'chain': [{'relation': {'direction': 'any',
+                                                                             'types': ['knows']},
+                                                                'node': {'parameter': '$f',
+                                                                         'labels': ['person']}}]}}]},
+                                       'return': {'distinct': False,
+                                                  'items': [{'parameter': '$f',
+                                                             'property': 'text',
+                                                             'as': 'name'}],
+                                                  'order': [{'ascending': True,
+                                                             'name': 'name'}],
+                                                  'skip': 1,
+                                                  'limit': 5}}})
 
     def test_rule_part_0(self):
         assert_that(TestGrammarVisitor.process) \
