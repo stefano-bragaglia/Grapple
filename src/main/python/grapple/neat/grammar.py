@@ -18,7 +18,7 @@ def clauses():
 
 
 def clause():
-    return rule_part(), ZeroOrMore(match_part), return_part
+    return rule_part(), Optional(match_parts), return_part
 
 
 def rule_part():
@@ -32,6 +32,8 @@ def rule_description():
 def rule_salience():
     return key_salience, json_integer
 
+def match_parts():
+    return OneOrMore(match_part)
 
 def match_part():
     return Optional(match_optional), match_patterns

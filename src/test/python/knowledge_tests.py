@@ -72,15 +72,14 @@ class TestGrammarVisitor(TestCase):
                                                    'limit': 1}},
                                        {'description': 'description',
                                         'salience': 5,
-                                        'match': {'optional': True,
-                                                  'pattern': [{'pattern': {
-                                                      'start': {'node': {'parameter': '$n',
-                                                                         'labels': ['main', 'person'],
-                                                                         'properties': {'text': 'Stefano'}}},
-                                                      'chain': [{'relation': {'direction': 'any',
-                                                                              'types': ['knows']},
-                                                                 'node': {'parameter': '$f',
-                                                                          'labels': ['person']}}]}}]},
+                                        'match': [{'optional': True,
+                                                   'pattern': [{'start': {'node': {'parameter': '$n',
+                                                                                   'labels': ['main', 'person'],
+                                                                                   'properties': {'text': 'Stefano'}}},
+                                                                'chain': [{'relation': {'direction': 'any',
+                                                                                        'types': ['knows']},
+                                                                           'node': {'parameter': '$f',
+                                                                                    'labels': ['person']}}]}]}],
                                         'return': {'distinct': False,
                                                    'items': [{'parameter': '$f',
                                                               'property': 'text',
@@ -89,34 +88,48 @@ class TestGrammarVisitor(TestCase):
                                                    'skip': 1,
                                                    'limit': 5}}]})
 
-    def test_knowledge_6(self):
+    def test_knowledge_7(self):
         assert_that(self.process(knowledge, 'RULE "description" '
                                             'SALIENCE 5 '
-                                            'OPTIONAL MATCH ($n :main:person {text: "Stefano"})-[:knows]-($f :person)'
-                                            'RETURN $f.text AS name '
-                                            'ORDER BY name '
+                                            'OPTIONAL MATCH ($n :main:person {text: "Stefano"})-[:knows]-($f :person), '
+                                            '               ($n)-[:works_at]->($c :company{current: True}) '
+                                            'MATCH ($a :avatar)-[:linked_to]-($n) '
+                                            'RETURN $f.text AS name, $c.text AS employer '
+                                            'ORDER BY name, employer DESC '
                                             'SKIP 1 '
                                             'LIMIT 5')) \
             .contains_only('value') \
             .contains_entry({'value': [{'description': 'description',
-                                                 'salience': 5,
-                                                 'match': {'optional': True,
-                                                           'pattern': [{'pattern': {
-                                                               'start': {'node': {'parameter': '$n',
-                                                                                  'labels': ['main', 'person'],
-                                                                                  'properties': {'text': 'Stefano'}}},
-                                                               'chain': [{'relation': {'direction': 'any',
-                                                                                       'types': ['knows']},
-                                                                          'node': {'parameter': '$f',
-                                                                                   'labels': ['person']}}]}}]},
-                                                 'return': {'distinct': False,
-                                                            'items': [{'parameter': '$f',
-                                                                       'property': 'text',
-                                                                       'as': 'name'}],
-                                                            'order': [{'ascending': True,
-                                                                       'name': 'name'}],
-                                                            'skip': 1,
-                                                            'limit': 5}}]})
+                                        'salience': 5,
+                                        'match': [{'optional': True,
+                                                   'pattern': [{'start': {'node': {'parameter': '$n',
+                                                                                   'labels': ['main', 'person'],
+                                                                                   'properties': {
+                                                                                       'text': 'Stefano'}}},
+                                                                'chain': [{'relation': {'direction': 'any',
+                                                                                        'types': ['knows']},
+                                                                           'node': {'parameter': '$f',
+                                                                                    'labels': ['person']}}]},
+                                                               {'start': {'node': {'parameter': '$n'}},
+                                                                'chain': [{'relation': {'direction': 'outgoing',
+                                                                                        'types': ['works_at']},
+                                                                           'node': {'parameter': '$c',
+                                                                                    'labels': ['company'],
+                                                                                    'properties': {
+                                                                                        'current': True}}}]}]},
+                                                  {'optional': False,
+                                                   'pattern': [{'start': {'node': {'parameter': '$a',
+                                                                                   'labels': ['avatar']}},
+                                                                'chain': [{'relation': {'direction': 'any',
+                                                                                        'types': ['linked_to']},
+                                                                           'node': {'parameter': '$n'}}]}]}],
+                                        'return': {'distinct': False,
+                                                   'items': [{'parameter': '$f', 'property': 'text', 'as': 'name'},
+                                                             {'parameter': '$c', 'property': 'text', 'as': 'employer'}],
+                                                   'order': [{'ascending': True, 'name': 'name'},
+                                                             {'ascending': False, 'name': 'employer'}],
+                                                   'skip': 1,
+                                                   'limit': 5}}]})
 
     def test_clause_0(self):
         assert_that(TestGrammarVisitor.process) \
@@ -152,15 +165,14 @@ class TestGrammarVisitor(TestCase):
             .contains_only('value') \
             .contains_entry({'value': {'description': 'description',
                                        'salience': 5,
-                                       'match': {'optional': True,
-                                                 'pattern': [{'pattern': {
-                                                     'start': {'node': {'parameter': '$n',
-                                                                        'labels': ['main', 'person'],
-                                                                        'properties': {'text': 'Stefano'}}},
-                                                     'chain': [{'relation': {'direction': 'any',
-                                                                             'types': ['knows']},
-                                                                'node': {'parameter': '$f',
-                                                                         'labels': ['person']}}]}}]},
+                                       'match': [{'optional': True,
+                                                  'pattern': [{'start': {'node': {'parameter': '$n',
+                                                                                  'labels': ['main', 'person'],
+                                                                                  'properties': {'text': 'Stefano'}}},
+                                                               'chain': [{'relation': {'direction': 'any',
+                                                                                       'types': ['knows']},
+                                                                          'node': {'parameter': '$f',
+                                                                                   'labels': ['person']}}]}]}],
                                        'return': {'distinct': False,
                                                   'items': [{'parameter': '$f',
                                                              'property': 'text',

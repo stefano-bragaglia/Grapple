@@ -42,6 +42,9 @@ class KnowledgeVisitor(PTNodeVisitor):
 
         return {'value': {'salience': value}}
 
+    def visit_match_parts(self, node: Node, children: List) -> object:
+        return {'value': {'match': [child['value']['match'] for child in children]}}
+
     def visit_match_part(self, node: Node, children: List) -> object:
         content = {'optional': False}
         for child in children:
@@ -63,10 +66,10 @@ class KnowledgeVisitor(PTNodeVisitor):
         return {'value': content}
 
     def visit_match_anonymous(self, node: Node, children: List) -> object:
-        return {'value': {'pattern': {
+        return {'value': {
             'start': children[0]['value'],
             'chain': [child['value'] for child in children[1:]]
-        }}}
+        }}
 
     def visit_match_start(self, node: Node, children: List) -> object:
         content = {}
