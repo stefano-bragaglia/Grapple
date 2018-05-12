@@ -1,4 +1,4 @@
-from typing import Optional, List, Union, Dict
+from typing import Dict, List, Optional, Union
 
 Value = Union[bool, int, float, str, List[bool], List[int], List[float], List[str]]
 

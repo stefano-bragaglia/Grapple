@@ -1,215 +1,231 @@
 import json
-from typing import List, Optional
+from typing import Dict, List
 
 from grapple.bom.container import Value
+from grapple.engine.descriptors import Direction
+
+Properties = Dict[str, Value]
+
+
+class Node(object):
+    def __init__(self, parameter: str = None, labels: List[str] = None, properties: Properties = None):
+        self.parameter = parameter
+        self.labels = labels if labels else []
+        self.properties = properties if properties else {}
+
+    def __repr__(self) -> str:
+        labels = ':' + ':'.join(self.labels) if self.labels else None
+        properties = json.dumps(self.properties, sort_keys=True) if self.properties else None
+        content = ' '.join(part for part in [self.parameter, labels, properties] if part)
+
+        return '(%s)' % content
+
+    def __getitem__(self, index: int) -> str:
+        return self.labels[index]
+
+
+class Relation(object):
+    def __init__(self, direction: str = None, parameter: str = None, types: List[str] = None,
+                 properties: Properties = None):
+        if direction == 'outgoing':
+            self.direction = Direction.OUTGOING
+        elif direction == 'incoming':
+            self.direction = Direction.INCOMING
+        else:
+            self.direction = Direction.ANY
+        self.parameter = parameter
+        self.types = types if types else []
+        self.properties = properties if properties else {}
+
+    def __repr__(self) -> str:
+        types = ':' + ':'.join(self.types) if self.types else None
+        properties = json.dumps(self.properties, sort_keys=True) if self.properties else None
+        content = ' '.join(part for part in [self.parameter, types, properties] if part)
+
+        if self.direction == Direction.OUTGOING:
+            return '-[%s]->' % content
+        elif self.direction == Direction.INCOMING:
+            return '<-[%s]-' % content
+        else:
+            return '-[%s]-' % content
+
+    def __getitem__(self, index: int) -> str:
+        return self.types[index]
+
+
+class Chain(object):
+    def __init__(self, node: dict, relation: dict):
+        self.relation = Relation(**relation)
+        self.node = Node(**node)
+
+    def __repr__(self) -> str:
+        return repr(self.relation) + repr(self.node)
+
+
+class Pattern(object):
+    def __init__(self, parameter: str = None, node: dict = None, chain: List[dict] = None):
+        self.parameter = parameter
+        self.node = Node(**node if node else {})
+        self.chain = [Chain(**data) for data in chain] if chain else []
+
+    def __repr__(self) -> str:
+        content = repr(self.node) + ''.join(repr(data) for data in self.chain)
+        if self.parameter:
+            content = self.parameter + ' = ' + content
+
+        return content
+
+    def __getitem__(self, index: int) -> Chain:
+        return self.chain[index]
+
+
+class Match(object):
+    def __init__(self, optional: bool = False, pattern: List[dict] = None):
+        self.optional = optional
+        self.pattern = [Pattern(**data) for data in pattern] if pattern else []
+
+    def __repr__(self) -> str:
+        content = 'MATCH ' + '\n'.join(repr(item) for item in self.pattern)
+        if self.optional:
+            content = 'OPTIONAL ' + content
+
+        return content
+
+
+    def __getitem__(self, index: int) -> Pattern:
+        return self.pattern[index]
 
 
 class Item(object):
     def __init__(self, function: str = None, parameter: str = None, property: str = None, value: 'Value' = None,
                  as_: str = None):
-        self._func = function
-        self._param = parameter
-        self._prop = property
-        self._value = value
-        self._name = as_
+        self.function = function
+        self.parameter = parameter
+        self.property = property
+        self.value = value
+        self.synonym = as_
 
     def __repr__(self) -> str:
-        if self._param:
-            if self._prop:
-                selector = '%s.%s' % (self._param, self._prop)
+        if self.parameter:
+            if self.property:
+                selector = '%s.%s' % (self.parameter, self.property)
             else:
-                selector = self._param
+                selector = self.parameter
         else:
             selector = None
-        data = json.dumps(self._value)
+        data = json.dumps(self.value)
 
-        if self._func is None:
+        if self.function is None:
             content = selector if selector else data
-        elif self._func == '*':
+        elif self.function == '*':
             return '*'
-        elif self._func == 'coalesce' and self._value:
-            content = '%s(%s, %s)' % (self._func, selector, data)
+        elif self.function == 'coalesce' and self.value:
+            content = '%s(%s, %s)' % (self.function, selector, data)
         else:
-            content = '%s(%s)' % (self._func, selector)
+            content = '%s(%s)' % (self.function, selector)
 
-        if self._name:
-            content += ' AS ' + self._name
+        if self.synonym:
+            content += ' AS ' + self.synonym
 
         return content
-
-    @property
-    def func(self) -> Optional[str]:
-        return self._func
-
-    @property
-    def param(self) -> Optional[str]:
-        return self._param
-
-    @property
-    def prop(self) -> Optional[str]:
-        return self._prop
-
-    @property
-    def value(self) -> Optional['Value']:
-        return self._value
-
-    @property
-    def name(self) -> Optional[str]:
-        return self._name
 
 
 class Order(object):
     def __init__(self, ascending: bool = True, parameter: str = None, property: str = None, name: str = None):
-        self._ascending = ascending
-        self._param = parameter
-        self._prop = property
-        self._name = name
+        self.ascending = ascending
+        self.parameter = parameter
+        self.property = property
+        self.synonym = name
 
     def __repr__(self) -> str:
-        if self._param:
-            if self._prop:
-                content = '%s.%s' % (self._param, self._prop)
+        if self.parameter:
+            if self.property:
+                content = '%s.%s' % (self.parameter, self.property)
             else:
-                content = self._param
+                content = self.parameter
         else:
-            content = self._name
-        if not self._ascending:
+            content = self.synonym
+        if not self.ascending:
             content += ' DESC'
 
         return content
 
-    @property
-    def ascending(self) -> bool:
-        return self._ascending
-
-    @property
-    def param(self) -> Optional[str]:
-        return self._param
-
-    @property
-    def prop(self) -> Optional[str]:
-        return self._prop
-
-    @property
-    def name(self) -> Optional[str]:
-        return self._name
-
 
 class Ordering(object):
     def __init__(self, *orders: dict):
-        self._orders = [Order(**data) for data in orders] if orders else []
+        self.items = [Order(**data) for data in orders] if orders else []
 
     def __repr__(self) -> str:
-        return ', '.join(repr(order) for order in self._orders)
+        return ', '.join(repr(item) for item in self.items)
 
     def __getitem__(self, index: int) -> Order:
-        return self._orders[index]
-
-    def is_empty(self) -> bool:
-        return not self._orders
-
-    @property
-    def orders(self) -> List[Order]:
-        return self._orders
+        return self.items[index]
 
 
 class Return(object):
     def __init__(self, distinct: bool = False, items: List[dict] = None, order: List[dict] = None,
                  skip: int = 0, limit: int = 0):
-        self._distinct = distinct
-        self._items = [Item(**data) for data in items] if items else []
-        self._ordering = Ordering(*order if order else [])
-        self._skip = skip
-        self._limit = limit
+        self.distinct = distinct
+        self.items = [Item(**data) for data in items] if items else []
+        self.ordering = Ordering(*order if order else [])
+        self.skip = skip
+        self.limit = limit
 
     def __repr__(self) -> str:
         content = 'RETURN '
-        if self._distinct:
+        if self.distinct:
             content += 'DISTINCT '
-        content += ',\n\t'.join(repr(item) for item in self._items)
-        if not self._ordering.is_empty():
-            content += '\nORDER BY ' + ',\n\t'.join(repr(order) for order in self._ordering)
-        if self._skip and self._skip > 0:
-            content += '\nSKIP %d' % self._skip
-        if self._limit and self._limit > 0:
-            content += '\nLIMIT %d' % self._limit
+        content += ',\n\t'.join(repr(item) for item in self.items)
+        if self.ordering:
+            content += '\nORDER BY ' + ',\n\t'.join(repr(order) for order in self.ordering)
+        if self.skip and self.skip > 0:
+            content += '\nSKIP %d' % self.skip
+        if self.limit and self.limit > 0:
+            content += '\nLIMIT %d' % self.limit
 
         return content
 
     def __getitem__(self, index: int) -> Item:
-        return self._items[index]
-
-    @property
-    def distinct(self) -> bool:
-        return self._distinct
-
-    @property
-    def items(self) -> List[Item]:
-        return self._items
-
-    @property
-    def ordering(self) -> Ordering:
-        return self._ordering
-
-    @property
-    def skip(self) -> int:
-        return self._skip
-
-    @property
-    def limit(self) -> int:
-        return self._limit
+        return self.items[index]
 
     def is_empty(self) -> bool:
-        if self._items or not self._ordering.is_empty() or self._skip and self._skip > 0 or self._limit:
+        if self.items or self.ordering or self.skip and self.skip > 0 or self.limit:
             return False
 
         return True
 
 
 class Rule(object):
-    def __init__(self, description: str = None, salience: int = 0, match: dict = None, return_: dict = None):
-        self._desc = description
-        self._salience = salience
-        # match
-        self._return = Return(**return_ if return_ else {})
+    def __init__(self, description: str = None, salience: int = 0, match: List[dict] = None, return_: dict = None):
+        self.description = description
+        self.salience = salience
+        self.match = [Match(**data) for data in match] if match else []
+        self.result = Return(**return_ if return_ else {})
 
     def __repr__(self) -> str:
         content = 'RULE'
-        if self._desc:
-            content += ' ' + json.dumps(self._desc)
-        if self._salience and self._salience > 0:
-            content += '\nSALIENCE %d' % self._salience
-        if not self._return.is_empty():
-            content += '\n' + repr(self._return)
+        if self.description:
+            content += ' ' + json.dumps(self.description)
+        if self.salience and self.salience > 0:
+            content += '\nSALIENCE %d' % self.salience
+        for match in self.match:
+            if match.pattern:
+                content += '\n' + repr(match)
+        if not self.result.is_empty():
+            content += '\n' + repr(self.result)
 
         return content
-
-    @property
-    def desc(self) -> Optional[str]:
-        return self._desc
-
-    @property
-    def salience(self) -> int:
-        return self._salience
-
-    @property
-    def return_(self) -> Optional[Return]:
-        return self._return
 
 
 class RuleBase(object):
     def __init__(self, *rules: dict):
-        self._rules = [Rule(**data) for data in rules]
+        self.rules = [Rule(**data) for data in rules]
 
     def __repr__(self) -> str:
-        return '\n\n'.join(repr(rule) for rule in self._rules)
+        return '\n\n'.join(repr(rule) for rule in self.rules)
 
     def __getitem__(self, index: int) -> Rule:
-        return self._rules[index]
-
-    @property
-    def rules(self) -> List[Rule]:
-        return self._rules
+        return self.rules[index]
 
 
 if __name__ == '__main__':
@@ -225,9 +241,9 @@ if __name__ == '__main__':
                         {'description': 'description',
                          'salience': 5,
                          'match': [{'optional': True,
-                                    'pattern': [{'start': {'node': {'parameter': '$n',
-                                                                    'labels': ['main', 'person'],
-                                                                    'properties': {'text': 'Stefano'}}},
+                                    'pattern': [{'node': {'parameter': '$n',
+                                                          'labels': ['main', 'person'],
+                                                          'properties': {'text': 'Stefano'}},
                                                  'chain': [{'relation': {'direction': 'any',
                                                                          'types': ['knows']},
                                                             'node': {'parameter': '$f',
