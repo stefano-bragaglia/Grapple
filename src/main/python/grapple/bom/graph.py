@@ -1,4 +1,4 @@
-from typing import List, Dict
+from typing import Dict, List
 
 from grapple.bom.container import Value
 from grapple.bom.node import Node
@@ -52,4 +52,3 @@ class Graph(object):
                 nodes.append(node)
 
         return nodes
-

@@ -14,8 +14,9 @@
 from __future__ import unicode_literals
 
 import os
+import re
 
-from arpeggio import *
+from arpeggio import NonTerminal, visit_parse_tree
 from arpeggio.export import PMDOTExporter
 from arpeggio.peg import PEGVisitor, ParserPEG
 
@@ -77,6 +78,10 @@ def main(debug=False):
     # parse PEG grammars
     parser.parser_model = parser_model
     parser.parse(peg_grammar)
+
+
+def gen(name, param, param1):
+    pass
 
 
 if __name__ == '__main__':

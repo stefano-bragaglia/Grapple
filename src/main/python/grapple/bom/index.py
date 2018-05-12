@@ -42,7 +42,6 @@ class Index(object):
                         return []
             return list(entities)
 
-
     def remove(self, entity: 'Entity') -> None:
         if entity.graph != self._graph:
             raise ValueError("'entity' is invalid: <%s>" % entity)
@@ -56,4 +55,4 @@ class Index(object):
                     if key in self._with_keys[kind]:
                         value = entity.get_property(key)
                         if value in self._with_keys[kind][key] and entity in self._with_keys[kind][key][value]:
-                                self._with_keys[kind][key][value].remove(entity)
+                            self._with_keys[kind][key][value].remove(entity)

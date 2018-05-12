@@ -1,5 +1,5 @@
 import json
-from typing import Optional, List, Dict
+from typing import Dict, List, Optional
 
 from grapple.bom.container import Value
 from grapple.bom.entity import Entity
@@ -89,7 +89,8 @@ class Node(Entity):
     def has_relations(self, *types: str, properties: Dict[str, Value] = None) -> bool:
         pass
 
-    def find_relations(self, *types: str, direction: Direction = Direction.ANY, properties: Dict[str, Value] = None) -> \
+    def find_relations(
+            self, *types: str, direction: Direction = Direction.ANY, properties: Dict[str, Value] = None) -> \
             List['Relation']:
         types = [type_ for type_ in types]
         items = (properties if properties else {}).items()

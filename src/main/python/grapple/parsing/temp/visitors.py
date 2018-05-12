@@ -26,7 +26,7 @@ class GrammarVisitor(PTNodeVisitor):
 
         return {"value": result}
 
-    # ----------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------------------------------------------
     def visit_rule_part(self, node, children):
         result = {"description": children[1]["value"]}
         for child in children[2:]:
@@ -37,7 +37,7 @@ class GrammarVisitor(PTNodeVisitor):
     def visit_salience(self, node, children):
         return {"value": {"salience": children[1]["value"]}}
 
-    # ----------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------------------------------------------
     def visit_match_part(self, node, children):
         return {"value": None}
 
@@ -126,7 +126,7 @@ class GrammarVisitor(PTNodeVisitor):
     def visit_properties(self, node, children):
         return {"value": {"properties": children[0]["value"]}}
 
-    # ----------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------------------------------------------
     def visit_return_part(self, node, children):
         return {"value": None}
 
@@ -277,7 +277,7 @@ class GrammarVisitor(PTNodeVisitor):
     def visit_skip(self, node, children):
         return {"value": None}
 
-    # ----------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------------------------------------------
     def visit_json_properties(self, node, children):
         return {"value": children[0]["value"]}
 
@@ -318,7 +318,7 @@ class GrammarVisitor(PTNodeVisitor):
     def visit_json_element_list(self, node, children):
         return {"value": [child["value"] for child in children]}
 
-    # ----------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------------------------------------------
     def visit_true(self, node, children):
         return {"value": True}
 
@@ -328,7 +328,7 @@ class GrammarVisitor(PTNodeVisitor):
     def visit_null(self, node, children):
         return {"value": None}
 
-    # ----------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------------------------------------------
     def visit_identifier(self, node, children):
         return {"value": node.value}
 
@@ -338,36 +338,36 @@ class GrammarVisitor(PTNodeVisitor):
     def visit_variable(self, node, children):
         return {"value": node.value[1:]}
 
-    # ----------------------------------------------------------------------------------------------------------------------
+    # ------------------------------------------------------------------------------------------------------------------
     def visit_comment(self, node, children):
         return {"value": None}
 
 
 if __name__ == "__main__":
-    content = """
-        /* Multi-line comment
-         * ****************** */
-        RULE rule_name
-        SALIENCE 5
-        OPTIONAL MATCH $a = ($b :main:node {k1: "value", "k2": 5})-[$c :link {key: "value"}]->($d :other {key: null}), 
-                       $e = ($f :main:node {"key": -1})-[$g :link {"key": 0.5E-2}]->($h :other {key: True})
-        // Single-line comment
-        RETURN DISTINCT *, 
-                        coalesce($a.key, ["v1", "v2"]) AS s_01,
-                        id($a) AS s_02, 
-                        keys($a) AS s_03, 
-                        properties($a) AS s_04, 
-                        labels($a) AS s_05, 
-                        types($a) AS s_06, 
-                        tail($a) AS s_07, 
-                        head($a) AS s_08,
-                        $a AS s_09,
-                        $a.key AS s_10,
-                        True AS s_11 
-        ORDER BY $a, $a.key, name, $b DESC, $b.key DESC, surname DESC 
-        SKIP 5 
-        LIMIT 10;
-    """
+    content = '/* Multi-line comment\n' \
+              ' * ****************** */\n' \
+              'RULE rule_name\n' \
+              'SALIENCE 5\n' \
+              'OPTIONAL MATCH $a = ($b :main:node {k1: "value", "k2": 5})' \
+              '-[$c :link {key: "value"}]->($d :other {key: null}),\n' \
+              '               $e = ($f :main:node {"key": -1})' \
+              '-[$g :link {"key": 0.5E-2}]->($h :other {key: True})\n' \
+              '// Single-line comment\n' \
+              'RETURN DISTINCT *,\n' \
+              '                coalesce($a.key, ["v1", "v2"]) AS s_01,\n' \
+              '                id($a) AS s_02,\n' \
+              '                keys($a) AS s_03,\n' \
+              '                properties($a) AS s_04,\n' \
+              '                labels($a) AS s_05,\n' \
+              '                types($a) AS s_06,\n' \
+              '                tail($a) AS s_07,\n' \
+              '                head($a) AS s_08,\n' \
+              '                $a AS s_09,\n' \
+              '                $a.key AS s_10,\n' \
+              '                True AS s_11\n' \
+              'ORDER BY $a, $a.key, name, $b DESC, $b.key DESC, surname DESC\n' \
+              'SKIP 5\n' \
+              'LIMIT 10;\n'
 
     parser = ParserPython(knowledge, comment)
     parse_tree = parser.parse(content)

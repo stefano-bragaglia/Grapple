@@ -23,6 +23,14 @@ def node_conditions(node: NodeDesc) -> List[Condition]:
     return conditions
 
 
+class IsOutgoing(object):
+    pass
+
+
+class IsIncoming(object):
+    pass
+
+
 def relation_conditions(relation: RelationDesc) -> List[Condition]:
     conditions = [IsRelation()]
     if relation.direction == Direction.OUTGOING:
