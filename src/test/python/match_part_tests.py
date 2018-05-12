@@ -3,9 +3,9 @@ from unittest import TestCase
 from arpeggio import NoMatch, ParserPython, visit_parse_tree
 from assertpy import assert_that
 
-from grapple.parsing.grammar import match_part, match_optional, match_patterns, match_pattern, match_anonymous, \
-    match_start, match_chain, match_node, match_relation, match_both, match_back, match_next, match_none, match_details, \
-    match_properties, match_labels, match_types
+from grapple.parsing.grammar import match_anonymous, match_back, match_both, match_chain, match_details, match_labels, \
+    match_next, match_node, match_none, match_optional, match_part, match_pattern, match_patterns, match_properties, \
+    match_relation, match_start, match_types
 from grapple.parsing.visitor import KnowledgeVisitor
 
 
@@ -21,11 +21,11 @@ class TestGrammarVisitor(TestCase):
             .contains_only('value') \
             .contains_entry({'value': {'match': {'optional': False,
                                                  'pattern': [{'parameter': '$pp',
-                                                              'pattern': {
-                                                                  'start': {'node': {'parameter': '$p',
-                                                                                     'labels': ['current'],
-                                                                                     'properties': {'key': 'value'}}},
-                                                                  'chain': []}}]}}})
+
+                                                              'node': {'parameter': '$p',
+                                                                       'labels': ['current'],
+                                                                       'properties': {'key': 'value'}},
+                                                              'chain': []}]}}})
 
     def test_match_part_2(self):
         assert_that(self.process(match_part, 'OPTIONAL MATCH ($p:current{key: "value"})'
@@ -33,17 +33,17 @@ class TestGrammarVisitor(TestCase):
                                              '($p:current{key: "value"})')) \
             .contains_only('value') \
             .contains_entry({'value': {'match': {'optional': True,
-                                                 'pattern': [{'pattern': {
-                                                     'start': {'node': {'parameter': '$p',
-                                                                        'labels': ['current'],
-                                                                        'properties': {'key': 'value'}}},
+                                                 'pattern': [{
+                                                     'node': {'parameter': '$p',
+                                                              'labels': ['current'],
+                                                              'properties': {'key': 'value'}},
                                                      'chain': [{'relation': {'direction': 'any',
                                                                              'parameter': '$p',
                                                                              'types': ['current'],
                                                                              'properties': {'key': 'value'}},
                                                                 'node': {'parameter': '$p',
                                                                          'labels': ['current'],
-                                                                         'properties': {'key': 'value'}}}]}}]}}})
+                                                                         'properties': {'key': 'value'}}}]}]}}})
 
     def test_match_part_3(self):
         assert_that(self.process(match_part, 'OPTIONAL MATCH $pp = ($p:current{key: "value"}), '
@@ -53,24 +53,22 @@ class TestGrammarVisitor(TestCase):
             .contains_only('value') \
             .contains_entry({'value': {'match': {'optional': True,
                                                  'pattern': [{'parameter': '$pp',
-                                                              'pattern': {
-                                                                  'start': {'node': {'parameter': '$p',
-                                                                                     'labels': ['current'],
-                                                                                     'properties': {'key': 'value'}}},
-                                                                  'chain': []}},
-                                                             {'pattern': {
-                                                                 'start': {'node': {'parameter': '$p',
-                                                                                    'labels': ['current'],
-                                                                                    'properties': {'key': 'value'}}},
-                                                                 'chain': [{'relation': {'direction': 'any',
-                                                                                         'parameter': '$p',
-                                                                                         'types': ['current'],
-                                                                                         'properties': {
-                                                                                             'key': 'value'}},
-                                                                            'node': {'parameter': '$p',
-                                                                                     'labels': ['current'],
-                                                                                     'properties': {
-                                                                                         'key': 'value'}}}]}}]}}})
+                                                              'node': {'parameter': '$p',
+                                                                       'labels': ['current'],
+                                                                       'properties': {'key': 'value'}},
+                                                              'chain': []},
+                                                             {'node': {'parameter': '$p',
+                                                                       'labels': ['current'],
+                                                                       'properties': {'key': 'value'}},
+                                                              'chain': [{'relation': {'direction': 'any',
+                                                                                      'parameter': '$p',
+                                                                                      'types': ['current'],
+                                                                                      'properties': {
+                                                                                          'key': 'value'}},
+                                                                         'node': {'parameter': '$p',
+                                                                                  'labels': ['current'],
+                                                                                  'properties': {
+                                                                                      'key': 'value'}}}]}]}}})
 
     def test_match_optional_0(self):
         assert_that(TestGrammarVisitor.process) \
@@ -93,27 +91,27 @@ class TestGrammarVisitor(TestCase):
         assert_that(self.process(match_patterns, 'MATCH $pp = ($p:current{key: "value"})')) \
             .contains_only('value') \
             .contains_entry({'value': {'pattern': [{'parameter': '$pp',
-                                                    'pattern': {'start': {'node': {'parameter': '$p',
-                                                                                   'labels': ['current'],
-                                                                                   'properties': {'key': 'value'}}},
-                                                                'chain': []}}]}})
+                                                    'node': {'parameter': '$p',
+                                                             'labels': ['current'],
+                                                             'properties': {'key': 'value'}},
+                                                    'chain': []}]}})
 
     def test_match_patterns_2(self):
         assert_that(self.process(match_patterns, 'MATCH ($p:current{key: "value"})'
                                                  '<-[$p:current{key: "value"}]->'
                                                  '($p:current{key: "value"})')) \
             .contains_only('value') \
-            .contains_entry({'value': {'pattern': [{'pattern': {'start': {'node': {'parameter': '$p',
-                                                                                   'labels': ['current'],
-                                                                                   'properties': {'key': 'value'}}},
-                                                                'chain': [{'relation': {'direction': 'any',
-                                                                                        'parameter': '$p',
-                                                                                        'types': ['current'],
-                                                                                        'properties': {'key': 'value'}},
-                                                                           'node': {'parameter': '$p',
-                                                                                    'labels': ['current'],
-                                                                                    'properties': {'key': 'value'}}}]
-                                                                }}]}})
+            .contains_entry({'value': {'pattern': [{'node': {'parameter': '$p',
+                                                             'labels': ['current'],
+                                                             'properties': {'key': 'value'}},
+                                                    'chain': [{'relation': {'direction': 'any',
+                                                                            'parameter': '$p',
+                                                                            'types': ['current'],
+                                                                            'properties': {'key': 'value'}},
+                                                               'node': {'parameter': '$p',
+                                                                        'labels': ['current'],
+                                                                        'properties': {'key': 'value'}}}]
+                                                    }]}})
 
     def test_match_patterns_3(self):
         assert_that(self.process(match_patterns, 'MATCH $pp = ($p:current{key: "value"}), '
@@ -122,21 +120,23 @@ class TestGrammarVisitor(TestCase):
                                                  '($p:current{key: "value"})')) \
             .contains_only('value') \
             .contains_entry({'value': {'pattern': [{'parameter': '$pp',
-                                                    'pattern': {'start': {'node': {'parameter': '$p',
-                                                                                   'labels': ['current'],
-                                                                                   'properties': {'key': 'value'}}},
-                                                                'chain': []}},
-                                                   {'pattern': {'start': {'node': {'parameter': '$p',
-                                                                                   'labels': ['current'],
-                                                                                   'properties': {'key': 'value'}}},
-                                                                'chain': [{'relation': {'direction': 'any',
-                                                                                        'parameter': '$p',
-                                                                                        'types': ['current'],
-                                                                                        'properties': {'key': 'value'}},
-                                                                           'node': {'parameter': '$p',
-                                                                                    'labels': ['current'],
-                                                                                    'properties': {'key': 'value'}}}]}}]
-                                       }})
+                                                    'node': {'parameter': '$p',
+                                                             'labels': ['current'],
+                                                             'properties': {
+                                                                 'key': 'value'}},
+                                                    'chain': []},
+                                                   {'node': {'parameter': '$p',
+                                                             'labels': ['current'],
+                                                             'properties': {'key': 'value'}},
+                                                    'chain': [{'relation': {'direction': 'any',
+                                                                            'parameter': '$p',
+                                                                            'types': ['current'],
+                                                                            'properties': {
+                                                                                'key': 'value'}},
+                                                               'node': {'parameter': '$p',
+                                                                        'labels': ['current'],
+                                                                        'properties': {
+                                                                            'key': 'value'}}}]}]}})
 
     def test_match_pattern_0(self):
         assert_that(TestGrammarVisitor.process) \
@@ -148,26 +148,27 @@ class TestGrammarVisitor(TestCase):
         assert_that(self.process(match_pattern, '$pp = ($p:current{key: "value"})')) \
             .contains_only('value') \
             .contains_entry({'value': {'parameter': '$pp',
-                                       'pattern': {'start': {'node': {'parameter': '$p', 'labels': ['current'],
-                                                                      'properties': {'key': 'value'}}},
-                                                   'chain': []}}})
+                                       'node': {'parameter': '$p', 'labels': ['current'],
+                                                'properties': {'key': 'value'}},
+                                       'chain': []}})
 
     def test_match_pattern_2(self):
         assert_that(self.process(match_pattern, '($p:current{key: "value"})'
                                                 '<-[$p:current{key: "value"}]->'
                                                 '($p:current{key: "value"})')) \
             .contains_only('value') \
-            .contains_entry({'value': {'pattern': {'start': {'node': {'parameter': '$p', 'labels': ['current'],
-                                                                      'properties': {'key': 'value'}}},
-                                                   'chain': [
-                                                       {'relation': {'direction': 'any',
-                                                                     'parameter': '$p',
-                                                                     'types': ['current'],
-                                                                     'properties': {'key': 'value'}},
-                                                        'node': {'parameter': '$p',
-                                                                 'labels': ['current'],
-                                                                 'properties': {'key': 'value'}}}
-                                                   ]}}})
+            .contains_entry({'value': {'node': {'parameter': '$p',
+                                                'labels': ['current'],
+                                                'properties': {'key': 'value'}},
+                                       'chain': [
+                                           {'relation': {'direction': 'any',
+                                                         'parameter': '$p',
+                                                         'types': ['current'],
+                                                         'properties': {'key': 'value'}},
+                                            'node': {'parameter': '$p',
+                                                     'labels': ['current'],
+                                                     'properties': {'key': 'value'}}}
+                                       ]}})
 
     def test_match_anonymous_0(self):
         assert_that(TestGrammarVisitor.process) \
@@ -178,26 +179,26 @@ class TestGrammarVisitor(TestCase):
     def test_match_anonymous_1(self):
         assert_that(self.process(match_anonymous, '($p:current{key: "value"})')) \
             .contains_only('value') \
-            .contains_entry({'value': {'pattern': {'start': {'node': {'parameter': '$p', 'labels': ['current'],
-                                                                      'properties': {'key': 'value'}}},
-                                                   'chain': []}}})
+            .contains_entry({'value': {'node': {'parameter': '$p', 'labels': ['current'],
+                                                'properties': {'key': 'value'}},
+                                       'chain': []}})
 
     def test_match_anonymous_2(self):
         assert_that(self.process(match_anonymous, '($p:current{key: "value"})'
                                                   '<-[$p:current{key: "value"}]->'
                                                   '($p:current{key: "value"})')) \
             .contains_only('value') \
-            .contains_entry({'value': {'pattern': {'start': {'node': {'parameter': '$p', 'labels': ['current'],
-                                                                      'properties': {'key': 'value'}}},
-                                                   'chain': [
-                                                       {'relation': {'direction': 'any',
-                                                                     'parameter': '$p',
-                                                                     'types': ['current'],
-                                                                     'properties': {'key': 'value'}},
-                                                        'node': {'parameter': '$p',
-                                                                 'labels': ['current'],
-                                                                 'properties': {'key': 'value'}}}
-                                                   ]}}})
+            .contains_entry({'value': {'node': {'parameter': '$p', 'labels': ['current'],
+                                                'properties': {'key': 'value'}},
+                                       'chain': [
+                                           {'relation': {'direction': 'any',
+                                                         'parameter': '$p',
+                                                         'types': ['current'],
+                                                         'properties': {'key': 'value'}},
+                                            'node': {'parameter': '$p',
+                                                     'labels': ['current'],
+                                                     'properties': {'key': 'value'}}}
+                                       ]}})
 
     def test_match_start_0(self):
         assert_that(TestGrammarVisitor.process) \

@@ -66,10 +66,9 @@ class KnowledgeVisitor(PTNodeVisitor):
         return {'value': content}
 
     def visit_match_anonymous(self, node: Node, children: List) -> object:
-        content = {
-            'chain': [child['value'] for child in children[1:]]
-        }
+        content = {}
         content.update(children[0]['value'])
+        content['chain'] = [child['value'] for child in children[1:]]
 
         return {'value': content}
 
@@ -146,7 +145,7 @@ class KnowledgeVisitor(PTNodeVisitor):
         for child in children[1:]:
             content.update(child['value'])
 
-        return {'value': {'return': content}}
+        return {'value': {'result': content}}
 
     def visit_return_distinct(self, node: Node, children: List) -> object:
         return {'value': {'distinct': True}}
@@ -237,7 +236,7 @@ class KnowledgeVisitor(PTNodeVisitor):
         return {'value': content}
 
     def visit_return_synonym(self, node: Node, children: List) -> object:
-        return {'value': {'as': children[1]['value']}}
+        return {'value': {'synonym': children[1]['value']}}
 
     def visit_return_order_by(self, node: Node, children: List) -> object:
         return {'value': {'order': children[2]['value']}}
@@ -266,7 +265,7 @@ class KnowledgeVisitor(PTNodeVisitor):
         return {'value': {'property': children[0]['value']}}
 
     def visit_return_order_by_name(self, node: Node, children: List) -> object:
-        return {'value': {'name': children[0]['value']}}
+        return {'value': {'synonym': children[0]['value']}}
 
     def visit_return_ordering(self, node: Node, children: List) -> object:
         return {'value': children[0]['value']}

@@ -16,11 +16,11 @@ class TestGrammarVisitor(TestCase):
         assert_that(self.process(return_part, 'RETURN DISTINCT *, coalesce($param.prop, 5) AS "synonym" '
                                               'ORDER BY synonym DESC SKIP 5 LIMIT 3')) \
             .contains_only('value') \
-            .contains_entry({'value': {'return': {'distinct': True,
+            .contains_entry({'value': {'result': {'distinct': True,
                                                   'items': [{'function': 'all'},
                                                             {'function': 'coalesce', 'parameter': '$param',
-                                                             'property': 'prop', 'default': 5, 'as': 'synonym'}],
-                                                  'order': [{'ascending': False, 'name': 'synonym'}],
+                                                             'property': 'prop', 'default': 5, 'synonym': 'synonym'}],
+                                                  'order': [{'ascending': False, 'synonym': 'synonym'}],
                                                   'skip': 5,
                                                   'limit': 3}}})
 
@@ -28,14 +28,14 @@ class TestGrammarVisitor(TestCase):
         assert_that(self.process(return_items, 'coalesce($param.prop, 5) AS "synonym"')) \
             .contains_only('value') \
             .contains_entry({'value': {'items': [{'function': 'coalesce', 'parameter': '$param', 'property': 'prop',
-                                                  'default': 5, 'as': 'synonym'}]}})
+                                                  'default': 5, 'synonym': 'synonym'}]}})
 
     def test_return_items_2(self):
         assert_that(self.process(return_items, '*, coalesce($param.prop, 5) AS "synonym"')) \
             .contains_only('value') \
             .contains_entry({'value': {'items': [{'function': 'all'},
                                                  {'function': 'coalesce', 'parameter': '$param', 'property': 'prop',
-                                                  'default': 5, 'as': 'synonym'}]}})
+                                                  'default': 5, 'synonym': 'synonym'}]}})
 
     def test_return_first_1(self):
         assert_that(self.process(return_first, '*')) \
@@ -46,103 +46,103 @@ class TestGrammarVisitor(TestCase):
         assert_that(self.process(return_first, 'coalesce($param.prop, 5) AS "synonym"')) \
             .contains_only('value') \
             .contains_entry({'value': {'function': 'coalesce', 'parameter': '$param', 'property': 'prop', 'default': 5,
-                                       'as': 'synonym'}})
+                                       'synonym': 'synonym'}})
 
     def test_return_first_3(self):
         assert_that(self.process(return_first, 'keys($param) AS "synonym"')) \
             .contains_only('value') \
-            .contains_entry({'value': {'function': 'keys', 'parameter': '$param', 'as': 'synonym'}})
+            .contains_entry({'value': {'function': 'keys', 'parameter': '$param', 'synonym': 'synonym'}})
 
     def test_return_first_4(self):
         assert_that(self.process(return_first, 'properties($param) AS "synonym"')) \
             .contains_only('value') \
-            .contains_entry({'value': {'function': 'properties', 'parameter': '$param', 'as': 'synonym'}})
+            .contains_entry({'value': {'function': 'properties', 'parameter': '$param', 'synonym': 'synonym'}})
 
     def test_return_first_5(self):
         assert_that(self.process(return_first, 'id($param) AS "synonym"')) \
             .contains_only('value') \
-            .contains_entry({'value': {'function': 'id', 'parameter': '$param', 'as': 'synonym'}})
+            .contains_entry({'value': {'function': 'id', 'parameter': '$param', 'synonym': 'synonym'}})
 
     def test_return_first_6(self):
         assert_that(self.process(return_first, 'labels($param) AS "synonym"')) \
             .contains_only('value') \
-            .contains_entry({'value': {'function': 'labels', 'parameter': '$param', 'as': 'synonym'}})
+            .contains_entry({'value': {'function': 'labels', 'parameter': '$param', 'synonym': 'synonym'}})
 
     def test_return_first_7(self):
         assert_that(self.process(return_first, 'types($param) AS "synonym"')) \
             .contains_only('value') \
-            .contains_entry({'value': {'function': 'types', 'parameter': '$param', 'as': 'synonym'}})
+            .contains_entry({'value': {'function': 'types', 'parameter': '$param', 'synonym': 'synonym'}})
 
     def test_return_first_8(self):
         assert_that(self.process(return_first, 'tail($param) AS "synonym"')) \
             .contains_only('value') \
-            .contains_entry({'value': {'function': 'tail', 'parameter': '$param', 'as': 'synonym'}})
+            .contains_entry({'value': {'function': 'tail', 'parameter': '$param', 'synonym': 'synonym'}})
 
     def test_return_first_9(self):
         assert_that(self.process(return_first, 'head($param) AS "synonym"')) \
             .contains_only('value') \
-            .contains_entry({'value': {'function': 'head', 'parameter': '$param', 'as': 'synonym'}})
+            .contains_entry({'value': {'function': 'head', 'parameter': '$param', 'synonym': 'synonym'}})
 
     def test_return_first_10(self):
         assert_that(self.process(return_first, '$param.prop AS "synonym"')) \
             .contains_only('value') \
-            .contains_entry({'value': {'parameter': '$param', 'property': 'prop', 'as': 'synonym'}})
+            .contains_entry({'value': {'parameter': '$param', 'property': 'prop', 'synonym': 'synonym'}})
 
     def test_return_first_11(self):
         assert_that(self.process(return_first, '5 AS "synonym"')) \
             .contains_only('value') \
-            .contains_entry({'value': {'value': 5, 'as': 'synonym'}})
+            .contains_entry({'value': {'value': 5, 'synonym': 'synonym'}})
 
     def test_return_item_1(self):
         assert_that(self.process(return_item, 'coalesce($param.prop, 5) AS "synonym"')) \
             .contains_only('value') \
             .contains_entry({'value': {'function': 'coalesce', 'parameter': '$param', 'property': 'prop', 'default': 5,
-                                       'as': 'synonym'}})
+                                       'synonym': 'synonym'}})
 
     def test_return_item_2(self):
         assert_that(self.process(return_item, 'keys($param) AS "synonym"')) \
             .contains_only('value') \
-            .contains_entry({'value': {'function': 'keys', 'parameter': '$param', 'as': 'synonym'}})
+            .contains_entry({'value': {'function': 'keys', 'parameter': '$param', 'synonym': 'synonym'}})
 
     def test_return_item_3(self):
         assert_that(self.process(return_item, 'properties($param) AS "synonym"')) \
             .contains_only('value') \
-            .contains_entry({'value': {'function': 'properties', 'parameter': '$param', 'as': 'synonym'}})
+            .contains_entry({'value': {'function': 'properties', 'parameter': '$param', 'synonym': 'synonym'}})
 
     def test_return_item_4(self):
         assert_that(self.process(return_item, 'id($param) AS "synonym"')) \
             .contains_only('value') \
-            .contains_entry({'value': {'function': 'id', 'parameter': '$param', 'as': 'synonym'}})
+            .contains_entry({'value': {'function': 'id', 'parameter': '$param', 'synonym': 'synonym'}})
 
     def test_return_item_5(self):
         assert_that(self.process(return_item, 'labels($param) AS "synonym"')) \
             .contains_only('value') \
-            .contains_entry({'value': {'function': 'labels', 'parameter': '$param', 'as': 'synonym'}})
+            .contains_entry({'value': {'function': 'labels', 'parameter': '$param', 'synonym': 'synonym'}})
 
     def test_return_item_6(self):
         assert_that(self.process(return_item, 'types($param) AS "synonym"')) \
             .contains_only('value') \
-            .contains_entry({'value': {'function': 'types', 'parameter': '$param', 'as': 'synonym'}})
+            .contains_entry({'value': {'function': 'types', 'parameter': '$param', 'synonym': 'synonym'}})
 
     def test_return_item_7(self):
         assert_that(self.process(return_item, 'tail($param) AS "synonym"')) \
             .contains_only('value') \
-            .contains_entry({'value': {'function': 'tail', 'parameter': '$param', 'as': 'synonym'}})
+            .contains_entry({'value': {'function': 'tail', 'parameter': '$param', 'synonym': 'synonym'}})
 
     def test_return_item_8(self):
         assert_that(self.process(return_item, 'head($param) AS "synonym"')) \
             .contains_only('value') \
-            .contains_entry({'value': {'function': 'head', 'parameter': '$param', 'as': 'synonym'}})
+            .contains_entry({'value': {'function': 'head', 'parameter': '$param', 'synonym': 'synonym'}})
 
     def test_return_item_9(self):
         assert_that(self.process(return_item, '$param.prop AS "synonym"')) \
             .contains_only('value') \
-            .contains_entry({'value': {'parameter': '$param', 'property': 'prop', 'as': 'synonym'}})
+            .contains_entry({'value': {'parameter': '$param', 'property': 'prop', 'synonym': 'synonym'}})
 
     def test_return_item_10(self):
         assert_that(self.process(return_item, '5 AS "synonym"')) \
             .contains_only('value') \
-            .contains_entry({'value': {'value': 5, 'as': 'synonym'}})
+            .contains_entry({'value': {'value': 5, 'synonym': 'synonym'}})
 
     def test_return_all_1(self):
         assert_that(self.process(return_all, '*')) \
@@ -153,7 +153,7 @@ class TestGrammarVisitor(TestCase):
         assert_that(self.process(return_coalesce, 'coalesce($param.prop, 5) AS "synonym"')) \
             .contains_only('value') \
             .contains_entry({'value': {'function': 'coalesce', 'parameter': '$param', 'property': 'prop', 'default': 5,
-                                       'as': 'synonym'}})
+                                       'synonym': 'synonym'}})
 
     def test_return_default_1(self):
         assert_that(self.process(return_default, ', 5')) \
@@ -163,47 +163,47 @@ class TestGrammarVisitor(TestCase):
     def test_return_keys_1(self):
         assert_that(self.process(return_keys, 'keys($param) AS "synonym"')) \
             .contains_only('value') \
-            .contains_entry({'value': {'function': 'keys', 'parameter': '$param', 'as': 'synonym'}})
+            .contains_entry({'value': {'function': 'keys', 'parameter': '$param', 'synonym': 'synonym'}})
 
     def test_return_properties_1(self):
         assert_that(self.process(return_properties, 'properties($param) AS "synonym"')) \
             .contains_only('value') \
-            .contains_entry({'value': {'function': 'properties', 'parameter': '$param', 'as': 'synonym'}})
+            .contains_entry({'value': {'function': 'properties', 'parameter': '$param', 'synonym': 'synonym'}})
 
     def test_return_id_1(self):
         assert_that(self.process(return_id, 'id($param) AS "synonym"')) \
             .contains_only('value') \
-            .contains_entry({'value': {'function': 'id', 'parameter': '$param', 'as': 'synonym'}})
+            .contains_entry({'value': {'function': 'id', 'parameter': '$param', 'synonym': 'synonym'}})
 
     def test_return_labels_1(self):
         assert_that(self.process(return_labels, 'labels($param) AS "synonym"')) \
             .contains_only('value') \
-            .contains_entry({'value': {'function': 'labels', 'parameter': '$param', 'as': 'synonym'}})
+            .contains_entry({'value': {'function': 'labels', 'parameter': '$param', 'synonym': 'synonym'}})
 
     def test_return_types_1(self):
         assert_that(self.process(return_types, 'types($param) AS "synonym"')) \
             .contains_only('value') \
-            .contains_entry({'value': {'function': 'types', 'parameter': '$param', 'as': 'synonym'}})
+            .contains_entry({'value': {'function': 'types', 'parameter': '$param', 'synonym': 'synonym'}})
 
     def test_return_tail_1(self):
         assert_that(self.process(return_tail, 'tail($param) AS "synonym"')) \
             .contains_only('value') \
-            .contains_entry({'value': {'function': 'tail', 'parameter': '$param', 'as': 'synonym'}})
+            .contains_entry({'value': {'function': 'tail', 'parameter': '$param', 'synonym': 'synonym'}})
 
     def test_return_head_1(self):
         assert_that(self.process(return_head, 'head($param) AS "synonym"')) \
             .contains_only('value') \
-            .contains_entry({'value': {'function': 'head', 'parameter': '$param', 'as': 'synonym'}})
+            .contains_entry({'value': {'function': 'head', 'parameter': '$param', 'synonym': 'synonym'}})
 
     def test_return_selector_1(self):
         assert_that(self.process(return_selector, '$param.prop AS "synonym"')) \
             .contains_only('value') \
-            .contains_entry({'value': {'parameter': '$param', 'property': 'prop', 'as': 'synonym'}})
+            .contains_entry({'value': {'parameter': '$param', 'property': 'prop', 'synonym': 'synonym'}})
 
     def test_return_value_1(self):
         assert_that(self.process(return_value, '5 AS "synonym"')) \
             .contains_only('value') \
-            .contains_entry({'value': {'value': 5, 'as': 'synonym'}})
+            .contains_entry({'value': {'value': 5, 'synonym': 'synonym'}})
 
     # ------------------------------------------------------------------------------------------------------------------
     def test_return_synonym_0(self):
@@ -215,47 +215,47 @@ class TestGrammarVisitor(TestCase):
     def test_return_synonym_1(self):
         assert_that(self.process(return_synonym, 'AS "synonym"')) \
             .contains_only('value') \
-            .contains_entry({'value': {'as': 'synonym'}})
+            .contains_entry({'value': {'synonym': 'synonym'}})
 
     def test_return_synonym_2(self):
         assert_that(self.process(return_synonym, 'As "synonym"')) \
             .contains_only('value') \
-            .contains_entry({'value': {'as': 'synonym'}})
+            .contains_entry({'value': {'synonym': 'synonym'}})
 
     def test_return_synonym_3(self):
         assert_that(self.process(return_synonym, 'as "synonym"')) \
             .contains_only('value') \
-            .contains_entry({'value': {'as': 'synonym'}})
+            .contains_entry({'value': {'synonym': 'synonym'}})
 
     def test_return_synonym_4(self):
         assert_that(self.process(return_synonym, "AS 'synonym'")) \
             .contains_only('value') \
-            .contains_entry({'value': {'as': 'synonym'}})
+            .contains_entry({'value': {'synonym': 'synonym'}})
 
     def test_return_synonym_5(self):
         assert_that(self.process(return_synonym, "As 'synonym'")) \
             .contains_only('value') \
-            .contains_entry({'value': {'as': 'synonym'}})
+            .contains_entry({'value': {'synonym': 'synonym'}})
 
     def test_return_synonym_6(self):
         assert_that(self.process(return_synonym, "as 'synonym'")) \
             .contains_only('value') \
-            .contains_entry({'value': {'as': 'synonym'}})
+            .contains_entry({'value': {'synonym': 'synonym'}})
 
     def test_return_synonym_7(self):
         assert_that(self.process(return_synonym, 'AS synonym')) \
             .contains_only('value') \
-            .contains_entry({'value': {'as': 'synonym'}})
+            .contains_entry({'value': {'synonym': 'synonym'}})
 
     def test_return_synonym_8(self):
         assert_that(self.process(return_synonym, 'As synonym')) \
             .contains_only('value') \
-            .contains_entry({'value': {'as': 'synonym'}})
+            .contains_entry({'value': {'synonym': 'synonym'}})
 
     def test_return_synonym_9(self):
         assert_that(self.process(return_synonym, 'as synonym')) \
             .contains_only('value') \
-            .contains_entry({'value': {'as': 'synonym'}})
+            .contains_entry({'value': {'synonym': 'synonym'}})
 
     def test_return_order_by_0(self):
         assert_that(TestGrammarVisitor.process) \
@@ -271,7 +271,7 @@ class TestGrammarVisitor(TestCase):
     def test_return_order_by_2(self):
         assert_that(self.process(return_order_by, 'ORDER BY _name ASC, $param, $param."_string" DESCENDING')) \
             .contains_only('value') \
-            .contains_entry({'value': {'order': [{'name': '_name', 'ascending': True},
+            .contains_entry({'value': {'order': [{'synonym': '_name', 'ascending': True},
                                                  {'parameter': '$param', 'ascending': True},
                                                  {'parameter': '$param', 'property': '_string', 'ascending': False}]}})
 
@@ -289,7 +289,7 @@ class TestGrammarVisitor(TestCase):
     def test_return_order_by_items_2(self):
         assert_that(self.process(return_order_by_items, '_name ASC, $param, $param."_string" DESCENDING')) \
             .contains_only('value') \
-            .contains_entry({'value': [{'name': '_name', 'ascending': True},
+            .contains_entry({'value': [{'synonym': '_name', 'ascending': True},
                                        {'parameter': '$param', 'ascending': True},
                                        {'parameter': '$param', 'property': '_string', 'ascending': False}]})
 
@@ -322,17 +322,17 @@ class TestGrammarVisitor(TestCase):
     def test_return_order_by_item_5(self):
         assert_that(self.process(return_order_by_item, '"_string"')) \
             .contains_only('value') \
-            .contains_entry({'value': {'name': '_string', 'ascending': True}})
+            .contains_entry({'value': {'synonym': '_string', 'ascending': True}})
 
     def test_return_order_by_item_6(self):
         assert_that(self.process(return_order_by_item, "'_string'")) \
             .contains_only('value') \
-            .contains_entry({'value': {'name': '_string', 'ascending': True}})
+            .contains_entry({'value': {'synonym': '_string', 'ascending': True}})
 
     def test_return_order_by_item_7(self):
         assert_that(self.process(return_order_by_item, '_string')) \
             .contains_only('value') \
-            .contains_entry({'value': {'name': '_string', 'ascending': True}})
+            .contains_entry({'value': {'synonym': '_string', 'ascending': True}})
 
     def test_return_order_by_item_8(self):
         assert_that(self.process(return_order_by_item, '$param ASC')) \
@@ -357,17 +357,17 @@ class TestGrammarVisitor(TestCase):
     def test_return_order_by_item_12(self):
         assert_that(self.process(return_order_by_item, '"_string" ASC')) \
             .contains_only('value') \
-            .contains_entry({'value': {'name': '_string', 'ascending': True}})
+            .contains_entry({'value': {'synonym': '_string', 'ascending': True}})
 
     def test_return_order_by_item_13(self):
         assert_that(self.process(return_order_by_item, "'_string' ASC")) \
             .contains_only('value') \
-            .contains_entry({'value': {'name': '_string', 'ascending': True}})
+            .contains_entry({'value': {'synonym': '_string', 'ascending': True}})
 
     def test_return_order_by_item_14(self):
         assert_that(self.process(return_order_by_item, '_string ASC')) \
             .contains_only('value') \
-            .contains_entry({'value': {'name': '_string', 'ascending': True}})
+            .contains_entry({'value': {'synonym': '_string', 'ascending': True}})
 
     def test_return_order_by_item_15(self):
         assert_that(self.process(return_order_by_item, '$param ASCENDING')) \
@@ -392,17 +392,17 @@ class TestGrammarVisitor(TestCase):
     def test_return_order_by_item_19(self):
         assert_that(self.process(return_order_by_item, '"_string" ASCENDING')) \
             .contains_only('value') \
-            .contains_entry({'value': {'name': '_string', 'ascending': True}})
+            .contains_entry({'value': {'synonym': '_string', 'ascending': True}})
 
     def test_return_order_by_item_20(self):
         assert_that(self.process(return_order_by_item, "'_string' ASCENDING")) \
             .contains_only('value') \
-            .contains_entry({'value': {'name': '_string', 'ascending': True}})
+            .contains_entry({'value': {'synonym': '_string', 'ascending': True}})
 
     def test_return_order_by_item_21(self):
         assert_that(self.process(return_order_by_item, '_string ASCENDING')) \
             .contains_only('value') \
-            .contains_entry({'value': {'name': '_string', 'ascending': True}})
+            .contains_entry({'value': {'synonym': '_string', 'ascending': True}})
 
     def test_return_order_by_item_22(self):
         assert_that(self.process(return_order_by_item, '$param DESC')) \
@@ -427,17 +427,17 @@ class TestGrammarVisitor(TestCase):
     def test_return_order_by_item_26(self):
         assert_that(self.process(return_order_by_item, '"_string" DESC')) \
             .contains_only('value') \
-            .contains_entry({'value': {'name': '_string', 'ascending': False}})
+            .contains_entry({'value': {'synonym': '_string', 'ascending': False}})
 
     def test_return_order_by_item_27(self):
         assert_that(self.process(return_order_by_item, "'_string' DESC")) \
             .contains_only('value') \
-            .contains_entry({'value': {'name': '_string', 'ascending': False}})
+            .contains_entry({'value': {'synonym': '_string', 'ascending': False}})
 
     def test_return_order_by_item_28(self):
         assert_that(self.process(return_order_by_item, '_string DESC')) \
             .contains_only('value') \
-            .contains_entry({'value': {'name': '_string', 'ascending': False}})
+            .contains_entry({'value': {'synonym': '_string', 'ascending': False}})
 
     def test_return_order_by_item_29(self):
         assert_that(self.process(return_order_by_item, '$param DESCENDING')) \
@@ -462,17 +462,17 @@ class TestGrammarVisitor(TestCase):
     def test_return_order_by_item_33(self):
         assert_that(self.process(return_order_by_item, '"_string" DESCENDING')) \
             .contains_only('value') \
-            .contains_entry({'value': {'name': '_string', 'ascending': False}})
+            .contains_entry({'value': {'synonym': '_string', 'ascending': False}})
 
     def test_return_order_by_item_34(self):
         assert_that(self.process(return_order_by_item, "'_string' DESCENDING")) \
             .contains_only('value') \
-            .contains_entry({'value': {'name': '_string', 'ascending': False}})
+            .contains_entry({'value': {'synonym': '_string', 'ascending': False}})
 
     def test_return_order_by_item_35(self):
         assert_that(self.process(return_order_by_item, '_string DESCENDING')) \
             .contains_only('value') \
-            .contains_entry({'value': {'name': '_string', 'ascending': False}})
+            .contains_entry({'value': {'synonym': '_string', 'ascending': False}})
 
     def test_return_order_by_selector_0(self):
         assert_that(TestGrammarVisitor.process) \
@@ -541,17 +541,17 @@ class TestGrammarVisitor(TestCase):
     def test_return_order_by_name_1(self):
         assert_that(self.process(return_order_by_name, '"_string"')) \
             .contains_only('value') \
-            .contains_entry({'value': {'name': '_string'}})
+            .contains_entry({'value': {'synonym': '_string'}})
 
     def test_return_order_by_name_2(self):
         assert_that(self.process(return_order_by_name, "'_string'")) \
             .contains_only('value') \
-            .contains_entry({'value': {'name': '_string'}})
+            .contains_entry({'value': {'synonym': '_string'}})
 
     def test_return_order_by_name_3(self):
         assert_that(self.process(return_order_by_name, '_string')) \
             .contains_only('value') \
-            .contains_entry({'value': {'name': '_string'}})
+            .contains_entry({'value': {'synonym': '_string'}})
 
     def test_return_ordering_0(self):
         assert_that(TestGrammarVisitor.process) \

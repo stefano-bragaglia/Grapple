@@ -40,15 +40,15 @@ class TestGrammarVisitor(TestCase):
         assert_that(self.process(knowledge, 'RULE RETURN True AS _bool')) \
             .contains_only('value') \
             .contains_entry({'value': [{'description': None,
-                                        'return': {'distinct': False,
-                                                   'items': [{'value': True, 'as': '_bool'}]}}]})
+                                        'result': {'distinct': False,
+                                                   'items': [{'value': True, 'synonym': '_bool'}]}}]})
 
     def test_knowledge_4(self):
         assert_that(self.process(knowledge, 'RULE RETURN True AS _bool;')) \
             .contains_only('value') \
             .contains_entry({'value': [{'description': None,
-                                        'return': {'distinct': False,
-                                                   'items': [{'value': True, 'as': '_bool'}]}}]})
+                                        'result': {'distinct': False,
+                                                   'items': [{'value': True, 'synonym': '_bool'}]}}]})
 
     def test_knowledge_5(self):
         assert_that(self.process(knowledge, 'RULE RETURN True AS _bool; '
@@ -62,29 +62,29 @@ class TestGrammarVisitor(TestCase):
                                             'LIMIT 5')) \
             .contains_only('value') \
             .contains_entry({'value': [{'description': None,
-                                        'return': {'distinct': False,
-                                                   'items': [{'value': True, 'as': '_bool'}]}},
+                                        'result': {'distinct': False,
+                                                   'items': [{'value': True, 'synonym': '_bool'}]}},
                                        {'description': None,
-                                        'return': {'distinct': False,
-                                                   'items': [{'value': True, 'as': '_bool'}],
-                                                   'order': [{'ascending': True, 'name': '_bool'}],
+                                        'result': {'distinct': False,
+                                                   'items': [{'value': True, 'synonym': '_bool'}],
+                                                   'order': [{'ascending': True, 'synonym': '_bool'}],
                                                    'skip': 5,
                                                    'limit': 1}},
                                        {'description': 'description',
                                         'salience': 5,
                                         'match': [{'optional': True,
-                                                   'pattern': [{'start': {'node': {'parameter': '$n',
-                                                                                   'labels': ['main', 'person'],
-                                                                                   'properties': {'text': 'Stefano'}}},
+                                                   'pattern': [{'node': {'parameter': '$n',
+                                                                         'labels': ['main', 'person'],
+                                                                         'properties': {'text': 'Stefano'}},
                                                                 'chain': [{'relation': {'direction': 'any',
                                                                                         'types': ['knows']},
                                                                            'node': {'parameter': '$f',
                                                                                     'labels': ['person']}}]}]}],
-                                        'return': {'distinct': False,
+                                        'result': {'distinct': False,
                                                    'items': [{'parameter': '$f',
                                                               'property': 'text',
-                                                              'as': 'name'}],
-                                                   'order': [{'ascending': True, 'name': 'name'}],
+                                                              'synonym': 'name'}],
+                                                   'order': [{'ascending': True, 'synonym': 'name'}],
                                                    'skip': 1,
                                                    'limit': 5}}]})
 
@@ -102,15 +102,15 @@ class TestGrammarVisitor(TestCase):
             .contains_entry({'value': [{'description': 'description',
                                         'salience': 5,
                                         'match': [{'optional': True,
-                                                   'pattern': [{'start': {'node': {'parameter': '$n',
-                                                                                   'labels': ['main', 'person'],
-                                                                                   'properties': {
-                                                                                       'text': 'Stefano'}}},
+                                                   'pattern': [{'node': {'parameter': '$n',
+                                                                         'labels': ['main', 'person'],
+                                                                         'properties': {
+                                                                             'text': 'Stefano'}},
                                                                 'chain': [{'relation': {'direction': 'any',
                                                                                         'types': ['knows']},
                                                                            'node': {'parameter': '$f',
                                                                                     'labels': ['person']}}]},
-                                                               {'start': {'node': {'parameter': '$n'}},
+                                                               {'node': {'parameter': '$n'},
                                                                 'chain': [{'relation': {'direction': 'outgoing',
                                                                                         'types': ['works_at']},
                                                                            'node': {'parameter': '$c',
@@ -118,16 +118,17 @@ class TestGrammarVisitor(TestCase):
                                                                                     'properties': {
                                                                                         'current': True}}}]}]},
                                                   {'optional': False,
-                                                   'pattern': [{'start': {'node': {'parameter': '$a',
-                                                                                   'labels': ['avatar']}},
+                                                   'pattern': [{'node': {'parameter': '$a',
+                                                                         'labels': ['avatar']},
                                                                 'chain': [{'relation': {'direction': 'any',
                                                                                         'types': ['linked_to']},
                                                                            'node': {'parameter': '$n'}}]}]}],
-                                        'return': {'distinct': False,
-                                                   'items': [{'parameter': '$f', 'property': 'text', 'as': 'name'},
-                                                             {'parameter': '$c', 'property': 'text', 'as': 'employer'}],
-                                                   'order': [{'ascending': True, 'name': 'name'},
-                                                             {'ascending': False, 'name': 'employer'}],
+                                        'result': {'distinct': False,
+                                                   'items': [
+                                                       {'parameter': '$f', 'property': 'text', 'synonym': 'name'},
+                                                       {'parameter': '$c', 'property': 'text', 'synonym': 'employer'}],
+                                                   'order': [{'ascending': True, 'synonym': 'name'},
+                                                             {'ascending': False, 'synonym': 'employer'}],
                                                    'skip': 1,
                                                    'limit': 5}}]})
 
@@ -141,16 +142,16 @@ class TestGrammarVisitor(TestCase):
         assert_that(self.process(clause, 'RULE RETURN True AS _bool')) \
             .contains_only('value') \
             .contains_entry({'value': {'description': None,
-                                       'return': {'distinct': False,
-                                                  'items': [{'value': True, 'as': '_bool'}]}}})
+                                       'result': {'distinct': False,
+                                                  'items': [{'value': True, 'synonym': '_bool'}]}}})
 
     def test_clause_2(self):
         assert_that(self.process(clause, 'RULE RETURN True AS _bool ORDER BY _bool SKIP 5 LIMIT 1')) \
             .contains_only('value') \
             .contains_entry({'value': {'description': None,
-                                       'return': {'distinct': False,
-                                                  'items': [{'value': True, 'as': '_bool'}],
-                                                  'order': [{'name': '_bool', 'ascending': True}],
+                                       'result': {'distinct': False,
+                                                  'items': [{'value': True, 'synonym': '_bool'}],
+                                                  'order': [{'synonym': '_bool', 'ascending': True}],
                                                   'skip': 5,
                                                   'limit': 1}}})
 
@@ -166,19 +167,19 @@ class TestGrammarVisitor(TestCase):
             .contains_entry({'value': {'description': 'description',
                                        'salience': 5,
                                        'match': [{'optional': True,
-                                                  'pattern': [{'start': {'node': {'parameter': '$n',
-                                                                                  'labels': ['main', 'person'],
-                                                                                  'properties': {'text': 'Stefano'}}},
+                                                  'pattern': [{'node': {'parameter': '$n',
+                                                                        'labels': ['main', 'person'],
+                                                                        'properties': {'text': 'Stefano'}},
                                                                'chain': [{'relation': {'direction': 'any',
                                                                                        'types': ['knows']},
                                                                           'node': {'parameter': '$f',
                                                                                    'labels': ['person']}}]}]}],
-                                       'return': {'distinct': False,
+                                       'result': {'distinct': False,
                                                   'items': [{'parameter': '$f',
                                                              'property': 'text',
-                                                             'as': 'name'}],
+                                                             'synonym': 'name'}],
                                                   'order': [{'ascending': True,
-                                                             'name': 'name'}],
+                                                             'synonym': 'name'}],
                                                   'skip': 1,
                                                   'limit': 5}}})
 

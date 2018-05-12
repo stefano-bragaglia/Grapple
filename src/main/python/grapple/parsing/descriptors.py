@@ -91,19 +91,18 @@ class Match(object):
 
         return content
 
-
     def __getitem__(self, index: int) -> Pattern:
         return self.pattern[index]
 
 
 class Item(object):
     def __init__(self, function: str = None, parameter: str = None, property: str = None, value: 'Value' = None,
-                 as_: str = None):
+                 synonym: str = None):
         self.function = function
         self.parameter = parameter
         self.property = property
         self.value = value
-        self.synonym = as_
+        self.synonym = synonym
 
     def __repr__(self) -> str:
         if self.parameter:
@@ -131,11 +130,11 @@ class Item(object):
 
 
 class Order(object):
-    def __init__(self, ascending: bool = True, parameter: str = None, property: str = None, name: str = None):
+    def __init__(self, ascending: bool = True, parameter: str = None, property: str = None, synonym: str = None):
         self.ascending = ascending
         self.parameter = parameter
         self.property = property
-        self.synonym = name
+        self.synonym = synonym
 
     def __repr__(self) -> str:
         if self.parameter:
@@ -176,7 +175,7 @@ class Return(object):
         if self.distinct:
             content += 'DISTINCT '
         content += ',\n\t'.join(repr(item) for item in self.items)
-        if self.ordering:
+        if self.ordering.items:
             content += '\nORDER BY ' + ',\n\t'.join(repr(order) for order in self.ordering)
         if self.skip and self.skip > 0:
             content += '\nSKIP %d' % self.skip
@@ -196,11 +195,11 @@ class Return(object):
 
 
 class Rule(object):
-    def __init__(self, description: str = None, salience: int = 0, match: List[dict] = None, return_: dict = None):
+    def __init__(self, description: str = None, salience: int = 0, match: List[dict] = None, result: dict = None):
         self.description = description
         self.salience = salience
         self.match = [Match(**data) for data in match] if match else []
-        self.result = Return(**return_ if return_ else {})
+        self.result = Return(**result if result else {})
 
     def __repr__(self) -> str:
         content = 'RULE'
@@ -213,12 +212,13 @@ class Rule(object):
                 content += '\n' + repr(match)
         if not self.result.is_empty():
             content += '\n' + repr(self.result)
+        content += ';'
 
         return content
 
 
 class RuleBase(object):
-    def __init__(self, *rules: dict):
+    def __init__(self, rules: dict):
         self.rules = [Rule(**data) for data in rules]
 
     def __repr__(self) -> str:
@@ -229,32 +229,32 @@ class RuleBase(object):
 
 
 if __name__ == '__main__':
-    result = {'value': [{'description': None,
-                         'return_': {'distinct': False,
-                                     'items': [{'value': True, 'as_': '_bool'}]}},
-                        {'description': None,
-                         'return_': {'distinct': False,
-                                     'items': [{'value': True, 'as_': '_bool'}],
-                                     'order': [{'ascending': True, 'name': '_bool'}],
+    content = {'value': [{'description': None,
+                          'result': {'distinct': False,
+                                     'items': [{'value': True, 'synonym': '_bool'}]}},
+                         {'description': None,
+                          'result': {'distinct': False,
+                                     'items': [{'value': True, 'synonym': '_bool'}],
+                                     'order': [{'ascending': True, 'synonym': '_bool'}],
                                      'skip': 5,
                                      'limit': 1}},
-                        {'description': 'description',
-                         'salience': 5,
-                         'match': [{'optional': True,
-                                    'pattern': [{'node': {'parameter': '$n',
-                                                          'labels': ['main', 'person'],
-                                                          'properties': {'text': 'Stefano'}},
-                                                 'chain': [{'relation': {'direction': 'any',
-                                                                         'types': ['knows']},
-                                                            'node': {'parameter': '$f',
-                                                                     'labels': ['person']}}]}]}],
-                         'return_': {'distinct': False,
+                         {'description': 'description',
+                          'salience': 5,
+                          'match': [{'optional': True,
+                                     'pattern': [{'node': {'parameter': '$n',
+                                                           'labels': ['main', 'person'],
+                                                           'properties': {'text': 'Stefano'}},
+                                                  'chain': [{'relation': {'direction': 'any',
+                                                                          'types': ['knows']},
+                                                             'node': {'parameter': '$f',
+                                                                      'labels': ['person']}}]}]}],
+                          'result': {'distinct': False,
                                      'items': [{'parameter': '$f',
                                                 'property': 'text',
-                                                'as_': 'name'}],
-                                     'order': [{'ascending': True, 'name': 'name'}],
+                                                'synonym': 'synonym'}],
+                                     'order': [{'ascending': True, 'synonym': 'synonym'}],
                                      'skip': 1,
                                      'limit': 5}}]}
 
-    rb = RuleBase(*result['value'])
+    rb = RuleBase(content['value'])
     print(rb)

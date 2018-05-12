@@ -9,6 +9,10 @@ from arpeggio import EOF, OneOrMore, Optional, RegExMatch, ZeroOrMore
 """
 
 
+def comment():
+    return [RegExMatch("//.*"), RegExMatch("/\*.*\*/", multiline=True)]
+
+
 def knowledge():
     return Optional(clauses), Optional(';'), EOF
 
@@ -32,8 +36,10 @@ def rule_description():
 def rule_salience():
     return key_salience, json_integer
 
+
 def match_parts():
     return OneOrMore(match_part)
+
 
 def match_part():
     return Optional(match_optional), match_patterns
