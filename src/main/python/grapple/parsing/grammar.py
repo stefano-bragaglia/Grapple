@@ -1,625 +1,378 @@
-from arpeggio import EOF, Optional, ZeroOrMore, OneOrMore, RegExMatch
+from arpeggio import EOF, OneOrMore, Optional, RegExMatch, ZeroOrMore
+
+"""
+// clause <- clause_reading / clause updating ;
+// clause_reading <- rule_part reading_part* return_part ;
+// clause_updating <- rule_part reading_part* updating_part+ return_part? ;
+// reading_part <- match_part / unwind_part / in_query_call_part ;
+// updating_part <- create_part / merge_part / delete_part / set_part / remove_part ;
+"""
 
 
-def _(name: str):
-    return _(name)
+def knowledge():
+    return Optional(clauses), Optional(';'), EOF
 
 
-def resource(): return ZeroOrMore(statement), EOF
+def clauses():
+    return clause, ZeroOrMore(';', clause)
 
 
-def statement(): return part_rule, Optional(part_match), part_return, ";"
+def clause():
+    return rule_part(), Optional(match_parts), return_part
 
 
-def part_rule(): return description, Optional(salience)
+def rule_part():
+    return rule_description, Optional(rule_salience)
 
 
-def description(): return key_rule, Optional(json_string)
+def rule_description():
+    return key_rule, Optional(json_string)
 
 
-def salience(): return key_salience, json_number
+def rule_salience():
+    return key_salience, json_integer
+
+def match_parts():
+    return OneOrMore(match_part)
+
+def match_part():
+    return Optional(match_optional), match_patterns
 
 
-def part_match(): return OneOrMore(key_match, path)
+def match_optional():
+    return key_optional
 
 
-def path(): return node, ZeroOrMore(relation, node)
+def match_patterns():
+    return key_match, match_pattern, ZeroOrMore(',', match_pattern)
 
 
-def relation(): return [relation_rwd, relation_fwd, relation_any]
+def match_pattern():
+    return Optional(return_parameter, '='), match_anonymous
 
 
-def relation_rwd(): return "<-", Optional(relation_def), "-"
+def match_anonymous():
+    return match_start, ZeroOrMore(match_chain)
 
 
-def relation_fwd(): return "-", Optional(relation_def), "->"
+def match_start():
+    return match_node
 
 
-def relation_any(): return "-", Optional(relation_def), "-"
+def match_chain():
+    return match_relation, match_node
 
 
-def relation_def(): return "[", Optional(assignment), Optional(flags), Optional(attributes), "]"
+def match_node():
+    return '(', Optional(return_parameter), Optional(match_labels), Optional(match_properties), ')'
 
 
-def node(): return "(", Optional(assignment), Optional(flags), Optional(attributes), ")"
+def match_relation():
+    return [match_both, match_back, match_next, match_none]
 
 
-def assignment(): return variable
+def match_both():
+    return '<-', Optional(match_details), '->'
 
 
-def flags(): return flag, ZeroOrMore(flag)
+def match_back():
+    return '<-', Optional(match_details), '-'
 
 
-def attributes(): return json_object
+def match_next():
+    return '-', Optional(match_details), '->'
+
+
+def match_none():
+    return '-', Optional(match_details), '-'
+
+
+def match_details():
+    return '[', Optional(return_parameter), Optional(match_types), Optional(match_properties), ']'
+
+
+def match_properties():
+    return json_object()
+
+
+def match_labels():
+    return OneOrMore(':', identifier)
+
+
+def match_types():
+    return OneOrMore(':', identifier)
 
 
 # ----------------------------------------------------------------------------------------------------------------------
-
-# ----------------------------------------------------------------------------------------------------------------------
-
-
-def part_return():
-    return _(r"RETURN"), Optional(_(r"DISTINCT")), return_body
+def return_part():
+    return key_return, Optional(return_distinct), return_items, Optional(return_order_by), Optional(
+        return_skip), Optional(return_limit)
 
 
-def return_body():
-    return return_items, Optional(order), Optional(skip), Optional(limit)
+def return_distinct():
+    return key_distinct
 
 
 def return_items():
-    return ["*", return_item], ZeroOrMore(",", return_item)
+    return return_first, ZeroOrMore(',', return_item)
+
+
+def return_first():
+    return [return_item, return_all]
 
 
 def return_item():
-    return expression, Optional(_(r"AS"), variable)
+    return [return_coalesce, return_keys, return_properties, return_id, return_labels, return_types,
+            return_tail, return_head, return_selector, return_value]
 
 
-def order():
-    return _(r"ORDER"), _(r"BY"), sort_items
+def return_all():
+    return '*'
 
 
-def sort_items():
-    return sort_item, ZeroOrMore(",", sort_item)
+def return_coalesce():
+    return key_coalesce, '(', return_parameter, return_property, Optional(return_default), ')', Optional(return_synonym)
 
 
-def sort_item():
-    return expression, Optional([_(r"ASCENDING"), _(r"ASC"), _(r"DESCENDING"), _(r"DESC")])
+def return_default():
+    return ',', json_value
 
 
-def skip():
-    return _(r"SKIP"), expression
+def return_keys():
+    return key_keys, '(', return_parameter, ')', Optional(return_synonym)
 
 
-def limit():
-    return _(r"LIMIT"), expression
+def return_properties():
+    return key_properties, '(', return_parameter, ')', Optional(return_synonym)
 
 
-# ----------------------------------------------------------------------------------------------------------------------
+def return_id():
+    return key_id, '(', return_parameter, ')', Optional(return_synonym)
 
-def expression():
-    return or_expression
 
+def return_labels():
+    return key_labels, '(', return_parameter, ')', Optional(return_synonym)
 
-def or_expression():
-    return xor_expression, ZeroOrMore(_(r"OR"), xor_expression)
 
+def return_types():
+    return key_types, '(', return_parameter, ')', Optional(return_synonym)
 
-def xor_expression():
-    return and_expression, ZeroOrMore(_(r"XOR"), and_expression)
 
+def return_tail():
+    return key_tail, '(', return_parameter, ')', Optional(return_synonym)
 
-def and_expression():
-    return not_expression, ZeroOrMore(_(r"AND"), not_expression)
 
+def return_head():
+    return key_head, '(', return_parameter, ')', Optional(return_synonym)
 
-def not_expression():
-    return ZeroOrMore(_(r"NOT")), comparison_expression
 
+def return_selector():
+    return return_order_by_selector, Optional(return_synonym)
 
-def comparison_expression():
-    return add_or_subtract_expression, ZeroOrMore(partial_comparison_expression)
 
+def return_value():
+    return json_value, Optional(return_synonym)
 
-def add_or_subtract_expression():
-    return multiply_divide_modulo_expression, ZeroOrMore([
-        ("+", multiply_divide_modulo_expression),
-        ("-", multiply_divide_modulo_expression)
-    ])
 
+def return_synonym():
+    return key_as, json_key
 
-def multiply_divide_modulo_expression():
-    return power_of_expression, ZeroOrMore([
-        ("*", power_of_expression),
-        ("/", power_of_expression),
-        ("%", power_of_expression)
-    ])
 
+def return_order_by():
+    return key_order, key_by, return_order_by_items
 
-def power_of_expression():
-    return unary_add_or_subtract_expression, ZeroOrMore("^", unary_add_or_subtract_expression)
 
+def return_order_by_items():
+    return return_order_by_item, ZeroOrMore(',', return_order_by_item)
 
-def unary_add_or_subtract_expression():
-    return ZeroOrMore(["+", "-"]), string_list_null_operator_expression
 
+def return_order_by_item():
+    return [return_order_by_selector, return_order_by_name], Optional(return_ordering)
 
-def string_list_null_operator_expression():
-    return property_or_labels_expression, ZeroOrMore([
-        ("[", expression, "]"),
-        ("[", Optional(expression), "..", Optional(expression), "]"),
-        ([
-             (_(r"IN")),
-             (_(r"STARTS"), _(r"WITH")),
-             (_(r"ENDS"), _(r"WITH")),
-             (_(r"CONTAINS"))
-         ], property_or_labels_expression),
-        (_(r"IS"), _(r"NULL")),
-        (_(r"IS"), _(r"NOT"),
-         _(r"NULL"))
-    ])
 
+def return_order_by_selector():
+    return return_parameter, Optional(return_property)
 
-def property_or_labels_expression():
-    return atom, ZeroOrMore(property_lookup), Optional(node_labels)
 
+def return_parameter():
+    return parameter
 
-def atom():
-    return [
-        literal,
-        parameter,
-        case_expression,
-        (_(r"COUNT"), "(", "*", ")"),
-        list_comprehension,
-        pattern_comprehension,
-        (_(r"FILTER"), "(", filter_expression, ")"),
-        Optional(_(r"EXTRACT"), "(", filter_expression, Optional("|", expression), ")"),
-        (_(r"ALL"), "(", filter_expression, ")"),
-        (_(r"ANY"), "(", filter_expression, ")"),
-        (_(r"NONE"), "(", filter_expression, ")"),
-        (_(r"SINGLE"), "(", filter_expression, ")"),
-        relationships_pattern,
-        parenthesized_expression,
-        function_invocation,
-        variable
-    ]
 
+def return_property():
+    return '.', json_key
 
-def literal():
-    return [
-        number_literal,
-        string_literal,
-        boolean_literal,
-        _(r"NULL"),
-        map_literal,
-        list_literal
-    ]
 
+def return_order_by_name():
+    return json_key
 
-def number_literal():
-    return [double_literal, integer_literal]
 
+def return_ordering():
+    return [return_ordering_ascending, return_ordering_descending]
 
-def double_literal():
-    return [exponent_decimal_real, regular_decimal_real]
 
+def return_ordering_ascending():
+    return [key_asc, key_ascending]
 
-def exponent_decimal_real():
-    return [
-               OneOrMore(digit),
-               (OneOrMore(digit), ".", OneOrMore(digit)),
-               (".", OneOrMore(digit))
-           ], [
-               _(r"E"),
-               (_(r"E"), Optional("-"), OneOrMore(digit))
-           ]
 
+def return_ordering_descending():
+    return [key_desc, key_descending]
 
-def regular_decimal_real():
-    return [ZeroOrMore(digit), (".", OneOrMore(digit))]
 
+def return_skip():
+    return key_skip, json_integer
 
-def integer_literal():
-    return [hex_integer, octal_integer, decimal_integer]
 
+def return_limit():
+    return key_limit, json_integer
 
-def hex_integer():
-    return "0x", OneOrMore(hex_digit)
 
+def json_object():
+    return '{', Optional(json_members), '}'
 
-def hex_digit():
-    return [digit, hex_letter]
 
+def json_members():
+    return json_member, ZeroOrMore(',', json_member)
 
-def digit():
-    return [zero_digit, non_zero_digit]
 
+def json_member():
+    return json_key, ':', json_value
 
-def zero_digit():
-    return "0"
 
+def json_key():
+    return [json_string, identifier]
 
-def non_zero_digit():
-    return [non_zero_oct_digit, "8", "9"]
 
+def json_value():
+    return [json_string, json_real, json_integer, json_object, json_array, json_true, json_false, json_null, parameter]
 
-def non_zero_oct_digit():
-    return ["1", "2", "3", "4", "5", "6", "7"]
 
+def json_string():
+    return [("'", RegExMatch(r"[^']*"), "'"), ('"', RegExMatch(r'[^"]*'), '"')]
 
-def hex_letter():
-    return _(r"[A-F]")
 
+def json_integer():
+    return RegExMatch(r'-?\d+')
 
-def octal_integer():
-    return zero_digit, OneOrMore(oct_digit)
 
+def json_real():
+    return RegExMatch(r'-?\d*\.\d+(E-?\d+)?', ignore_case=True)
 
-def oct_digit():
-    return [zero_digit, non_zero_oct_digit]
 
+def json_array():
+    return '[', Optional(json_elements), ']'
 
-def decimal_integer():
-    return [zero_digit, (non_zero_digit, ZeroOrMore(digit))]
 
+def json_elements():
+    return json_value, ZeroOrMore(',', json_value)
 
-def string_literal():
-    return [
-        ('"', ZeroOrMore([_(r'[^"]*'), escaped_char]), '"'),
-        ("'", ZeroOrMore([_(r"[^']*"), escaped_char]), "'")
-    ]
 
+def json_true():
+    return RegExMatch(r'true', ignore_case=True)
 
-def escaped_char():
-    return [
-        "\\\\",
-        "\\'",
-        '\\"',
-        _(r"\\b"),
-        _(r"\\f"),
-        _(r"\\n"),
-        _(r"\\t"),
-        (_(r"\\U"), (hex_digit, hex_digit, hex_digit, hex_digit)),
-        (_(r"\\U"), (hex_digit, hex_digit, hex_digit, hex_digit, hex_digit, hex_digit, hex_digit, hex_digit))
-    ]
 
+def json_false():
+    return RegExMatch(r'false', ignore_case=True)
 
-def boolean_literal():
-    return [_(r"TRUE"), _(r"FALSE")]
 
+def json_null():
+    return RegExMatch(r'null', ignore_case=True)
 
-def map_literal():
-    return "{", Optional(property_key_name, ":", expression, ZeroOrMore(",", property_key_name, ":", expression)), "}"
 
-
-def property_key_name():
-    return schema_name
-
-
-def schema_name():
-    return [symbolic_name, reserved_word]
-
-
-def symbolic_name():
-    return [
-        unescaped_symbolic_name,
-        escaped_symbolic_name,
-        hex_letter,
-        _(r"COUNT"),
-        _(r"FILTER"),
-        _(r"EXTRACT"),
-        _(r"ANY"),
-        _(r"NONE"),
-        _(r"SINGLE")
-    ]
-
-
-def unescaped_symbolic_name():
-    return _(r"[a-zA-Z_][0-9A-Za-z_$]*")
-
-
-def escaped_symbolic_name():
-    return OneOrMore("`", _(r"[^`]*"), "`")
-
-
-def reserved_word():
-    return [
-        _(r"ALL"),
-        _(r"ASC"),
-        _(r"ASCENDING"),
-        _(r"BY"),
-        _(r"CREATE"),
-        _(r"DELETE"),
-        _(r"DESC"),
-        _(r"DESCENDING"),
-        _(r"DETACH"),
-        _(r"EXISTS"),
-        _(r"LIMIT"),
-        _(r"MATCH"),
-        _(r"MERGE"),
-        _(r"ON"),
-        _(r"OPTIONAL"),
-        _(r"ORDER"),
-        _(r"REMOVE"),
-        _(r"RETURN"),
-        _(r"SET"),
-        _(r"SKIP"),
-        _(r"WHERE"),
-        _(r"WITH"),
-        _(r"UNION"),
-        _(r"UNWIND"),
-        _(r"AND"),
-        _(r"AS"),
-        _(r"CONTAINS"),
-        _(r"DISTINCT"),
-        _(r"ENDS"),
-        _(r"IN"),
-        _(r"IS"),
-        _(r"NOT"),
-        _(r"OR"),
-        _(r"STARTS"),
-        _(r"XOR"),
-        _(r"FALSE"),
-        _(r"TRUE"),
-        _(r"NULL"),
-        _(r"CONSTRAINT"),
-        _(r"DO"),
-        _(r"FOR"),
-        _(r"REQUIRE"),
-        _(r"UNIQUE"),
-        _(r"CASE"),
-        _(r"WHEN"),
-        _(r"THEN"),
-        _(r"ELSE"),
-        _(r"END"),
-        _(r"MANDATORY"),
-        _(r"SCALAR"),
-        _(r"OF"),
-        _(r"ADD"),
-        _(r"DROP")
-    ]
-
-
-def list_literal():
-    return "[", ZeroOrMore(expression, Optional(",", expression)), "]"
+def identifier():
+    return RegExMatch(r'[A-Za-z_][A-Za-z_0-9]*')
 
 
 def parameter():
-    return "$", [symbolic_name, decimal_integer]
+    return RegExMatch(r'\$[A-Za-z_0-9]+')
 
 
-def case_expression():
-    return [
-               (_(r"CASE"), OneOrMore(case_alternatives)),
-               (_(r"CASE"), expression, OneOrMore(case_alternatives))
-           ], Optional(_(r"ELSE"), expression), _(r"END")
+def key_as():
+    return RegExMatch(r'AS', ignore_case=True)
 
 
-def case_alternatives():
-    return _(r"WHEN"), expression, _(r"THEN"), expression
+def key_asc():
+    return RegExMatch(r'ASC', ignore_case=True)
 
 
-def list_comprehension():
-    return "[", filter_expression, Optional("|", expression), "]"
+def key_ascending():
+    return RegExMatch(r'ASCENDING', ignore_case=True)
 
 
-def filter_expression():
-    return id_in_coll, Optional(where)
+def key_by():
+    return RegExMatch(r'BY', ignore_case=True)
 
 
-def id_in_coll():
-    return variable, _(r"IN"), expression
+def key_coalesce():
+    return RegExMatch(r'coalesce', ignore_case=True)
 
 
-def variable():
-    return symbolic_name
+def key_desc():
+    return RegExMatch(r'DESC', ignore_case=True)
 
 
-def where():
-    return _(r"WHERE"), expression
+def key_descending():
+    return RegExMatch(r'DESCENDING', ignore_case=True)
 
 
-def pattern_comprehension():
-    return "[", Optional(variable, "="), relationships_pattern, Optional(_(r"WHERE"), expression), "|", expression, "]"
+def key_distinct():
+    return RegExMatch(r'DISTINCT', ignore_case=True)
 
 
-def relationships_pattern():
-    return node_pattern, OneOrMore(pattern_element_chain)
+def key_head():
+    return RegExMatch(r'head', ignore_case=True)
 
 
-def node_pattern():
-    return "(", Optional(variable), Optional(node_labels), Optional(properties), ")"
+def key_id():
+    return RegExMatch(r'id', ignore_case=True)
 
 
-def node_labels():
-    return node_label, ZeroOrMore(node_label)
+def key_keys():
+    return RegExMatch(r'keys', ignore_case=True)
 
 
-def node_label():
-    return ":", label_name
+def key_labels():
+    return RegExMatch(r'labels', ignore_case=True)
 
 
-def label_name():
-    return schema_name
+def key_limit():
+    return RegExMatch(r'LIMIT', ignore_case=True)
 
 
-def properties():
-    return [map_literal, parameter]
+def key_match():
+    return RegExMatch(r'MATCH', ignore_case=True)
 
 
-def pattern_element_chain():
-    return relationship_pattern, node_pattern
+def key_optional():
+    return RegExMatch(r'OPTIONAL', ignore_case=True)
 
 
-def relationship_pattern():
-    return [
-        (left_arrow_head, dash, Optional(relationship_detail), dash, right_arrow_head),
-        (left_arrow_head, dash, Optional(relationship_detail), dash),
-        (dash, Optional(relationship_detail), dash, right_arrow_head),
-        (dash, Optional(relationship_detail), dash)
-    ]
+def key_order():
+    return RegExMatch(r'ORDER', ignore_case=True)
 
 
-def relationship_detail():
-    return "[", Optional(variable), Optional(relationship_types), Optional(range_literal), Optional(properties), "]"
+def key_properties():
+    return RegExMatch(r'properties', ignore_case=True)
 
 
-def relationship_types():
-    return ":", rel_type_name, ZeroOrMore("|", Optional(":"), rel_type_name)
+def key_return():
+    return RegExMatch(r'RETURN', ignore_case=True)
 
 
-def rel_type_name():
-    return schema_name
+def key_rule():
+    return RegExMatch(r'RULE', ignore_case=True)
 
 
-def range_literal():
-    return "*", Optional(integer_literal), Optional("..", Optional(integer_literal))
+def key_salience():
+    return RegExMatch(r'SALIENCE', ignore_case=True)
 
 
-def parenthesized_expression():
-    return "(", expression, ")"
+def key_skip():
+    return RegExMatch(r'SKIP', ignore_case=True)
 
 
-def function_invocation():
-    return function_name, "(", Optional(_(r"DISTINCT")), Optional(expression, ZeroOrMore(",", expression)), ")"
+def key_tail():
+    return RegExMatch(r'tail', ignore_case=True)
 
 
-def function_name():
-    return [symbolic_name, _(r"EXISTS")]
-
-
-def property_lookup():
-    return ".", property_key_name
-
-
-def partial_comparison_expression():
-    return [
-        ("=", add_or_subtract_expression),
-        ("<>", add_or_subtract_expression),
-        ("<", add_or_subtract_expression),
-        (">", add_or_subtract_expression),
-        ("<=", add_or_subtract_expression),
-        (">=", add_or_subtract_expression)
-    ]
-
-
-def left_arrow_head():
-    return ["<", "⟨", "〈", "﹤", "＜"]
-
-
-def right_arrow_head():
-    return [">", "⟩", "〉", "﹥", "＞"]
-
-
-def dash():
-    return ["-", "­", "‐", "‑", "‒", "–", "—", "―", "−", "﹘", "﹣", "－"]
-
-
-# ----------------------------------------------------------------------------------------------------------------------
-
-
-# ----------------------------------------------------------------------------------------------------------------------
-
-
-def return_item(): return content, synonym
-
-
-def content(): return [value, labels, types, ident, accessor]
-
-
-def value(): return json_value()
-
-
-def labels(): return key_labels, "(", variable, ")"
-
-
-def types(): return key_types, "(", variable, ")"
-
-
-def ident(): return key_id, "(", variable, ")"
-
-
-def accessor(): return variable, Optional(".", identifier)
-
-
-def synonym(): return Optional(key_as, identifier)
-
-
-def skip_body(): return key_skip,
-
-
-def flag(): return _(r":[a-zA-Z]\w*")
-
-
-def identifier(): return _(r"[a-zA-Z]\w*")
-
-
-def variable(): return _(r"\$[a-zA-Z]\w*")
-
-
-def json_object(): return "{", Optional(json_members), "}"
-
-
-def json_members(): return json_member, ZeroOrMore(",", json_member)
-
-
-def json_member(): return json_string, ":", json_value
-
-
-def json_value(): return [json_string, json_number, json_object, json_array, key_true, key_false, key_null]
-
-
-def json_string(): return '"', _('[^"]*'), '"'
-
-
-def json_number(): return _('-?\d+((\.\d*)?((e|E)(\+|-)?\d+)?)?')
-
-
-def json_array(): return "[", Optional(json_elements), "]"
-
-
-def json_elements(): return json_value, ZeroOrMore(",", json_value)
-
-
-def key_as(): return _(r"AS")
-
-
-def key_distinct(): return _(r"AS")
-
-
-def key_false(): return _(r"FALSE")
-
-
-def key_id(): return _(r"ID")
-
-
-def key_labels(): return _(r"LABELS")
-
-
-def key_limit(): return _(r"LIMIT")
-
-
-def key_match(): return _(r"MATCH")
-
-
-def key_null(): return _(r"NULL")
-
-
-def key_return(): return _(r"RETURN")
-
-
-def key_rule(): return _(r"RULE")
-
-
-def key_salience(): return _(r"SALIENCE")
-
-
-def key_skip(): return _(r"SKIP")
-
-
-def key_true(): return _(r"TRUE")
-
-
-def key_types(): return _(r"TYPES")
-
-
-def comment(): return [RegExMatch(r"/\*.*\*/"), RegExMatch(r"//.*")]
+def key_types():
+    return RegExMatch(r'types', ignore_case=True)

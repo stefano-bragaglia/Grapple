@@ -3,8 +3,8 @@ from unittest import TestCase
 from arpeggio import NoMatch, ParserPython, SemanticError, visit_parse_tree
 from assertpy import assert_that
 
-from grapple.neat.grammar import clause, knowledge, rule_description, rule_part, rule_salience
-from grapple.neat.visitor import KnowledgeVisitor
+from grapple.parsing.grammar import clause, knowledge, rule_description, rule_part, rule_salience
+from grapple.parsing.visitor import KnowledgeVisitor
 
 
 class TestGrammarVisitor(TestCase):

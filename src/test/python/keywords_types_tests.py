@@ -3,10 +3,10 @@ from unittest import TestCase
 from arpeggio import NoMatch, ParserPython, visit_parse_tree
 from assertpy import assert_that
 
-from grapple.neat.grammar import identifier, parameter, key_as, key_asc, key_ascending, key_by, key_coalesce, key_desc, \
+from grapple.parsing.grammar import identifier, parameter, key_as, key_asc, key_ascending, key_by, key_coalesce, key_desc, \
     key_descending, key_distinct, key_head, key_id, key_keys, key_labels, key_limit, key_match, key_optional, key_order, \
     key_properties, key_return, key_rule, key_salience, key_skip, key_tail, key_types
-from grapple.neat.visitor import KnowledgeVisitor
+from grapple.parsing.visitor import KnowledgeVisitor
 
 
 class TestGrammarVisitor(TestCase):

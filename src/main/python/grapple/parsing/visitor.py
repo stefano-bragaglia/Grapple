@@ -66,10 +66,12 @@ class KnowledgeVisitor(PTNodeVisitor):
         return {'value': content}
 
     def visit_match_anonymous(self, node: Node, children: List) -> object:
-        return {'value': {
-            'start': children[0]['value'],
+        content = {
             'chain': [child['value'] for child in children[1:]]
-        }}
+        }
+        content.update(children[0]['value'])
+
+        return {'value': content}
 
     def visit_match_start(self, node: Node, children: List) -> object:
         content = {}
