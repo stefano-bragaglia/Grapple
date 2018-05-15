@@ -2,7 +2,7 @@ import json
 from typing import Dict, List
 
 from grapple.bom.container import Value
-from grapple.engine.descriptors import Direction
+from grapple.tentative_engine.descriptors import Direction
 
 Properties = Dict[str, Value]
 

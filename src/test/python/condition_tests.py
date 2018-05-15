@@ -3,7 +3,7 @@ from unittest import TestCase
 from assertpy import assert_that
 
 from grapple.bom.graph import Graph
-from grapple.engine.condition import Payload, IsNode, HasLabel, IsRelation, HasType, HasProperty, HasKey, AreEqual
+from grapple.tentative_engine.condition import Payload, IsNode, HasLabel, IsRelation, HasType, HasProperty, HasKey, AreEqual
 
 Node = 0
 Relation = -1

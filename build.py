@@ -33,6 +33,7 @@ def set_properties(project):
     project.set_property("dir_source_unittest_python", "src/test/python")
 
     project.depends_on("assertpy")
+    project.depends_on("overloading")
     project.depends_on("coloredlogs")
     project.depends_on("verboselogs")
     project.depends_on_requirements("requirements.txt")

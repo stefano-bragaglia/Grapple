@@ -22,7 +22,23 @@ def clauses():
 
 
 def clause():
-    return rule_part(), Optional(match_parts), return_part
+    return [clause_reading, clause_updating]
+
+
+def clause_reading():
+    return rule_part, Optional(match_parts), return_part
+
+
+def clause_updating():
+    return rule_part, Optional(match_parts), updating_parts, Optional(return_part)
+
+
+def updating_parts():
+    return OneOrMore(updating_part)
+
+
+def updating_part():
+    return [create_part, delete_part]
 
 
 def rule_part():
@@ -39,6 +55,34 @@ def rule_salience():
 
 def match_parts():
     return OneOrMore(match_part)
+
+
+def create_part():
+    return key_create, match_pattern, ZeroOrMore(',', match_pattern)
+
+
+def delete_part():
+    return Optional(delete_detach), key_delete, delete_patterns
+
+
+def delete_detach():
+    return key_detach
+
+
+def delete_patterns():
+    return delete_pattern, ZeroOrMore(",", delete_pattern)
+
+
+def delete_pattern():
+    return delete_parameter, Optional(delete_property)
+
+
+def delete_parameter():
+    return parameter
+
+
+def delete_property():
+    return '.', json_key
 
 
 def match_part():
@@ -310,6 +354,18 @@ def key_by():
 
 def key_coalesce():
     return RegExMatch(r'coalesce', ignore_case=True)
+
+
+def key_create():
+    return RegExMatch(r'CREATE', ignore_case=True)
+
+
+def key_delete():
+    return RegExMatch(r'DELETE', ignore_case=True)
+
+
+def key_detach():
+    return RegExMatch(r'DETACH', ignore_case=True)
 
 
 def key_desc():

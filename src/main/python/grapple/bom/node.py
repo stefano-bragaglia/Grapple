@@ -4,7 +4,7 @@ from typing import Dict, List, Optional
 from grapple.bom.container import Value
 from grapple.bom.entity import Entity
 from grapple.bom.relation import Relation
-from grapple.engine.descriptors import Direction
+from grapple.tentative_engine.descriptors import Direction
 
 
 class Node(Entity):
