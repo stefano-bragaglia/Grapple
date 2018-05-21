@@ -9,11 +9,13 @@ from arpeggio import EOF, OneOrMore, Optional, RegExMatch, ZeroOrMore
 """
 
 
+# ----------------------------------------------------------------------------------------------------------------------
 def comment():
     return [RegExMatch("//.*"), RegExMatch("/\*.*\*/", multiline=True)]
 
 
-def knowledge():
+# ----------------------------------------------------------------------------------------------------------------------
+def cypher():
     return Optional(clauses), Optional(';'), EOF
 
 
@@ -26,256 +28,281 @@ def clause():
 
 
 def clause_reading():
-    return rule_part, Optional(match_parts), return_part
+    return rule_part, ZeroOrMore(match_part), return_part
 
 
 def clause_updating():
-    return rule_part, Optional(match_parts), updating_parts, Optional(return_part)
-
-
-def updating_parts():
-    return OneOrMore(updating_part)
+    return rule_part, ZeroOrMore(match_part), OneOrMore(updating_part), Optional(return_part)
 
 
 def updating_part():
-    return [create_part, delete_part]
+    return [create_part, remove_part, set_part, delete_part]
 
 
 def rule_part():
-    return rule_description, Optional(rule_salience)
-
-
-def rule_description():
-    return key_rule, Optional(json_string)
-
-
-def rule_salience():
-    return key_salience, json_integer
-
-
-def match_parts():
-    return OneOrMore(match_part)
+    return description, Optional(salience)
 
 
 def create_part():
-    return key_create, match_pattern, ZeroOrMore(',', match_pattern)
+    return key_create, pattern, ZeroOrMore(',', pattern)
 
 
 def delete_part():
-    return Optional(delete_detach), key_delete, delete_patterns
-
-
-def delete_detach():
-    return key_detach
-
-
-def delete_patterns():
-    return delete_pattern, ZeroOrMore(",", delete_pattern)
-
-
-def delete_pattern():
-    return delete_parameter, Optional(delete_property)
-
-
-def delete_parameter():
-    return parameter
-
-
-def delete_property():
-    return '.', json_key
+    return Optional(is_detach), key_delete, parameter, ZeroOrMore(',', parameter)
 
 
 def match_part():
-    return Optional(match_optional), match_patterns
+    return Optional(is_optional), key_match, pattern, ZeroOrMore(',', pattern)
 
 
-def match_optional():
-    return key_optional
+def remove_part():
+    return key_remove, removable, ZeroOrMore(',', removable)
 
 
-def match_patterns():
-    return key_match, match_pattern, ZeroOrMore(',', match_pattern)
+def set_part():
+    return key_set, settable, ZeroOrMore(',', settable)
 
 
-def match_pattern():
-    return Optional(return_parameter, '='), match_anonymous
-
-
-def match_anonymous():
-    return match_start, ZeroOrMore(match_chain)
-
-
-def match_start():
-    return match_node
-
-
-def match_chain():
-    return match_relation, match_node
-
-
-def match_node():
-    return '(', Optional(return_parameter), Optional(match_labels), Optional(match_properties), ')'
-
-
-def match_relation():
-    return [match_both, match_back, match_next, match_none]
-
-
-def match_both():
-    return '<-', Optional(match_details), '->'
-
-
-def match_back():
-    return '<-', Optional(match_details), '-'
-
-
-def match_next():
-    return '-', Optional(match_details), '->'
-
-
-def match_none():
-    return '-', Optional(match_details), '-'
-
-
-def match_details():
-    return '[', Optional(return_parameter), Optional(match_types), Optional(match_properties), ']'
-
-
-def match_properties():
-    return json_object()
-
-
-def match_labels():
-    return OneOrMore(':', identifier)
-
-
-def match_types():
-    return OneOrMore(':', identifier)
+def return_part():
+    return key_return, Optional(is_distinct), items, Optional(order_by), Optional(skip), Optional(limit)
 
 
 # ----------------------------------------------------------------------------------------------------------------------
-def return_part():
-    return key_return, Optional(return_distinct), return_items, Optional(return_order_by), Optional(
-        return_skip), Optional(return_limit)
+def pattern():
+    return Optional(entity, '='), node, Optional(chain)
 
 
-def return_distinct():
-    return key_distinct
+def chain():
+    return OneOrMore(next)
 
 
-def return_items():
-    return return_first, ZeroOrMore(',', return_item)
+def next():
+    return relation, node
 
 
-def return_first():
-    return [return_item, return_all]
+def node():
+    return '(', Optional(entity), Optional(labels), Optional(properties), ')'
 
 
-def return_item():
-    return [return_coalesce, return_keys, return_properties, return_id, return_labels, return_types,
-            return_tail, return_head, return_selector, return_value]
+def relation():
+    return [dir_both, dir_back, dir_next, dir_none]
 
 
-def return_all():
+def dir_both():
+    return '<-', Optional(details), '->'
+
+
+def dir_back():
+    return '<-', Optional(details), '-'
+
+
+def dir_next():
+    return '-', Optional(details), '->'
+
+
+def dir_none():
+    return '-', Optional(details), '-'
+
+
+def details():
+    return '[', Optional(entity), Optional(types), Optional(properties), ']'
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+def removable():
+    return [descriptor, selector]
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+def settable():
+    return [descriptor, replace_map, assign_map, assign_value]
+
+
+def replace_map():
+    return entity, '+=', [parameter, properties]
+
+
+def assign_map():
+    return entity, '=', [parameter, properties]
+
+
+def assign_value():
+    return selector, '=', [parameter, value]
+
+
+def sortable():
+    return [entity, selector, name], Optional([asc, desc])
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+def items():
+    return first, ZeroOrMore(',', item)
+
+
+def first():
+    return [item, item_all]
+
+
+def item():
+    return [item_coalesce, item_keys, item_properties, item_id, item_labels, item_types,
+            item_tail, item_head, item_length, item_nodes, item_relations, item_selector, item_value]
+
+
+def item_all():
     return '*'
 
 
-def return_coalesce():
-    return key_coalesce, '(', return_parameter, return_property, Optional(return_default), ')', Optional(return_synonym)
+def item_coalesce():
+    return func_coalesce, '(', selector, Optional(',', value), ')', Optional(synonym)
 
 
-def return_default():
-    return ',', json_value
+def item_keys():
+    return func_keys, '(', parameter, ')', Optional(synonym)
 
 
-def return_keys():
-    return key_keys, '(', return_parameter, ')', Optional(return_synonym)
+def item_properties():
+    return func_properties, '(', parameter, ')', Optional(synonym)
 
 
-def return_properties():
-    return key_properties, '(', return_parameter, ')', Optional(return_synonym)
+def item_id():
+    return func_id, '(', parameter, ')', Optional(synonym)
 
 
-def return_id():
-    return key_id, '(', return_parameter, ')', Optional(return_synonym)
+def item_labels():
+    return func_labels, '(', parameter, ')', Optional(synonym)
 
 
-def return_labels():
-    return key_labels, '(', return_parameter, ')', Optional(return_synonym)
+def item_types():
+    return func_types, '(', parameter, ')', Optional(synonym)
 
 
-def return_types():
-    return key_types, '(', return_parameter, ')', Optional(return_synonym)
+def item_tail():
+    return func_tail, '(', parameter, ')', Optional(synonym)
 
 
-def return_tail():
-    return key_tail, '(', return_parameter, ')', Optional(return_synonym)
+def item_head():
+    return func_head, '(', parameter, ')', Optional(synonym)
 
 
-def return_head():
-    return key_head, '(', return_parameter, ')', Optional(return_synonym)
+def item_length():
+    return func_length, '(', parameter, ')', Optional(synonym)
 
 
-def return_selector():
-    return return_order_by_selector, Optional(return_synonym)
+def item_nodes():
+    return func_nodes, '(', parameter, ')', Optional(synonym)
 
 
-def return_value():
-    return json_value, Optional(return_synonym)
+def item_relations():
+    return func_relations, '(', parameter, ')', Optional(synonym)
 
 
-def return_synonym():
-    return key_as, json_key
+def item_selector():
+    return entity, Optional(field), Optional(synonym)
 
 
-def return_order_by():
-    return key_order, key_by, return_order_by_items
+def item_value():
+    return value, Optional(synonym)
 
 
-def return_order_by_items():
-    return return_order_by_item, ZeroOrMore(',', return_order_by_item)
+def order_by():
+    return key_order, key_by, sortable, ZeroOrMore(',', sortable)
 
 
-def return_order_by_item():
-    return [return_order_by_selector, return_order_by_name], Optional(return_ordering)
-
-
-def return_order_by_selector():
-    return return_parameter, Optional(return_property)
-
-
-def return_parameter():
-    return parameter
-
-
-def return_property():
-    return '.', json_key
-
-
-def return_order_by_name():
-    return json_key
-
-
-def return_ordering():
-    return [return_ordering_ascending, return_ordering_descending]
-
-
-def return_ordering_ascending():
+# ----------------------------------------------------------------------------------------------------------------------
+def asc():
     return [key_asc, key_ascending]
 
 
-def return_ordering_descending():
+def desc():
     return [key_desc, key_descending]
 
 
-def return_skip():
-    return key_skip, json_integer
+def description():
+    return key_rule, Optional(json_string)
 
 
-def return_limit():
+def descriptor():
+    return entity, OneOrMore(flag)
+
+
+def entity():
+    return variable
+
+
+def field():
+    return '.', json_key
+
+
+def flag():
+    return ':', identifier
+
+
+def is_detach():
+    return key_detach
+
+
+def is_distinct():
+    return key_distinct
+
+
+def is_optional():
+    return key_optional
+
+
+def labels():
+    return OneOrMore(flag)
+
+
+def limit():
     return key_limit, json_integer
 
 
+def name():
+    return json_key
+
+
+def parameter():
+    return variable
+
+
+def properties():
+    return json_object
+
+
+def salience():
+    return key_salience, json_integer
+
+
+def selector():
+    return entity, field
+
+
+def skip():
+    return key_skip, json_integer
+
+
+def synonym():
+    return key_as, json_key
+
+
+def types():
+    return OneOrMore(flag)
+
+
+def value():
+    return json_value
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+def identifier():
+    return RegExMatch(r'[A-Za-z_][A-Za-z_0-9]*')
+
+
+def variable():
+    return RegExMatch(r'\$[A-Za-z_0-9]+')
+
+
+# ----------------------------------------------------------------------------------------------------------------------
 def json_object():
     return '{', Optional(json_members), '}'
 
@@ -328,14 +355,52 @@ def json_null():
     return RegExMatch(r'null', ignore_case=True)
 
 
-def identifier():
-    return RegExMatch(r'[A-Za-z_][A-Za-z_0-9]*')
+# ----------------------------------------------------------------------------------------------------------------------
+def func_coalesce():
+    return RegExMatch(r'coalesce', ignore_case=True)
 
 
-def parameter():
-    return RegExMatch(r'\$[A-Za-z_0-9]+')
+def func_head():
+    return RegExMatch(r'head', ignore_case=True)
 
 
+def func_id():
+    return RegExMatch(r'id', ignore_case=True)
+
+
+def func_keys():
+    return RegExMatch(r'keys', ignore_case=True)
+
+
+def func_labels():
+    return RegExMatch(r'labels', ignore_case=True)
+
+
+def func_length():
+    return RegExMatch(r'length', ignore_case=True)
+
+
+def func_nodes():
+    return RegExMatch(r'nodes', ignore_case=True)
+
+
+def func_relations():
+    return RegExMatch(r'relations', ignore_case=True)
+
+
+def func_properties():
+    return RegExMatch(r'properties', ignore_case=True)
+
+
+def func_tail():
+    return RegExMatch(r'tail', ignore_case=True)
+
+
+def func_types():
+    return RegExMatch(r'types', ignore_case=True)
+
+
+# ----------------------------------------------------------------------------------------------------------------------
 def key_as():
     return RegExMatch(r'AS', ignore_case=True)
 
@@ -350,10 +415,6 @@ def key_ascending():
 
 def key_by():
     return RegExMatch(r'BY', ignore_case=True)
-
-
-def key_coalesce():
-    return RegExMatch(r'coalesce', ignore_case=True)
 
 
 def key_create():
@@ -380,22 +441,6 @@ def key_distinct():
     return RegExMatch(r'DISTINCT', ignore_case=True)
 
 
-def key_head():
-    return RegExMatch(r'head', ignore_case=True)
-
-
-def key_id():
-    return RegExMatch(r'id', ignore_case=True)
-
-
-def key_keys():
-    return RegExMatch(r'keys', ignore_case=True)
-
-
-def key_labels():
-    return RegExMatch(r'labels', ignore_case=True)
-
-
 def key_limit():
     return RegExMatch(r'LIMIT', ignore_case=True)
 
@@ -412,8 +457,8 @@ def key_order():
     return RegExMatch(r'ORDER', ignore_case=True)
 
 
-def key_properties():
-    return RegExMatch(r'properties', ignore_case=True)
+def key_remove():
+    return RegExMatch(r'REMOVE', ignore_case=True)
 
 
 def key_return():
@@ -428,13 +473,9 @@ def key_salience():
     return RegExMatch(r'SALIENCE', ignore_case=True)
 
 
+def key_set():
+    return RegExMatch(r'SET', ignore_case=True)
+
+
 def key_skip():
     return RegExMatch(r'SKIP', ignore_case=True)
-
-
-def key_tail():
-    return RegExMatch(r'tail', ignore_case=True)
-
-
-def key_types():
-    return RegExMatch(r'types', ignore_case=True)

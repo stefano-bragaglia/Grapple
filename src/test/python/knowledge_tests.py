@@ -3,7 +3,7 @@ from unittest import TestCase
 from arpeggio import NoMatch, ParserPython, SemanticError, visit_parse_tree
 from assertpy import assert_that
 
-from grapple.parsing.grammar import clause, knowledge, rule_description, rule_part, rule_salience
+from grapple.parsing.grammar import clause, cypher, rule_description, rule_part, rule_salience
 from grapple.parsing.visitor import KnowledgeVisitor
 
 
@@ -23,35 +23,35 @@ class TestGrammarVisitor(TestCase):
     def test_knowledge_0(self):
         assert_that(TestGrammarVisitor.process) \
             .raises(NoMatch) \
-            .when_called_with(knowledge, '~other~') \
+            .when_called_with(cypher, '~other~') \
             .starts_with("Expected key_rule or ';' or EOF at position")
 
     def test_knowledge_1(self):
-        assert_that(self.process(knowledge, '')) \
+        assert_that(self.process(cypher, '')) \
             .contains_only('value') \
             .contains_entry({'value': []})
 
     def test_knowledge_2(self):
-        assert_that(self.process(knowledge, ';')) \
+        assert_that(self.process(cypher, ';')) \
             .contains_only('value') \
             .contains_entry({'value': []})
 
     def test_knowledge_3(self):
-        assert_that(self.process(knowledge, 'RULE RETURN True AS _bool')) \
+        assert_that(self.process(cypher, 'RULE RETURN True AS _bool')) \
             .contains_only('value') \
             .contains_entry({'value': [{'description': None,
                                         'result': {'distinct': False,
                                                    'items': [{'value': True, 'synonym': '_bool'}]}}]})
 
     def test_knowledge_4(self):
-        assert_that(self.process(knowledge, 'RULE RETURN True AS _bool;')) \
+        assert_that(self.process(cypher, 'RULE RETURN True AS _bool;')) \
             .contains_only('value') \
             .contains_entry({'value': [{'description': None,
                                         'result': {'distinct': False,
                                                    'items': [{'value': True, 'synonym': '_bool'}]}}]})
 
     def test_knowledge_5(self):
-        assert_that(self.process(knowledge, 'RULE RETURN True AS _bool; '
+        assert_that(self.process(cypher, 'RULE RETURN True AS _bool; '
                                             'RULE RETURN True AS _bool ORDER BY _bool SKIP 5 LIMIT 1;'
                                             'RULE "description" '
                                             'SALIENCE 5 '
@@ -89,7 +89,7 @@ class TestGrammarVisitor(TestCase):
                                                    'limit': 5}}]})
 
     def test_knowledge_7(self):
-        assert_that(self.process(knowledge, 'RULE "description" '
+        assert_that(self.process(cypher, 'RULE "description" '
                                             'SALIENCE 5 '
                                             'OPTIONAL MATCH ($n :main:person {text: "Stefano"})-[:knows]-($f :person), '
                                             '               ($n)-[:works_at]->($c :company{current: True}) '

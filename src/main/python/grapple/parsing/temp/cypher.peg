@@ -1,0 +1,88 @@
+comment <- r'//.*' / r'/\*.*\*/' ;
+
+cypher <- clauses? ';'? EOF ;
+clauses <- clause (';' clause)* ;
+clause <- clause_reading / clause_updating ;
+clause_reading <- rule_part match_part* return_part ;
+clause_updating <- rule_part match_part* updating_part+ return_part? ;
+updating_part <- create_part / remove_part / set_part / delete_part ;
+
+rule_part <- key_rule description? (key_salience salience)? ;
+
+match_part <- is_optional? key_match pattern (',' pattern)* ;
+is_optional <- key_optional;
+pattern <- (parameter '=')? node chain* ;
+chain <- relation node ;
+node <- '(' parameter? labels? properties? ')' ;
+relation <- both / back / next / none ;
+both <- '<-' details? '->' ;
+back <- '<-' details? '-' ;
+next <- '-' details? '->' ;
+none <- '-' details? '-' ;
+details <- '[' parameter? labels? properties? ']' ;
+
+create_part <- key_create pattern (',' pattern)* ;
+
+delete_part <- is_detach? key_delete parameter (',' parameter)* ;
+id_detach <- key_detach ;
+
+remove_part <- key_remove remove (',' remove)* ;
+remove <- remove_1 / remove_2 ;
+remove_1 <- parameter (':' identifier)* ;
+remove_2 <- parameter '.' identifier ;
+
+set_part <- key_set update (',' update)* ;
+update <- update_1 / update_2 / update_3 ;
+update_1 <- parameter (':' identifier)* ;
+update_2 <- parameter ('+=' / '=') (json_object / parameter) ;
+update_3 <- parameter '.' identifier '=' (json_value / parameter) ;
+
+return_part <- key_return key_distinct? items order_by? skip? limit? ;
+items <- first (',' item)* ;
+first <- item / item_all ;
+item <- item_coalesce / item_keys / item_properties / item_id / item_labels / item_types / item_tail / item_head /
+        item_selector / item_value ;
+item_all <- '*' ;
+item_coalesce <- func_coalesce '(' parameter '.' identifier (',' value)? ')' synonym? ;
+item_keys <- func_keys '(' parameter ')' synonym? ;
+item_properties <- func_properties '(' parameter ')' synonym? ;
+item_id <- func_id '(' parameter ')' synonym? ;
+item_labels <- func_labels '(' parameter ')' synonym? ;
+item_types <- func_types '(' parameter ')' synonym? ;
+item_tail <- func_tail '(' parameter ')' synonym? ;
+item_head <- func_head '(' parameter ')' synonym? ;
+item_selector <- parameter ('.' identifier) synonym? ;
+item_value <- value synonym? ;
+
+value <- json_value ;
+synonym <- key_as json_key ;
+identifier <- json_key ;
+
+description <- json_string ;
+salience <- json_integer ;
+parameter <- variable ;
+labels <- (':' identifier)+ ;
+properties <- json_properties ;
+
+func_coalesce <- 'coalesce' ;
+func_keys <- 'keys' ;
+func_properties <- 'properties' ;
+func_id <- 'id' ;
+func_labels <- 'labels' ;
+func_types <- 'types' ;
+func_tail <- 'tail' ;
+func_head <- 'head' ;
+
+
+key_as <- 'AS'
+key_create <- 'CREATE' ;
+key_delete <- 'DELETE' ;
+key_distinct <- 'DISTINCT' ;
+key_match <- 'MATCH' ;
+key_optional <- 'OPTIONAL' ;
+key_REMOVE <- 'REMOVE' ;
+key_return <- 'RETURN' ;
+key_rule <- 'RULE' ;
+key_salience <- 'SALIENCE' ;
+key_set <- 'SET' ;
+

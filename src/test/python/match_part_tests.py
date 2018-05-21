@@ -4,7 +4,7 @@ from arpeggio import NoMatch, ParserPython, visit_parse_tree
 from assertpy import assert_that
 
 from grapple.parsing.grammar import match_anonymous, match_back, match_both, match_chain, match_details, match_labels, \
-    match_next, match_node, match_none, match_optional, match_part, match_pattern, match_patterns, match_properties, \
+    match_next, match_node, match_none, is_optional, match_part, match_pattern, match_patterns, match_properties, \
     match_relation, match_start, match_types
 from grapple.parsing.visitor import KnowledgeVisitor
 
@@ -73,11 +73,11 @@ class TestGrammarVisitor(TestCase):
     def test_match_optional_0(self):
         assert_that(TestGrammarVisitor.process) \
             .raises(NoMatch) \
-            .when_called_with(match_optional, '~other~') \
+            .when_called_with(is_optional, '~other~') \
             .starts_with("Expected match_optional at position")
 
     def test_match_optional_1(self):
-        assert_that(self.process(match_optional, 'OPTIONAL')) \
+        assert_that(self.process(is_optional, 'OPTIONAL')) \
             .contains_only('value') \
             .contains_entry({'value': {'optional': True}})
 

@@ -5,7 +5,7 @@ from arpeggio import ParserPython, visit_parse_tree
 from assertpy import assert_that
 
 from grapple.parsing.descriptors import RuleBase
-from grapple.parsing.grammar import comment, knowledge
+from grapple.parsing.grammar import comment, cypher
 from grapple.parsing.visitor import KnowledgeVisitor
 
 
@@ -23,7 +23,7 @@ class TestParsing(TestCase):
                   'SKIP 1 \n' \
                   'LIMIT 5;'
 
-        parser = ParserPython(knowledge, comment_def=comment)
+        parser = ParserPython(cypher, comment_def=comment)
         parsed = parser.parse(content)
         visited = visit_parse_tree(parsed, KnowledgeVisitor())
         base = RuleBase(visited['value'])

@@ -4,7 +4,7 @@ from typing import Set
 from arpeggio import ParserPython, visit_parse_tree
 
 from grapple.parsing.descriptors import Rule, RuleBase
-from grapple.parsing.grammar import comment, knowledge
+from grapple.parsing.grammar import comment, cypher
 from grapple.parsing.visitor import KnowledgeVisitor
 
 
@@ -36,7 +36,7 @@ class Builder(object):
         return self
 
     def load_from_str(self, content: str) -> 'Builder':
-        parser = ParserPython(knowledge, comment_def=comment)
+        parser = ParserPython(cypher, comment_def=comment)
         parsed = parser.parse(content)
         visited = visit_parse_tree(parsed, KnowledgeVisitor())
         base = RuleBase(visited['value'])
