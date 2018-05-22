@@ -1,26 +1,90 @@
+import math
+import random
+import sys
 from unittest import TestCase
 
 from arpeggio import ParserPython, visit_parse_tree
 from assertpy import assert_that
 
-from grapple.parsing.grammar import func_tail, func_types, key_as, key_asc, key_ascending, key_by, key_create, \
-    key_delete, key_desc, key_descending, key_detach, key_distinct, key_limit, key_match, key_optional, key_order, \
-    key_remove, key_return, key_rule, key_salience, key_set, key_skip, func_properties, func_relations, func_nodes
+from grapple.parsing.grammar import func_coalesce, func_head, func_id, func_keys, func_labels, func_length, func_nodes, \
+    func_properties, func_relations, func_tail, func_types, json_false, json_integer, json_null, json_real, json_true, \
+    key_as, key_asc, key_ascending, key_by, key_create, key_delete, key_desc, key_descending, key_detach, key_distinct, \
+    key_limit, key_match, key_optional, key_order, key_remove, key_return, key_rule, key_salience, key_set, key_skip
 from grapple.parsing.visitor import KnowledgeVisitor
 
 
 class TestParsing(TestCase):
+    def test_json_integer(self):
+        value = random.randint(-sys.maxsize, sys.maxsize)
+        assert_that(self.process(json_integer, str(value))) \
+            .contains_only('data') \
+            .contains_entry({'data': value})
+
+    def test_json_real(self):
+        value = random.randint(-sys.maxsize, sys.maxsize) * random.random()
+        result = self.process(json_real, str(value))
+        assert_that(result) \
+            .contains_only('data')
+        tolerance = result['data'] - value
+        if tolerance < 0:
+            tolerance = tolerance * -1
+        assert_that(result['data']) \
+            .is_close_to(value, tolerance)
+
+    def test_json_true(self):
+        assert_that(self.process(json_true, 'true')) \
+            .contains_only('data') \
+            .contains_entry({'data': True})
+
+    def test_json_false(self):
+        assert_that(self.process(json_false, 'false')) \
+            .contains_only('data') \
+            .contains_entry({'data': False})
+
+    def test_json_null(self):
+        assert_that(self.process(json_null, 'null')) \
+            .contains_only('data') \
+            .contains_entry({'data': None})
+
+    def test_func_coalesce(self):
+        assert_that(self.process(func_coalesce, 'coalesce')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'function': 'coalesce'}})
+
+    def test_func_head(self):
+        assert_that(self.process(func_head, 'head')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'function': 'head'}})
+
+    def test_func_id(self):
+        assert_that(self.process(func_id, 'id')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'function': 'id'}})
+
+    def test_func_keys(self):
+        assert_that(self.process(func_keys, 'keys')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'function': 'keys'}})
+
+    def test_func_labels(self):
+        assert_that(self.process(func_labels, 'labels')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'function': 'labels'}})
+
+    def test_func_length(self):
+        assert_that(self.process(func_length, 'length')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'function': 'length'}})
+
     def test_func_nodes(self):
         assert_that(self.process(func_nodes, 'nodes')) \
             .contains_only('data') \
             .contains_entry({'data': {'function': 'nodes'}})
 
-
     def test_func_relations(self):
         assert_that(self.process(func_relations, 'relations')) \
             .contains_only('data') \
             .contains_entry({'data': {'function': 'relations'}})
-
 
     def test_func_properties(self):
         assert_that(self.process(func_properties, 'properties')) \
