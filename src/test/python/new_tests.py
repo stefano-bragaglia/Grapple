@@ -1,4 +1,3 @@
-import math
 import random
 import sys
 from unittest import TestCase
@@ -14,38 +13,6 @@ from grapple.parsing.visitor import KnowledgeVisitor
 
 
 class TestParsing(TestCase):
-    def test_json_integer(self):
-        value = random.randint(-sys.maxsize, sys.maxsize)
-        assert_that(self.process(json_integer, str(value))) \
-            .contains_only('data') \
-            .contains_entry({'data': value})
-
-    def test_json_real(self):
-        value = random.randint(-sys.maxsize, sys.maxsize) * random.random()
-        result = self.process(json_real, str(value))
-        assert_that(result) \
-            .contains_only('data')
-        tolerance = result['data'] - value
-        if tolerance < 0:
-            tolerance = tolerance * -1
-        assert_that(result['data']) \
-            .is_close_to(value, tolerance)
-
-    def test_json_true(self):
-        assert_that(self.process(json_true, 'true')) \
-            .contains_only('data') \
-            .contains_entry({'data': True})
-
-    def test_json_false(self):
-        assert_that(self.process(json_false, 'false')) \
-            .contains_only('data') \
-            .contains_entry({'data': False})
-
-    def test_json_null(self):
-        assert_that(self.process(json_null, 'null')) \
-            .contains_only('data') \
-            .contains_entry({'data': None})
-
     def test_func_coalesce(self):
         assert_that(self.process(func_coalesce, 'coalesce')) \
             .contains_only('data') \

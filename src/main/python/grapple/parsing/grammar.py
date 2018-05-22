@@ -320,7 +320,7 @@ def json_key():
 
 
 def json_value():
-    return [json_string, json_real, json_integer, json_object, json_array, json_true, json_false, json_null, parameter]
+    return [json_string, json_real, json_integer, json_object, json_array, json_true, json_false, json_null, variable]
 
 
 def json_string():

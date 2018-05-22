@@ -1,6 +1,6 @@
 from typing import List, Union
 
-from arpeggio import NonTerminal, PTNodeVisitor, Terminal
+from arpeggio import NonTerminal, PTNodeVisitor, SemanticError, Terminal
 
 Node = Union[Terminal, NonTerminal]
 
@@ -252,14 +252,14 @@ class KnowledgeVisitor(PTNodeVisitor):
     def visit_descriptor(self, node: Node, children: List) -> object:
         content = {
             'entity': children[0]['data']['entity'],
-            'flag': []}
-        for child in children[:1]:
-            content['flag'].append(child['data']['flag'])
+            'flags': []}
+        for child in children[1:]:
+            content['flags'].append(child['data']['flag'])
 
         return {'data': {'descriptor': content}}
 
     def visit_entity(self, node: Node, children: List) -> object:
-        return {'data': {'entity': children[0]['data']}}
+        return {'data': {'entity': node.value}}
 
     def visit_field(self, node: Node, children: List) -> object:
         return {'data': {'field': children[0]['data']}}
@@ -277,34 +277,46 @@ class KnowledgeVisitor(PTNodeVisitor):
         return {'data': {'optional': True}}
 
     def visit_labels(self, node: Node, children: List) -> object:
-        return {'data': {'labels': [child['data'] for child in children]}}
+        return {'data': {'labels': [child['data']['flag'] for child in children]}}
 
     def visit_limit(self, node: Node, children: List) -> object:
-        return {'data': {'limit': children[1]['data']}}
+        value = children[1]['data']
+        if value < 0:
+            raise SemanticError("'limit' expected to be non-negative")
+
+        return {'data': {'limit': value}}
 
     def visit_name(self, node: Node, children: List) -> object:
         return {'data': {'name': children[0]['data']}}
 
     def visit_parameter(self, node: Node, children: List) -> object:
-        return {'data': {'parameter': children[0]['data']}}
+        return {'data': {'parameter': node.value}}
 
     def visit_properties(self, node: Node, children: List) -> object:
-        return {'data': {'properties': children[0]['data']}}
+        return {'data': {'properties': children[0]['data'] if children else {}}}
 
     def visit_salience(self, node: Node, children: List) -> object:
-        return {'data': {'salience': children[1]['data']}}
+        value = children[1]['data']
+        if value < 0:
+            raise SemanticError("'salience' expected to be non-negative")
+
+        return {'data': {'salience': value}}
 
     def visit_selector(self, node: Node, children: List) -> object:
         return {'data': {key: value for child in children for key, value in child['data'].items()}}
 
     def visit_skip(self, node: Node, children: List) -> object:
-        return {'data': {'skip': children[1]['data']}}
+        value = children[1]['data']
+        if value < 0:
+            raise SemanticError("'skip' expected to be non-negative")
+
+        return {'data': {'skip': value}}
 
     def visit_synonym(self, node: Node, children: List) -> object:
         return {'data': {'synonym': children[1]['data']}}
 
     def visit_types(self, node: Node, children: List) -> object:
-        return {'data': {'types': [child['data'] for child in children]}}
+        return {'data': {'types': [child['data']['flag'] for child in children]}}
 
     def visit_value(self, node: Node, children: List) -> object:
         return {'data': {'value': children[0]['data']}}
