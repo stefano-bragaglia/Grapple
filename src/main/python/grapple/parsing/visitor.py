@@ -178,7 +178,7 @@ class KnowledgeVisitor(PTNodeVisitor):
         return {'data': {'settable': content}}
 
     def visit_sortable(self, node: Node, children: List) -> object:
-        content = {}
+        content = {'ascending': True}
         for child in children:
             content.update(child['data'])
 
@@ -241,10 +241,10 @@ class KnowledgeVisitor(PTNodeVisitor):
 
     # ------------------------------------------------------------------------------------------------------------------
     def visit_asc(self, node: Node, children: List) -> object:
-        return {'data': {'ordering': True}}
+        return {'data': {'ascending': True}}
 
     def visit_desc(self, node: Node, children: List) -> object:
-        return {'data': {'ordering': False}}
+        return {'data': {'ascending': False}}
 
     def visit_description(self, node: Node, children: List) -> object:
         return {'data': {'description': children[1]['data'] if len(children) > 1 else None}}

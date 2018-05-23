@@ -131,7 +131,7 @@ def assign_value():
 
 
 def sortable():
-    return [entity, selector, name], Optional([asc, desc])
+    return [selector, entity, name], Optional([asc, desc])
 
 
 # ----------------------------------------------------------------------------------------------------------------------
