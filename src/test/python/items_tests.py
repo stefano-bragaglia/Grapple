@@ -428,9 +428,9 @@ class TestParsing(TestCase):
             .contains_entry({'data': {'sortable': {'ascending': False, 'entity': '$ent', 'field': 'key'}}})
 
     def test_sortable_79(self):
-        assert_that(self.process(sortable, 'name')) \
+        assert_that(self.process(sortable, 'reference')) \
             .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': False, 'entity': '$ent', 'field': 'key'}}})
+            .contains_entry({'data': {'sortable': {'ascending': True, 'name': 'reference'}}})
 
     @staticmethod
     def process(scope, content) -> dict:
