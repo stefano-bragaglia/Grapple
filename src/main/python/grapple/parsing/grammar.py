@@ -113,9 +113,17 @@ def removable():
     return [descriptor, selector]
 
 
+def selector():
+    return entity, field
+
+
 # ----------------------------------------------------------------------------------------------------------------------
 def settable():
     return [descriptor, replace_map, assign_map, assign_value]
+
+
+def descriptor():
+    return entity, OneOrMore(flag)
 
 
 def replace_map():
@@ -153,7 +161,7 @@ def item_all():
 
 
 def item_coalesce():
-    return func_coalesce, '(', selector, Optional(',', value), ')', Optional(synonym)
+    return func_coalesce, '(', parameter, field, ',', value, ')', Optional(synonym)
 
 
 def item_keys():
@@ -221,10 +229,6 @@ def description():
     return key_rule, Optional(json_string)
 
 
-def descriptor():
-    return entity, OneOrMore(flag)
-
-
 def entity():
     return variable
 
@@ -271,10 +275,6 @@ def properties():
 
 def salience():
     return key_salience, json_integer
-
-
-def selector():
-    return entity, field
 
 
 def skip():

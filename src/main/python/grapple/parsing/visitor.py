@@ -150,39 +150,48 @@ class KnowledgeVisitor(PTNodeVisitor):
 
     # ------------------------------------------------------------------------------------------------------------------
     def visit_removable(self, node: Node, children: List) -> object:
-        return {'data': {'settable': next(children[0]['data'].values())}}
+        return {'data': children[0]['data']}
 
     # ------------------------------------------------------------------------------------------------------------------
     def visit_settable(self, node: Node, children: List) -> object:
-        return {'data': {'settable': next(children[0]['data'].values())}}
+        return {'data': children[0]['data']}
+
+    def visit_descriptor(self, node: Node, children: List) -> object:
+        content = {
+            'entity': children[0]['data']['entity'],
+            'flags': []}
+        for child in children[1:]:
+            content['flags'].append(child['data']['flag'])
+
+        return {'data': content}
 
     def visit_replace_map(self, node: Node, children: List) -> object:
         content = {'function': 'replace'}
         for child in children:
             content.update(child['data'])
 
-        return {'data': {'settable': content}}
+        return {'data': content}
 
     def visit_assign_map(self, node: Node, children: List) -> object:
         content = {'function': 'assign'}
         for child in children:
             content.update(child['data'])
 
-        return {'data': {'settable': content}}
+        return {'data': content}
 
     def visit_assign_value(self, node: Node, children: List) -> object:
         content = {'function': 'assign'}
         for child in children:
             content.update(child['data'])
 
-        return {'data': {'settable': content}}
+        return {'data': content}
 
     def visit_sortable(self, node: Node, children: List) -> object:
         content = {'ascending': True}
         for child in children:
             content.update(child['data'])
 
-        return {'data': {'sortable': content}}
+        return {'data': content}
 
     # ------------------------------------------------------------------------------------------------------------------
     def visit_items(self, node: Node, children: List) -> object:
@@ -198,37 +207,81 @@ class KnowledgeVisitor(PTNodeVisitor):
         return {'data': {'item': {'function': 'all'}}}
 
     def visit_item_coalesce(self, node: Node, children: List) -> object:
-        return {'data': {'item': [child['data'] for child in children]}}
+        content = {}
+        for child in children:
+            content.update(child['data'])
+
+        return {'data': {'item': content}}
 
     def visit_item_keys(self, node: Node, children: List) -> object:
-        return {'data': {'item': [child['data'] for child in children]}}
+        content = {}
+        for child in children:
+            content.update(child['data'])
+
+        return {'data': {'item': content}}
 
     def visit_item_properties(self, node: Node, children: List) -> object:
-        return {'data': {'item': [child['data'] for child in children]}}
+        content = {}
+        for child in children:
+            content.update(child['data'])
+
+        return {'data': {'item': content}}
 
     def visit_item_id(self, node: Node, children: List) -> object:
-        return {'data': {'item': [child['data'] for child in children]}}
+        content = {}
+        for child in children:
+            content.update(child['data'])
+
+        return {'data': {'item': content}}
 
     def visit_item_labels(self, node: Node, children: List) -> object:
-        return {'data': {'item': [child['data'] for child in children]}}
+        content = {}
+        for child in children:
+            content.update(child['data'])
+
+        return {'data': {'item': content}}
 
     def visit_item_types(self, node: Node, children: List) -> object:
-        return {'data': {'item': [child['data'] for child in children]}}
+        content = {}
+        for child in children:
+            content.update(child['data'])
+
+        return {'data': {'item': content}}
 
     def visit_item_tail(self, node: Node, children: List) -> object:
-        return {'data': {'item': [child['data'] for child in children]}}
+        content = {}
+        for child in children:
+            content.update(child['data'])
+
+        return {'data': {'item': content}}
 
     def visit_item_head(self, node: Node, children: List) -> object:
-        return {'data': {'item': [child['data'] for child in children]}}
+        content = {}
+        for child in children:
+            content.update(child['data'])
+
+        return {'data': {'item': content}}
 
     def visit_item_length(self, node: Node, children: List) -> object:
-        return {'data': {'item': [child['data'] for child in children]}}
+        content = {}
+        for child in children:
+            content.update(child['data'])
+
+        return {'data': {'item': content}}
 
     def visit_item_nodes(self, node: Node, children: List) -> object:
-        return {'data': {'item': [child['data'] for child in children]}}
+        content = {}
+        for child in children:
+            content.update(child['data'])
+
+        return {'data': {'item': content}}
 
     def visit_item_relations(self, node: Node, children: List) -> object:
-        return {'data': {'item': [child['data'] for child in children]}}
+        content = {}
+        for child in children:
+            content.update(child['data'])
+
+        return {'data': {'item': content}}
 
     def visit_item_selector(self, node: Node, children: List) -> object:
         content = {}
@@ -256,15 +309,6 @@ class KnowledgeVisitor(PTNodeVisitor):
 
     def visit_description(self, node: Node, children: List) -> object:
         return {'data': {'description': children[1]['data'] if len(children) > 1 else None}}
-
-    def visit_descriptor(self, node: Node, children: List) -> object:
-        content = {
-            'entity': children[0]['data']['entity'],
-            'flags': []}
-        for child in children[1:]:
-            content['flags'].append(child['data']['flag'])
-
-        return {'data': {'descriptor': content}}
 
     def visit_entity(self, node: Node, children: List) -> object:
         return {'data': {'entity': node.value}}

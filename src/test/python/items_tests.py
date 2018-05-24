@@ -3,21 +3,304 @@ from unittest import TestCase
 from arpeggio import NoMatch, ParserPython, visit_parse_tree
 from assertpy import assert_that
 
-from grapple.parsing.grammar import item_selector, item_value, order_by, item_relations
+from grapple.parsing.grammar import first, item, item_all, item_coalesce, item_head, item_id, item_keys, item_labels, \
+    item_length, item_nodes, item_properties, item_relations, item_selector, item_tail, item_types, item_value, items, \
+    order_by
 from grapple.parsing.visitor import KnowledgeVisitor
 
 
 class TestParsing(TestCase):
+    def test_items_00(self):
+        assert_that(self.process(items, '*, coalesce($ent."key", -.123) AS name, keys($ent) AS name, '
+                                        'properties($ent) AS name, id($ent) AS name, labels($ent) AS name, '
+                                        'types($ent) AS name, tail($ent) AS name, head($ent) AS name, '
+                                        'length($ent) AS name, nodes($ent) AS name, relations($ent) AS name, '
+                                        '$ent.key AS name, -.123 AS name')) \
+            .contains_only('data') \
+            .contains_entry(
+            {'data': {'items': [
+                {'function': 'all'},
+                {'function': 'coalesce', 'parameter': '$ent', 'field': 'key', 'value': -0.123, 'synonym': 'name'},
+                {'function': 'keys', 'parameter': '$ent', 'synonym': 'name'},
+                {'function': 'properties', 'parameter': '$ent', 'synonym': 'name'},
+                {'function': 'id', 'parameter': '$ent', 'synonym': 'name'},
+                {'function': 'labels', 'parameter': '$ent', 'synonym': 'name'},
+                {'function': 'types', 'parameter': '$ent', 'synonym': 'name'},
+                {'function': 'tail', 'parameter': '$ent', 'synonym': 'name'},
+                {'function': 'head', 'parameter': '$ent', 'synonym': 'name'},
+                {'function': 'length', 'parameter': '$ent', 'synonym': 'name'},
+                {'function': 'nodes', 'parameter': '$ent', 'synonym': 'name'},
+                {'function': 'relations', 'parameter': '$ent', 'synonym': 'name'},
+                {'entity': '$ent', 'field': 'key', 'synonym': 'name'},
+                {'value': -0.123, 'synonym': 'name'},
+            ]}})
+
+    def test_first_00(self):
+        assert_that(self.process(first, '*')) \
+            .contains_only('data') \
+            .contains_entry(
+            {'data': {'item': {'function': 'all'}}})
+
+    def test_first_01(self):
+        assert_that(self.process(first, 'coalesce($ent."key", -.123) AS name')) \
+            .contains_only('data') \
+            .contains_entry(
+            {'data': {'item': {
+                'function': 'coalesce',
+                'parameter': '$ent',
+                'field': 'key',
+                'value': -0.123,
+                'synonym': 'name',
+            }}})
+
+    def test_first_02(self):
+        assert_that(self.process(first, 'keys($ent) AS name')) \
+            .contains_only('data') \
+            .contains_entry(
+            {'data': {'item': {'function': 'keys', 'parameter': '$ent', 'synonym': 'name'}}})
+
+    def test_first_03(self):
+        assert_that(self.process(first, 'properties($ent) AS name')) \
+            .contains_only('data') \
+            .contains_entry(
+            {'data': {'item': {'function': 'properties', 'parameter': '$ent', 'synonym': 'name'}}})
+
+    def test_first_04(self):
+        assert_that(self.process(first, 'id($ent) AS name')) \
+            .contains_only('data') \
+            .contains_entry(
+            {'data': {'item': {'function': 'id', 'parameter': '$ent', 'synonym': 'name'}}})
+
+    def test_first_05(self):
+        assert_that(self.process(first, 'labels($ent) AS name')) \
+            .contains_only('data') \
+            .contains_entry(
+            {'data': {'item': {'function': 'labels', 'parameter': '$ent', 'synonym': 'name'}}})
+
+    def test_first_06(self):
+        assert_that(self.process(first, 'types($ent) AS name')) \
+            .contains_only('data') \
+            .contains_entry(
+            {'data': {'item': {'function': 'types', 'parameter': '$ent', 'synonym': 'name'}}})
+
+    def test_first_07(self):
+        assert_that(self.process(first, 'tail($ent) AS name')) \
+            .contains_only('data') \
+            .contains_entry(
+            {'data': {'item': {'function': 'tail', 'parameter': '$ent', 'synonym': 'name'}}})
+
+    def test_first_08(self):
+        assert_that(self.process(first, 'head($ent) AS name')) \
+            .contains_only('data') \
+            .contains_entry(
+            {'data': {'item': {'function': 'head', 'parameter': '$ent', 'synonym': 'name'}}})
+
+    def test_first_09(self):
+        assert_that(self.process(first, 'length($ent) AS name')) \
+            .contains_only('data') \
+            .contains_entry(
+            {'data': {'item': {'function': 'length', 'parameter': '$ent', 'synonym': 'name'}}})
+
+    def test_first_10(self):
+        assert_that(self.process(first, 'nodes($ent) AS name')) \
+            .contains_only('data') \
+            .contains_entry(
+            {'data': {'item': {'function': 'nodes', 'parameter': '$ent', 'synonym': 'name'}}})
+
+    def test_first_11(self):
+        assert_that(self.process(first, 'relations($ent) AS name')) \
+            .contains_only('data') \
+            .contains_entry(
+            {'data': {'item': {'function': 'relations', 'parameter': '$ent', 'synonym': 'name'}}})
+
+    def test_first_12(self):
+        assert_that(self.process(first, '$ent.key AS name')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'item': {'entity': '$ent', 'field': 'key', 'synonym': 'name'}}})
+
+    def test_first_13(self):
+        assert_that(self.process(first, '-.123 AS name')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'item': {'value': -0.123, 'synonym': 'name'}}})
+
+    def test_item_00(self):
+        assert_that(self.process) \
+            .raises(NoMatch) \
+            .when_called_with(item, '*') \
+            .starts_with("Expected func_coalesce or func_keys or func_properties or func_id or func_labels or "
+                         "func_types or func_tail or func_head or func_length or func_nodes or func_relations or "
+                         "entity or ''' or '\"' or json_real or json_integer or '{' or '[' or json_true or "
+                         "json_false or json_null or variable at position")
+
+    def test_item_01(self):
+        assert_that(self.process(item, 'coalesce($ent."key", -.123) AS name')) \
+            .contains_only('data') \
+            .contains_entry(
+            {'data': {'item': {
+                'function': 'coalesce',
+                'parameter': '$ent',
+                'field': 'key',
+                'value': -0.123,
+                'synonym': 'name',
+            }}})
+
+    def test_item_02(self):
+        assert_that(self.process(item, 'keys($ent) AS name')) \
+            .contains_only('data') \
+            .contains_entry(
+            {'data': {'item': {'function': 'keys', 'parameter': '$ent', 'synonym': 'name'}}})
+
+    def test_item_03(self):
+        assert_that(self.process(item, 'properties($ent) AS name')) \
+            .contains_only('data') \
+            .contains_entry(
+            {'data': {'item': {'function': 'properties', 'parameter': '$ent', 'synonym': 'name'}}})
+
+    def test_item_04(self):
+        assert_that(self.process(item, 'id($ent) AS name')) \
+            .contains_only('data') \
+            .contains_entry(
+            {'data': {'item': {'function': 'id', 'parameter': '$ent', 'synonym': 'name'}}})
+
+    def test_item_05(self):
+        assert_that(self.process(item, 'labels($ent) AS name')) \
+            .contains_only('data') \
+            .contains_entry(
+            {'data': {'item': {'function': 'labels', 'parameter': '$ent', 'synonym': 'name'}}})
+
+    def test_item_06(self):
+        assert_that(self.process(item, 'types($ent) AS name')) \
+            .contains_only('data') \
+            .contains_entry(
+            {'data': {'item': {'function': 'types', 'parameter': '$ent', 'synonym': 'name'}}})
+
+    def test_item_07(self):
+        assert_that(self.process(item, 'tail($ent) AS name')) \
+            .contains_only('data') \
+            .contains_entry(
+            {'data': {'item': {'function': 'tail', 'parameter': '$ent', 'synonym': 'name'}}})
+
+    def test_item_08(self):
+        assert_that(self.process(item, 'head($ent) AS name')) \
+            .contains_only('data') \
+            .contains_entry(
+            {'data': {'item': {'function': 'head', 'parameter': '$ent', 'synonym': 'name'}}})
+
+    def test_item_09(self):
+        assert_that(self.process(item, 'length($ent) AS name')) \
+            .contains_only('data') \
+            .contains_entry(
+            {'data': {'item': {'function': 'length', 'parameter': '$ent', 'synonym': 'name'}}})
+
+    def test_item_10(self):
+        assert_that(self.process(item, 'nodes($ent) AS name')) \
+            .contains_only('data') \
+            .contains_entry(
+            {'data': {'item': {'function': 'nodes', 'parameter': '$ent', 'synonym': 'name'}}})
+
+    def test_item_11(self):
+        assert_that(self.process(item, 'relations($ent) AS name')) \
+            .contains_only('data') \
+            .contains_entry(
+            {'data': {'item': {'function': 'relations', 'parameter': '$ent', 'synonym': 'name'}}})
+
+    def test_item_12(self):
+        assert_that(self.process(item, '$ent.key AS name')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'item': {'entity': '$ent', 'field': 'key', 'synonym': 'name'}}})
+
+    def test_item_13(self):
+        assert_that(self.process(item, '-.123 AS name')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'item': {'value': -0.123, 'synonym': 'name'}}})
+
+    def test_item_all_99(self):
+        assert_that(self.process(item_all, '*')) \
+            .contains_only('data') \
+            .contains_entry(
+            {'data': {'item': {'function': 'all'}}})
+
+    def test_item_coalesce_99(self):
+        assert_that(self.process(item_coalesce, 'coalesce($ent."key", -.123) AS name')) \
+            .contains_only('data') \
+            .contains_entry(
+            {'data': {'item': {
+                'function': 'coalesce',
+                'parameter': '$ent',
+                'field': 'key',
+                'value': -0.123,
+                'synonym': 'name',
+            }}})
+
+    def test_item_keys_99(self):
+        assert_that(self.process(item_keys, 'keys($ent) AS name')) \
+            .contains_only('data') \
+            .contains_entry(
+            {'data': {'item': {'function': 'keys', 'parameter': '$ent', 'synonym': 'name'}}})
+
+    def test_item_properties_99(self):
+        assert_that(self.process(item_properties, 'properties($ent) AS name')) \
+            .contains_only('data') \
+            .contains_entry(
+            {'data': {'item': {'function': 'properties', 'parameter': '$ent', 'synonym': 'name'}}})
+
+    def test_item_id_99(self):
+        assert_that(self.process(item_id, 'id($ent) AS name')) \
+            .contains_only('data') \
+            .contains_entry(
+            {'data': {'item': {'function': 'id', 'parameter': '$ent', 'synonym': 'name'}}})
+
+    def test_item_labels_99(self):
+        assert_that(self.process(item_labels, 'labels($ent) AS name')) \
+            .contains_only('data') \
+            .contains_entry(
+            {'data': {'item': {'function': 'labels', 'parameter': '$ent', 'synonym': 'name'}}})
+
+    def test_item_types_99(self):
+        assert_that(self.process(item_types, 'types($ent) AS name')) \
+            .contains_only('data') \
+            .contains_entry(
+            {'data': {'item': {'function': 'types', 'parameter': '$ent', 'synonym': 'name'}}})
+
+    def test_item_tail_99(self):
+        assert_that(self.process(item_tail, 'tail($ent) AS name')) \
+            .contains_only('data') \
+            .contains_entry(
+            {'data': {'item': {'function': 'tail', 'parameter': '$ent', 'synonym': 'name'}}})
+
+    def test_item_head_99(self):
+        assert_that(self.process(item_head, 'head($ent) AS name')) \
+            .contains_only('data') \
+            .contains_entry(
+            {'data': {'item': {'function': 'head', 'parameter': '$ent', 'synonym': 'name'}}})
+
+    def test_item_length_99(self):
+        assert_that(self.process(item_length, 'length($ent) AS name')) \
+            .contains_only('data') \
+            .contains_entry(
+            {'data': {'item': {'function': 'length', 'parameter': '$ent', 'synonym': 'name'}}})
+
+    def test_item_nodes_99(self):
+        assert_that(self.process(item_nodes, 'nodes($ent) AS name')) \
+            .contains_only('data') \
+            .contains_entry(
+            {'data': {'item': {'function': 'nodes', 'parameter': '$ent', 'synonym': 'name'}}})
+
     def test_item_relations_99(self):
         assert_that(self.process(item_relations, 'relations($ent) AS name')) \
             .contains_only('data') \
             .contains_entry(
-            {'data': {'item': {'function': 'relations', 'entity': '$ent', 'field': 'key', 'synonym': 'name'}}})
+            {'data': {'item': {'function': 'relations', 'parameter': '$ent', 'synonym': 'name'}}})
 
     def test_item_selector_99(self):
         assert_that(self.process(item_selector, '$ent.key AS name')) \
             .contains_only('data') \
             .contains_entry({'data': {'item': {'entity': '$ent', 'field': 'key', 'synonym': 'name'}}})
+
+    def test_item_value_99(self):
+        assert_that(self.process(item_value, '-.123')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'item': {'value': -0.123}}})
 
     def test_item_value_00(self):
         assert_that(self.process) \
@@ -412,11 +695,13 @@ class TestParsing(TestCase):
             .starts_with("Expected entity or entity or ''' or '\"' or identifier at position")
 
     def test_order_by_03(self):
-        assert_that(self.process(order_by, 'ORDER BY $ent')) \
+        assert_that(self.process(order_by, 'ORDER BY $ent, $ent.key, "name"')) \
             .contains_only('data') \
-            .contains_entry({'data': 'SKIP'})
-
-    # All the sortables here
+            .contains_entry({'data': {'order_by': [
+            {'ascending': True, 'entity': '$ent'},
+            {'ascending': True, 'entity': '$ent', 'field': 'key'},
+            {'ascending': True, 'name': 'name'},
+        ]}})
 
     @staticmethod
     def process(scope, content) -> dict:

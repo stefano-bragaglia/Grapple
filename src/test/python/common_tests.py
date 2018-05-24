@@ -3,8 +3,8 @@ from unittest import TestCase
 from arpeggio import NoMatch, ParserPython, SemanticError, visit_parse_tree
 from assertpy import assert_that
 
-from grapple.parsing.grammar import asc, desc, description, descriptor, entity, field, flag, identifier, is_detach, \
-    is_distinct, is_optional, labels, limit, name, parameter, properties, salience, selector, skip, synonym, types, \
+from grapple.parsing.grammar import asc, desc, description, entity, field, flag, identifier, is_detach, \
+    is_distinct, is_optional, labels, limit, name, parameter, properties, salience, skip, synonym, types, \
     value, variable
 from grapple.parsing.visitor import KnowledgeVisitor
 
@@ -102,55 +102,6 @@ class TestParsing(TestCase):
         assert_that(self.process(description, "RULE 'desc'")) \
             .contains_only('data') \
             .contains_entry({'data': {'description': 'desc'}})
-
-    def test_descriptor_0(self):
-        assert_that(self.process) \
-            .raises(NoMatch) \
-            .when_called_with(descriptor, '~other~') \
-            .starts_with('Expected entity at position')
-
-    def test_descriptor_1(self):
-        assert_that(self.process) \
-            .raises(NoMatch) \
-            .when_called_with(descriptor, '$ent') \
-            .starts_with("Expected ':' at position")
-
-    def test_descriptor_2(self):
-        assert_that(self.process) \
-            .raises(NoMatch) \
-            .when_called_with(descriptor, '$ent:') \
-            .starts_with('Expected identifier at position')
-
-    def test_descriptor_3(self):
-        assert_that(self.process) \
-            .raises(NoMatch) \
-            .when_called_with(descriptor, '$ent :') \
-            .starts_with('Expected identifier at position')
-
-    def test_descriptor_4(self):
-        assert_that(self.process(descriptor, '$ent:flag1')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'descriptor': {'entity': '$ent', 'flags': ['flag1']}}})
-
-    def test_descriptor_5(self):
-        assert_that(self.process(descriptor, '$ent :flag1')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'descriptor': {'entity': '$ent', 'flags': ['flag1']}}})
-
-    def test_descriptor_6(self):
-        assert_that(self.process(descriptor, '$ent:flag1:flag2')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'descriptor': {'entity': '$ent', 'flags': ['flag1', 'flag2']}}})
-
-    def test_descriptor_7(self):
-        assert_that(self.process(descriptor, '$ent :flag1:flag2')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'descriptor': {'entity': '$ent', 'flags': ['flag1', 'flag2']}}})
-
-    def test_descriptor_8(self):
-        assert_that(self.process(descriptor, '$ent :flag1 :flag2')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'descriptor': {'entity': '$ent', 'flags': ['flag1', 'flag2']}}})
 
     def test_entity_0(self):
         assert_that(self.process) \
@@ -498,40 +449,6 @@ class TestParsing(TestCase):
             .raises(SemanticError) \
             .when_called_with(salience, 'salience -5') \
             .starts_with("\"'salience' expected to be non-negative\"")
-
-    def test_selector_0(self):
-        assert_that(self.process) \
-            .raises(NoMatch) \
-            .when_called_with(selector, '~other~') \
-            .starts_with('Expected entity at position')
-
-    def test_selector_1(self):
-        assert_that(self.process) \
-            .raises(NoMatch) \
-            .when_called_with(selector, '$ent') \
-            .starts_with("Expected '.' at position")
-
-    def test_selector_2(self):
-        assert_that(self.process) \
-            .raises(NoMatch) \
-            .when_called_with(selector, '$ent.') \
-            .starts_with("Expected ''' or '\"' or identifier at position")
-
-    def test_selector_3(self):
-        assert_that(self.process) \
-            .raises(NoMatch) \
-            .when_called_with(selector, '$ent .') \
-            .starts_with("Expected ''' or '\"' or identifier at position")
-
-    def test_selector_4(self):
-        assert_that(self.process(selector, '$ent.key')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'entity': '$ent', 'field': 'key'}})
-
-    def test_selector_5(self):
-        assert_that(self.process(selector, '$ent . key')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'entity': '$ent', 'field': 'key'}})
 
     def test_return_skip_0(self):
         assert_that(self.process) \
