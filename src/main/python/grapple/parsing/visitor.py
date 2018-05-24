@@ -231,7 +231,11 @@ class KnowledgeVisitor(PTNodeVisitor):
         return {'data': {'item': [child['data'] for child in children]}}
 
     def visit_item_selector(self, node: Node, children: List) -> object:
-        return {'data': {'item': [child['data'] for child in children]}}
+        content = {}
+        for child in children:
+            content.update(child['data'])
+
+        return {'data': {'item': content}}
 
     def visit_item_value(self, node: Node, children: List) -> object:
         content = {}
