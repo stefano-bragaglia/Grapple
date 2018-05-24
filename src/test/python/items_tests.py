@@ -3,11 +3,381 @@ from unittest import TestCase
 from arpeggio import NoMatch, ParserPython, visit_parse_tree
 from assertpy import assert_that
 
-from grapple.parsing.grammar import order_by, sortable
+from grapple.parsing.grammar import item_value, order_by
 from grapple.parsing.visitor import KnowledgeVisitor
 
 
 class TestParsing(TestCase):
+
+    def test_value_00(self):
+        assert_that(self.process) \
+            .raises(NoMatch) \
+            .when_called_with(item_value, '~other~') \
+            .starts_with("Expected ''' or '\"' or json_real or json_integer or '{' or '[' or json_true or json_false "
+                         "or json_null or variable at position")
+
+    def test_value_01(self):
+        assert_that(self.process) \
+            .raises(NoMatch) \
+            .when_called_with(item_value, '"string') \
+            .starts_with("Expected '\"' at position")
+
+    def test_value_02(self):
+        assert_that(self.process) \
+            .raises(NoMatch) \
+            .when_called_with(item_value, "'string") \
+            .starts_with("Expected ''' at position")
+
+    def test_value_03(self):
+        assert_that(self.process) \
+            .raises(NoMatch) \
+            .when_called_with(item_value, "string'") \
+            .starts_with("Expected ''' or '\"' or json_real or json_integer or '{' or '[' or json_true or json_false "
+                         "or json_null or variable at position")
+
+    def test_value_04(self):
+        assert_that(self.process) \
+            .raises(NoMatch) \
+            .when_called_with(item_value, 'string"') \
+            .starts_with("Expected ''' or '\"' or json_real or json_integer or '{' or '[' or json_true or json_false "
+                         "or json_null or variable at position")
+
+    def test_value_05(self):
+        assert_that(self.process(item_value, '""')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'item': [{'value': ''}]}})
+
+    def test_value_06(self):
+        assert_that(self.process(item_value, '""')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'item': [{'value': ''}]}})
+
+    def test_value_07(self):
+        assert_that(self.process(item_value, '"string"')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'item': [{'value': 'string'}]}})
+
+    def test_value_08(self):
+        assert_that(self.process(item_value, "'string'")) \
+            .contains_only('data') \
+            .contains_entry({'data': {'item': [{'value': 'string'}]}})
+
+    def test_value_09(self):
+        assert_that(self.process(item_value, '.123')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'item': [{'value': 0.123}]}})
+
+    def test_value_10(self):
+        assert_that(self.process(item_value, '1.0E-2')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'item': [{'value': 0.01}]}})
+
+    def test_value_11(self):
+        assert_that(self.process(item_value, '-5.')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'item': [{'value': -5}]}})
+
+    def test_value_12(self):
+        assert_that(self.process(item_value, '-5.0')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'item': [{'value': -5.0}]}})
+
+    def test_value_13(self):
+        assert_that(self.process(item_value, '0')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'value': 0}})
+
+    def test_value_14(self):
+        assert_that(self.process(item_value, '5')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'value': 5}})
+
+    def test_value_15(self):
+        assert_that(self.process(item_value, '-5')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'value': -5}})
+
+    def test_value_16(self):
+        assert_that(self.process(item_value, "{}")) \
+            .contains_only('data') \
+            .contains_entry({'data': {'value': {}}})
+
+    def test_value_17(self):
+        assert_that(self.process(item_value, '{\'k1\': -5, "k2": .123, k3: {}, \'k4\': ["value"], '
+                                             '"k5": true, k6: false, \'k7\': null, "k8": $v}')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'value': {'k1': -5, 'k2': 0.123, 'k3': {}, 'k4': ['value'],
+                                                'k5': True, 'k6': False, 'k7': None, 'k8': '$v'}}})
+
+    def test_value_18(self):
+        assert_that(self.process(item_value, '[]')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'value': []}})
+
+    def test_value_19(self):
+        assert_that(self.process(item_value, '[\'\', \'string\', "", "string"]')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'value': ['', 'string', '', 'string']}})
+
+    def test_value_20(self):
+        assert_that(self.process(item_value, '[0, 5, -5]')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'value': [0, 5, -5]}})
+
+    def test_value_21(self):
+        assert_that(self.process(item_value, '[.123, 1.0E-2, -5.0]')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'value': [0.123, 1.0E-2, -5.0]}})
+
+    def test_value_22(self):
+        assert_that(self.process(item_value, '[{}, {\'k1\': 0, "k2": [.123, 1.0E-2, -5.0], k3: $v}]')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'value': [{}, {'k1': 0, 'k2': [0.123, 1.0E-2, -5.0], 'k3': '$v'}]}})
+
+    def test_value_23(self):
+        assert_that(self.process(item_value, '[[], [5, .123, {"key": [true, false]}, [true], false, null, $v]]')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'value': [[], [5, 0.123, {"key": [True, False]}, [True], False, None, '$v']]}})
+
+    def test_value_24(self):
+        assert_that(self.process(item_value, '[TRUE, True, true]')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'value': [True, True, True]}})
+
+    def test_value_25(self):
+        assert_that(self.process(item_value, '[FALSE, False, false]')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'value': [False, False, False]}})
+
+    def test_value_26(self):
+        assert_that(self.process(item_value, '[NULL, Null, null]')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'value': [None, None, None]}})
+
+    def test_value_27(self):
+        assert_that(self.process(item_value, '[$1Ab_, $_2Ab, $aB_4]')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'value': ['$1Ab_', '$_2Ab', '$aB_4']}})
+
+    def test_value_28(self):
+        assert_that(self.process(item_value, '["string", -5, .123, {}, [], true, false, null, $1Ab_]')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'value': ["string", -5, 0.123, {}, [], True, False, None, '$1Ab_']}})
+
+    def test_value_29(self):
+        assert_that(self.process(item_value, 'TRUE')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'value': True}})
+
+    def test_value_30(self):
+        assert_that(self.process(item_value, 'true')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'value': True}})
+
+    def test_value_31(self):
+        assert_that(self.process(item_value, 'True')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'value': True}})
+
+    def test_value_32(self):
+        assert_that(self.process(item_value, 'FALSE')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'value': False}})
+
+    def test_value_33(self):
+        assert_that(self.process(item_value, 'false')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'value': False}})
+
+    def test_value_34(self):
+        assert_that(self.process(item_value, 'False')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'value': False}})
+
+    def test_value_35(self):
+        assert_that(self.process(item_value, 'NULL')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'value': None}})
+
+    def test_value_36(self):
+        assert_that(self.process(item_value, 'null')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'value': None}})
+
+    def test_value_37(self):
+        assert_that(self.process(item_value, 'Null')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'value': None}})
+
+    def test_value_38(self):
+        assert_that(self.process(item_value, '"" AS name')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'value': ''}})
+
+    def test_value_39(self):
+        assert_that(self.process(item_value, "'' AS name")) \
+            .contains_only('data') \
+            .contains_entry({'data': {'value': ''}})
+
+    def test_value_40(self):
+        assert_that(self.process(item_value, '"string" AS name')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'value': 'string'}})
+
+    def test_value_41(self):
+        assert_that(self.process(item_value, "'string' AS name")) \
+            .contains_only('data') \
+            .contains_entry({'data': {'value': 'string'}})
+
+    def test_value_42(self):
+        assert_that(self.process(item_value, '.123 AS name')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'value': 0.123}})
+
+    def test_value_43(self):
+        assert_that(self.process(item_value, '1.0E-2 AS name')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'value': 1.0E-2}})
+
+    def test_value_44(self):
+        assert_that(self.process(item_value, '-5. AS name')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'value': -5.0}})
+
+    def test_value_45(self):
+        assert_that(self.process(item_value, '-5.0 AS name')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'value': -5.0}})
+
+    def test_value_46(self):
+        assert_that(self.process(item_value, '0 AS name')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'value': 0}})
+
+    def test_value_47(self):
+        assert_that(self.process(item_value, '5 AS name')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'value': 5}})
+
+    def test_value_48(self):
+        assert_that(self.process(item_value, '-5 AS name')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'value': -5}})
+
+    def test_value_49(self):
+        assert_that(self.process(item_value, "{} AS name")) \
+            .contains_only('data') \
+            .contains_entry({'data': {'value': {}}})
+
+    def test_value_50(self):
+        assert_that(self.process(item_value, '{\'k1\': -5, "k2": .123, k3: {}, \'k4\': ["value"], '
+                                             '"k5": true, k6: false, \'k7\': null, "k8": $v} AS name')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'value': {'k1': -5, 'k2': 0.123, 'k3': {}, 'k4': ['value'],
+                                                'k5': True, 'k6': False, 'k7': None, 'k8': '$v'}}})
+
+    def test_value_51(self):
+        assert_that(self.process(item_value, '[] AS name')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'value': []}})
+
+    def test_value_52(self):
+        assert_that(self.process(item_value, '[\'\', \'string\', "", "string"] AS name')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'value': ['', 'string', '', 'string']}})
+
+    def test_value_53(self):
+        assert_that(self.process(item_value, '[0, 5, -5] AS name')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'value': [0, 5, -5]}})
+
+    def test_value_54(self):
+        assert_that(self.process(item_value, '[.123, 1.0E-2, -5.0] AS name')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'value': [0.123, 1.0E-2, -5.0]}})
+
+    def test_value_55(self):
+        assert_that(self.process(item_value, '[{}, {\'k1\': 0, "k2": [.123, 1.0E-2, -5.0], k3: $v}] AS name')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'value': [{}, {'k1': 0, 'k2': [0.123, 1.0E-2, -5.0], 'k3': '$v'}]}})
+
+    def test_value_56(self):
+        assert_that(
+            self.process(item_value, '[[], [5, .123, {"key": [true, false]}, [true], false, null, $v]] AS name')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'value': [[], [5, 0.123, {"key": [True, False]}, [True], False, None, '$v']]}})
+
+    def test_value_57(self):
+        assert_that(self.process(item_value, '[TRUE, True, true] AS name')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'value': [True, True, True]}})
+
+    def test_value_58(self):
+        assert_that(self.process(item_value, '[FALSE, False, false] AS name')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'value': [False, False, False]}})
+
+    def test_value_59(self):
+        assert_that(self.process(item_value, '[NULL, Null, null] AS name')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'value': [None, None, None]}})
+
+    def test_value_60(self):
+        assert_that(self.process(item_value, '[$1Ab_, $_2Ab, $aB_4] AS name')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'value': ['$1Ab_', '$_2Ab', '$aB_4']}})
+
+    def test_value_61(self):
+        assert_that(self.process(item_value, '["string", -5, .123, {}, [], true, false, null, $1Ab_] AS name')) \
+            .contains_only('data') \
+            .contains_entry(
+            {'data': {'item': {'value': ['string', -5, 0.123, {}, [], True, False, None, '$1Ab_'], 'synonym': 'name'}}})
+
+    def test_value_62(self):
+        assert_that(self.process(item_value, 'TRUE AS name')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'item': {'value': True, 'synonym': 'name'}}})
+
+    def test_value_63(self):
+        assert_that(self.process(item_value, 'true AS name')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'item': {'value': True, 'synonym': 'name'}}})
+
+    def test_value_64(self):
+        assert_that(self.process(item_value, 'True AS name')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'item': {'value': True, 'synonym': 'name'}}})
+
+    def test_value_65(self):
+        assert_that(self.process(item_value, 'FALSE AS name')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'item': {'value': False, 'synonym': 'name'}}})
+
+    def test_value_66(self):
+        assert_that(self.process(item_value, 'false AS name')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'item': {'value': False, 'synonym': 'name'}}})
+
+    def test_value_67(self):
+        assert_that(self.process(item_value, 'False AS name')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'item': {'value': False, 'synonym': 'name'}}})
+
+    def test_value_68(self):
+        assert_that(self.process(item_value, 'NULL AS name')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'item': {'value': None, 'synonym': 'name'}}})
+
+    def test_value_69(self):
+        assert_that(self.process(item_value, 'null AS name')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'item': {'value': None, 'synonym': 'name'}}})
+
+    def test_value_70(self):
+        assert_that(self.process(item_value, 'Null AS name')) \
+            .contains_only('data') \
+            .contains_entry({'data': {'item': {'value': None, 'synonym': 'name'}}})
+
     def test_order_by_00(self):
         assert_that(self.process) \
             .raises(NoMatch) \
@@ -31,406 +401,7 @@ class TestParsing(TestCase):
             .contains_only('data') \
             .contains_entry({'data': 'SKIP'})
 
-    def test_sortable_00(self):
-        assert_that(self.process) \
-            .raises(NoMatch) \
-            .when_called_with(sortable, '~other~') \
-            .starts_with("Expected entity or entity or ''' or '\"' or identifier at position")
-
-    def test_sortable_01(self):
-        assert_that(self.process(sortable, '$ent')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': True, 'entity': '$ent'}}})
-
-    def test_sortable_02(self):
-        assert_that(self.process(sortable, '$ent ASC')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': True, 'entity': '$ent'}}})
-
-    def test_sortable_03(self):
-        assert_that(self.process(sortable, '$ent Asc')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': True, 'entity': '$ent'}}})
-
-    def test_sortable_04(self):
-        assert_that(self.process(sortable, '$ent asc')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': True, 'entity': '$ent'}}})
-
-    def test_sortable_05(self):
-        assert_that(self.process(sortable, '$ent ASCENDING')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': True, 'entity': '$ent'}}})
-
-    def test_sortable_06(self):
-        assert_that(self.process(sortable, '$ent Ascending')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': True, 'entity': '$ent'}}})
-
-    def test_sortable_07(self):
-        assert_that(self.process(sortable, '$ent ascending')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': True, 'entity': '$ent'}}})
-
-    def test_sortable_08(self):
-        assert_that(self.process(sortable, '$ent DESC')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': False, 'entity': '$ent'}}})
-
-    def test_sortable_09(self):
-        assert_that(self.process(sortable, '$ent Desc')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': False, 'entity': '$ent'}}})
-
-    def test_sortable_10(self):
-        assert_that(self.process(sortable, '$ent desc')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': False, 'entity': '$ent'}}})
-
-    def test_sortable_11(self):
-        assert_that(self.process(sortable, '$ent DESCENDING')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': False, 'entity': '$ent'}}})
-
-    def test_sortable_12(self):
-        assert_that(self.process(sortable, '$ent Descending')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': False, 'entity': '$ent'}}})
-
-    def test_sortable_13(self):
-        assert_that(self.process(sortable, '$ent descending')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': False, 'entity': '$ent'}}})
-
-    def test_sortable_14(self):
-        assert_that(self.process(sortable, '$ent.')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': True, 'entity': '$ent'}}})
-
-    def test_sortable_15(self):
-        assert_that(self.process(sortable, '$ent. ASC')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': True, 'entity': '$ent', 'field': 'ASC'}}})
-
-    def test_sortable_16(self):
-        assert_that(self.process(sortable, '$ent. Asc')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': True, 'entity': '$ent', 'field': 'Asc'}}})
-
-    def test_sortable_17(self):
-        assert_that(self.process(sortable, '$ent. asc')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': True, 'entity': '$ent', 'field': 'asc'}}})
-
-    def test_sortable_18(self):
-        assert_that(self.process(sortable, '$ent. ASCENDING')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': True, 'entity': '$ent', 'field': 'ASCENDING'}}})
-
-    def test_sortable_19(self):
-        assert_that(self.process(sortable, '$ent. Ascending')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': True, 'entity': '$ent', 'field': 'Ascending'}}})
-
-    def test_sortable_20(self):
-        assert_that(self.process(sortable, '$ent. ascending')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': True, 'entity': '$ent', 'field': 'ascending'}}})
-
-    def test_sortable_21(self):
-        assert_that(self.process(sortable, '$ent. DESC')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': True, 'entity': '$ent', 'field': 'DESC'}}})
-
-    def test_sortable_22(self):
-        assert_that(self.process(sortable, '$ent. Desc')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': True, 'entity': '$ent', 'field': 'Desc'}}})
-
-    def test_sortable_23(self):
-        assert_that(self.process(sortable, '$ent. desc')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': True, 'entity': '$ent', 'field': 'desc'}}})
-
-    def test_sortable_24(self):
-        assert_that(self.process(sortable, '$ent. DESCENDING')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': True, 'entity': '$ent', 'field': 'DESCENDING'}}})
-
-    def test_sortable_25(self):
-        assert_that(self.process(sortable, '$ent. Descending')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': True, 'entity': '$ent', 'field': 'Descending'}}})
-
-    def test_sortable_26(self):
-        assert_that(self.process(sortable, '$ent. descending')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': True, 'entity': '$ent', 'field': 'descending'}}})
-
-    def test_sortable_27(self):
-        assert_that(self.process(sortable, '$ent .')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': True, 'entity': '$ent'}}})
-
-    def test_sortable_28(self):
-        assert_that(self.process(sortable, '$ent . ASC')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': True, 'entity': '$ent', 'field': 'ASC'}}})
-
-    def test_sortable_29(self):
-        assert_that(self.process(sortable, '$ent . Asc')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': True, 'entity': '$ent', 'field': 'Asc'}}})
-
-    def test_sortable_30(self):
-        assert_that(self.process(sortable, '$ent . asc')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': True, 'entity': '$ent', 'field': 'asc'}}})
-
-    def test_sortable_31(self):
-        assert_that(self.process(sortable, '$ent . ASCENDING')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': True, 'entity': '$ent', 'field': 'ASCENDING'}}})
-
-    def test_sortable_32(self):
-        assert_that(self.process(sortable, '$ent . Ascending')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': True, 'entity': '$ent', 'field': 'Ascending'}}})
-
-    def test_sortable_33(self):
-        assert_that(self.process(sortable, '$ent . ascending')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': True, 'entity': '$ent', 'field': 'ascending'}}})
-
-    def test_sortable_34(self):
-        assert_that(self.process(sortable, '$ent . DESC')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': True, 'entity': '$ent', 'field': 'DESC'}}})
-
-    def test_sortable_35(self):
-        assert_that(self.process(sortable, '$ent . Desc')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': True, 'entity': '$ent', 'field': 'Desc'}}})
-
-    def test_sortable_36(self):
-        assert_that(self.process(sortable, '$ent . desc')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': True, 'entity': '$ent', 'field': 'desc'}}})
-
-    def test_sortable_37(self):
-        assert_that(self.process(sortable, '$ent . DESCENDING')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': True, 'entity': '$ent', 'field': 'DESCENDING'}}})
-
-    def test_sortable_38(self):
-        assert_that(self.process(sortable, '$ent . Descending')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': True, 'entity': '$ent', 'field': 'Descending'}}})
-
-    def test_sortable_39(self):
-        assert_that(self.process(sortable, '$ent . descending')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': True, 'entity': '$ent', 'field': 'descending'}}})
-
-    def test_sortable_40(self):
-        assert_that(self.process(sortable, '$ent.key')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': True, 'entity': '$ent', 'field': 'key'}}})
-
-    def test_sortable_41(self):
-        assert_that(self.process(sortable, '$ent.key ASC')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': True, 'entity': '$ent', 'field': 'key'}}})
-
-    def test_sortable_42(self):
-        assert_that(self.process(sortable, '$ent.key Asc')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': True, 'entity': '$ent', 'field': 'key'}}})
-
-    def test_sortable_43(self):
-        assert_that(self.process(sortable, '$ent.key asc')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': True, 'entity': '$ent', 'field': 'key'}}})
-
-    def test_sortable_44(self):
-        assert_that(self.process(sortable, '$ent.key ASCENDING')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': True, 'entity': '$ent', 'field': 'key'}}})
-
-    def test_sortable_45(self):
-        assert_that(self.process(sortable, '$ent.key Ascending')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': True, 'entity': '$ent', 'field': 'key'}}})
-
-    def test_sortable_46(self):
-        assert_that(self.process(sortable, '$ent.key ascending')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': True, 'entity': '$ent', 'field': 'key'}}})
-
-    def test_sortable_47(self):
-        assert_that(self.process(sortable, '$ent.key DESC')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': False, 'entity': '$ent', 'field': 'key'}}})
-
-    def test_sortable_48(self):
-        assert_that(self.process(sortable, '$ent.key Desc')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': False, 'entity': '$ent', 'field': 'key'}}})
-
-    def test_sortable_49(self):
-        assert_that(self.process(sortable, '$ent.key desc')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': False, 'entity': '$ent', 'field': 'key'}}})
-
-    def test_sortable_50(self):
-        assert_that(self.process(sortable, '$ent.key DESCENDING')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': False, 'entity': '$ent', 'field': 'key'}}})
-
-    def test_sortable_51(self):
-        assert_that(self.process(sortable, '$ent.key Descending')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': False, 'entity': '$ent', 'field': 'key'}}})
-
-    def test_sortable_52(self):
-        assert_that(self.process(sortable, '$ent.key descending')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': False, 'entity': '$ent', 'field': 'key'}}})
-
-    def test_sortable_53(self):
-        assert_that(self.process(sortable, '$ent."key"')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': True, 'entity': '$ent', 'field': 'key'}}})
-
-    def test_sortable_54(self):
-        assert_that(self.process(sortable, '$ent."key" ASC')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': True, 'entity': '$ent', 'field': 'key'}}})
-
-    def test_sortable_55(self):
-        assert_that(self.process(sortable, '$ent."key" Asc')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': True, 'entity': '$ent', 'field': 'key'}}})
-
-    def test_sortable_56(self):
-        assert_that(self.process(sortable, '$ent."key" asc')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': True, 'entity': '$ent', 'field': 'key'}}})
-
-    def test_sortable_57(self):
-        assert_that(self.process(sortable, '$ent."key" ASCENDING')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': True, 'entity': '$ent', 'field': 'key'}}})
-
-    def test_sortable_58(self):
-        assert_that(self.process(sortable, '$ent."key" Ascending')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': True, 'entity': '$ent', 'field': 'key'}}})
-
-    def test_sortable_59(self):
-        assert_that(self.process(sortable, '$ent."key" ascending')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': True, 'entity': '$ent', 'field': 'key'}}})
-
-    def test_sortable_60(self):
-        assert_that(self.process(sortable, '$ent."key" DESC')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': False, 'entity': '$ent', 'field': 'key'}}})
-
-    def test_sortable_61(self):
-        assert_that(self.process(sortable, '$ent."key" Desc')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': False, 'entity': '$ent', 'field': 'key'}}})
-
-    def test_sortable_62(self):
-        assert_that(self.process(sortable, '$ent."key" desc')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': False, 'entity': '$ent', 'field': 'key'}}})
-
-    def test_sortable_63(self):
-        assert_that(self.process(sortable, '$ent."key" DESCENDING')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': False, 'entity': '$ent', 'field': 'key'}}})
-
-    def test_sortable_64(self):
-        assert_that(self.process(sortable, '$ent."key" Descending')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': False, 'entity': '$ent', 'field': 'key'}}})
-
-    def test_sortable_65(self):
-        assert_that(self.process(sortable, '$ent."key" descending')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': False, 'entity': '$ent', 'field': 'key'}}})
-
-    def test_sortable_66(self):
-        assert_that(self.process(sortable, "$ent.'key'")) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': True, 'entity': '$ent', 'field': 'key'}}})
-
-    def test_sortable_67(self):
-        assert_that(self.process(sortable, "$ent.'key' ASC")) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': True, 'entity': '$ent', 'field': 'key'}}})
-
-    def test_sortable_68(self):
-        assert_that(self.process(sortable, "$ent.'key' Asc")) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': True, 'entity': '$ent', 'field': 'key'}}})
-
-    def test_sortable_69(self):
-        assert_that(self.process(sortable, "$ent.'key' asc")) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': True, 'entity': '$ent', 'field': 'key'}}})
-
-    def test_sortable_70(self):
-        assert_that(self.process(sortable, "$ent.'key' ASCENDING")) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': True, 'entity': '$ent', 'field': 'key'}}})
-
-    def test_sortable_71(self):
-        assert_that(self.process(sortable, "$ent.'key' Ascending")) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': True, 'entity': '$ent', 'field': 'key'}}})
-
-    def test_sortable_72(self):
-        assert_that(self.process(sortable, "$ent.'key' ascending")) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': True, 'entity': '$ent', 'field': 'key'}}})
-
-    def test_sortable_73(self):
-        assert_that(self.process(sortable, "$ent.'key' DESC")) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': False, 'entity': '$ent', 'field': 'key'}}})
-
-    def test_sortable_74(self):
-        assert_that(self.process(sortable, "$ent.'key' Desc")) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': False, 'entity': '$ent', 'field': 'key'}}})
-
-    def test_sortable_75(self):
-        assert_that(self.process(sortable, "$ent.'key' desc")) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': False, 'entity': '$ent', 'field': 'key'}}})
-
-    def test_sortable_76(self):
-        assert_that(self.process(sortable, "$ent.'key' DESCENDING")) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': False, 'entity': '$ent', 'field': 'key'}}})
-
-    def test_sortable_77(self):
-        assert_that(self.process(sortable, "$ent.'key' Descending")) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': False, 'entity': '$ent', 'field': 'key'}}})
-
-    def test_sortable_78(self):
-        assert_that(self.process(sortable, "$ent.'key' descending")) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': False, 'entity': '$ent', 'field': 'key'}}})
-
-    def test_sortable_79(self):
-        assert_that(self.process(sortable, 'reference')) \
-            .contains_only('data') \
-            .contains_entry({'data': {'sortable': {'ascending': True, 'name': 'reference'}}})
+    # All the sortables here
 
     @staticmethod
     def process(scope, content) -> dict:
