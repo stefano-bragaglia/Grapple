@@ -19,32 +19,32 @@ class TestParsing(TestCase):
     def test_asc_1(self):
         assert_that(self.process(asc, 'ASC')) \
             .contains_only('data') \
-            .contains_entry({'data': {'ordering': True}})
+            .contains_entry({'data': {'ascending': True}})
 
     def test_asc_2(self):
         assert_that(self.process(asc, 'asc')) \
             .contains_only('data') \
-            .contains_entry({'data': {'ordering': True}})
+            .contains_entry({'data': {'ascending': True}})
 
     def test_asc_3(self):
         assert_that(self.process(asc, 'Asc')) \
             .contains_only('data') \
-            .contains_entry({'data': {'ordering': True}})
+            .contains_entry({'data': {'ascending': True}})
 
     def test_asc_4(self):
         assert_that(self.process(asc, 'ASCENDING')) \
             .contains_only('data') \
-            .contains_entry({'data': {'ordering': True}})
+            .contains_entry({'data': {'ascending': True}})
 
     def test_asc_5(self):
         assert_that(self.process(asc, 'ascending')) \
             .contains_only('data') \
-            .contains_entry({'data': {'ordering': True}})
+            .contains_entry({'data': {'ascending': True}})
 
     def test_asc_6(self):
         assert_that(self.process(asc, 'Ascending')) \
             .contains_only('data') \
-            .contains_entry({'data': {'ordering': True}})
+            .contains_entry({'data': {'ascending': True}})
 
     def test_desc_0(self):
         assert_that(self.process) \
@@ -55,32 +55,32 @@ class TestParsing(TestCase):
     def test_desc_1(self):
         assert_that(self.process(desc, 'DESC')) \
             .contains_only('data') \
-            .contains_entry({'data': {'ordering': False}})
+            .contains_entry({'data': {'ascending': False}})
 
     def test_desc_2(self):
         assert_that(self.process(desc, 'desc')) \
             .contains_only('data') \
-            .contains_entry({'data': {'ordering': False}})
+            .contains_entry({'data': {'ascending': False}})
 
     def test_desc_3(self):
         assert_that(self.process(desc, 'Desc')) \
             .contains_only('data') \
-            .contains_entry({'data': {'ordering': False}})
+            .contains_entry({'data': {'ascending': False}})
 
     def test_desc_4(self):
         assert_that(self.process(desc, 'DESCENDING')) \
             .contains_only('data') \
-            .contains_entry({'data': {'ordering': False}})
+            .contains_entry({'data': {'ascending': False}})
 
     def test_desc_5(self):
         assert_that(self.process(desc, 'descending')) \
             .contains_only('data') \
-            .contains_entry({'data': {'ordering': False}})
+            .contains_entry({'data': {'ascending': False}})
 
     def test_desc_6(self):
         assert_that(self.process(desc, 'Descending')) \
             .contains_only('data') \
-            .contains_entry({'data': {'ordering': False}})
+            .contains_entry({'data': {'ascending': False}})
 
     def test_description_0(self):
         assert_that(self.process) \
