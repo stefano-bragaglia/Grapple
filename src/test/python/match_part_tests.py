@@ -8,66 +8,6 @@ from grapple.parsing.visitor import KnowledgeVisitor
 
 
 class TestGrammarVisitor(TestCase):
-    def test_match_part_0(self):
-        assert_that(TestGrammarVisitor.process) \
-            .raises(NoMatch) \
-            .when_called_with(match_part, '~other~') \
-            .starts_with("Expected match_optional or key_match at position")
-
-    def test_match_part_1(self):
-        assert_that(self.process(match_part, 'MATCH $pp = ($p:current{key: "value"})')) \
-            .contains_only('value') \
-            .contains_entry({'value': {'match': {'optional': False,
-                                                 'pattern': [{'parameter': '$pp',
-
-                                                              'node': {'parameter': '$p',
-                                                                       'labels': ['current'],
-                                                                       'properties': {'key': 'value'}},
-                                                              'chain': []}]}}})
-
-    def test_match_part_2(self):
-        assert_that(self.process(match_part, 'OPTIONAL MATCH ($p:current{key: "value"})'
-                                             '<-[$p:current{key: "value"}]->'
-                                             '($p:current{key: "value"})')) \
-            .contains_only('value') \
-            .contains_entry({'value': {'match': {'optional': True,
-                                                 'pattern': [{
-                                                     'node': {'parameter': '$p',
-                                                              'labels': ['current'],
-                                                              'properties': {'key': 'value'}},
-                                                     'chain': [{'relation': {'direction': 'any',
-                                                                             'parameter': '$p',
-                                                                             'types': ['current'],
-                                                                             'properties': {'key': 'value'}},
-                                                                'node': {'parameter': '$p',
-                                                                         'labels': ['current'],
-                                                                         'properties': {'key': 'value'}}}]}]}}})
-
-    def test_match_part_3(self):
-        assert_that(self.process(match_part, 'OPTIONAL MATCH $pp = ($p:current{key: "value"}), '
-                                             '($p:current{key: "value"})'
-                                             '<-[$p:current{key: "value"}]->'
-                                             '($p:current{key: "value"})')) \
-            .contains_only('value') \
-            .contains_entry({'value': {'match': {'optional': True,
-                                                 'pattern': [{'parameter': '$pp',
-                                                              'node': {'parameter': '$p',
-                                                                       'labels': ['current'],
-                                                                       'properties': {'key': 'value'}},
-                                                              'chain': []},
-                                                             {'node': {'parameter': '$p',
-                                                                       'labels': ['current'],
-                                                                       'properties': {'key': 'value'}},
-                                                              'chain': [{'relation': {'direction': 'any',
-                                                                                      'parameter': '$p',
-                                                                                      'types': ['current'],
-                                                                                      'properties': {
-                                                                                          'key': 'value'}},
-                                                                         'node': {'parameter': '$p',
-                                                                                  'labels': ['current'],
-                                                                                  'properties': {
-                                                                                      'key': 'value'}}}]}]}}})
-
     def test_match_optional_0(self):
         assert_that(TestGrammarVisitor.process) \
             .raises(NoMatch) \

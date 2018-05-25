@@ -3,27 +3,11 @@ from unittest import TestCase
 from arpeggio import NoMatch, ParserPython, SemanticError, visit_parse_tree
 from assertpy import assert_that
 
-from grapple.parsing.grammar import return_part, return_items, return_first, return_item, return_all, return_coalesce, \
-    return_default, return_keys, return_properties, return_id, return_labels, return_types, return_tail, return_head, \
-    return_selector, return_value, return_synonym, return_order_by, return_order_by_items, return_order_by_item, \
-    return_order_by_selector, return_parameter, return_property, return_order_by_name, return_ordering, \
-    return_ordering_ascending, return_ordering_descending, return_skip, return_limit
+from grapple.parsing.grammar import return_part
 from grapple.parsing.visitor import KnowledgeVisitor
 
 
 class TestGrammarVisitor(TestCase):
-    def test_return_part_1(self):
-        assert_that(self.process(return_part, 'RETURN DISTINCT *, coalesce($param.prop, 5) AS "synonym" '
-                                              'ORDER BY synonym DESC SKIP 5 LIMIT 3')) \
-            .contains_only('value') \
-            .contains_entry({'value': {'result': {'distinct': True,
-                                                  'items': [{'function': 'all'},
-                                                            {'function': 'coalesce', 'parameter': '$param',
-                                                             'property': 'prop', 'default': 5, 'synonym': 'synonym'}],
-                                                  'order': [{'ascending': False, 'synonym': 'synonym'}],
-                                                  'skip': 5,
-                                                  'limit': 3}}})
-
     def test_return_items_1(self):
         assert_that(self.process(return_items, 'coalesce($param.prop, 5) AS "synonym"')) \
             .contains_only('value') \

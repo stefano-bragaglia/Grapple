@@ -46,43 +46,35 @@ class KnowledgeVisitor(PTNodeVisitor):
         return {'data': {'rule_part': content}}
 
     def visit_create_part(self, node: Node, children: List) -> object:
-        content = {}
-        for child in children:
-            content.update(child['data'])
-
-        return {'data': {'create_part': content}}
+        return {'data': {'create_part': {'items': [child['data'] for child in children[1:]]}}}
 
     def visit_delete_part(self, node: Node, children: List) -> object:
-        content = {}
-        for child in children:
-            content.update(child['data'])
+        if children[0] == {'data': 'DELETE'}:
+            content = {'items': [child['data'] for child in children[1:]]}
+        else:
+            content = children[0]['data']
+            content['items'] = [child['data'] for child in children[2:]]
 
         return {'data': {'delete_part': content}}
 
     def visit_match_part(self, node: Node, children: List) -> object:
-        content = {}
-        for child in children:
-            content.update(child['data'])
+        if children[0] == {'data': 'MATCH'}:
+            content = {'items': [child['data'] for child in children[1:]]}
+        else:
+            content = children[0]['data']
+            content['items'] = [child['data'] for child in children[2:]]
 
         return {'data': {'match_part': content}}
 
     def visit_remove_part(self, node: Node, children: List) -> object:
-        content = {}
-        for child in children:
-            content.update(child['data'])
-
-        return {'data': {'remove_part': content}}
+        return {'data': {'remove_part': {'items': [child['data'] for child in children[1:]]}}}
 
     def visit_set_part(self, node: Node, children: List) -> object:
-        content = {}
-        for child in children:
-            content.update(child['data'])
-
-        return {'data': {'set_part': content}}
+        return {'data': {'set_part': {'items': [child['data'] for child in children[1:]]}}}
 
     def visit_return_part(self, node: Node, children: List) -> object:
         content = {}
-        for child in children:
+        for child in children[1:]:
             content.update(child['data'])
 
         return {'data': {'return_part': content}}

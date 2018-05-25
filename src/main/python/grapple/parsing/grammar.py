@@ -48,7 +48,7 @@ def create_part():
 
 
 def delete_part():
-    return Optional(is_detach), key_delete, parameter, ZeroOrMore(',', parameter)
+    return Optional(is_detach), key_delete, entity, ZeroOrMore(',', entity)
 
 
 def match_part():
