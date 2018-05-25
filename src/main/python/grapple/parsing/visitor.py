@@ -95,62 +95,70 @@ class KnowledgeVisitor(PTNodeVisitor):
 
         return {'data': {'pattern': content}}
 
-    def visit_chain(self, node: Node, children: List) -> object:
-        content = [child['data']['next'] for child in children]
-
-        return {'data': {'chain': content}}
-
-    def visit_next(self, node: Node, children: List) -> object:
-        content = {}
-        for child in children:
-            content.update(child['data'])
-
-        return {'data': {'next': content}}
-
-    def visit_node(self, node: Node, children: List) -> object:
+    def visit_start(self, node: Node, children: List) -> object:
         content = {}
         for child in children:
             content.update(child['data'])
 
         return {'data': {'node': content}}
 
+    def visit_chain(self, node: Node, children: List) -> object:
+        return {'data': {'chain': [child['data'] for child in children]}}
+
+    def visit_step(self, node: Node, children: List) -> object:
+        return {'data': {'relation': children[0]['data'], 'node': children[1]['data']}}
+
+    def visit_node(self, node: Node, children: List) -> object:
+        content = {}
+        for child in children:
+            content.update(child['data'])
+
+        return {'data': content}
+
     def visit_relation(self, node: Node, children: List) -> object:
         return {'data': children[0]['data']}
 
     def visit_dir_both(self, node: Node, children: List) -> object:
         content = {'direction': 'any'}
-        content.update(children[0]['data']['relation'])
+        for child in children:
+            content.update(child['data'])
 
-        return {'data': {'relation': content}}
+        return {'data': content}
 
     def visit_dir_back(self, node: Node, children: List) -> object:
         content = {'direction': 'incoming'}
-        content.update(children[0]['data']['relation'])
+        for child in children:
+            content.update(child['data'])
 
-        return {'data': {'relation': content}}
+        return {'data': content}
 
     def visit_dir_next(self, node: Node, children: List) -> object:
-        content = {'direction': 'ongoing'}
-        content.update(children[0]['data']['relation'])
+        content = {'direction': 'outgoing'}
+        for child in children:
+            content.update(child['data'])
 
-        return {'data': {'relation': content}}
+        return {'data': content}
 
     def visit_dir_none(self, node: Node, children: List) -> object:
         content = {'direction': 'any'}
-        content.update(children[0]['data']['relation'])
+        for child in children:
+            content.update(child['data'])
 
-        return {'data': {'relation': content}}
+        return {'data': content}
 
     def visit_details(self, node: Node, children: List) -> object:
         content = {}
         for child in children:
             content.update(child['data'])
 
-        return {'data': {'relation': content}}
+        return {'data': content}
 
     # ------------------------------------------------------------------------------------------------------------------
     def visit_removable(self, node: Node, children: List) -> object:
         return {'data': children[0]['data']}
+
+    def visit_selector(self, node: Node, children: List) -> object:
+        return {'data': {key: value for child in children for key, value in child['data'].items()}}
 
     # ------------------------------------------------------------------------------------------------------------------
     def visit_settable(self, node: Node, children: List) -> object:
@@ -353,9 +361,6 @@ class KnowledgeVisitor(PTNodeVisitor):
             raise SemanticError("'salience' expected to be non-negative")
 
         return {'data': {'salience': value}}
-
-    def visit_selector(self, node: Node, children: List) -> object:
-        return {'data': {key: value for child in children for key, value in child['data'].items()}}
 
     def visit_skip(self, node: Node, children: List) -> object:
         value = children[1]['data']

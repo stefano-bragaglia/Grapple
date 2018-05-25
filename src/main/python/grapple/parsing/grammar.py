@@ -69,14 +69,18 @@ def return_part():
 
 # ----------------------------------------------------------------------------------------------------------------------
 def pattern():
-    return Optional(entity, '='), node, Optional(chain)
+    return Optional(entity, '='), start, Optional(chain)
+
+
+def start():
+    return node
 
 
 def chain():
-    return OneOrMore(next)
+    return OneOrMore(step)
 
 
-def next():
+def step():
     return relation, node
 
 
