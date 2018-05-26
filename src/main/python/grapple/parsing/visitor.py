@@ -26,14 +26,14 @@ class KnowledgeVisitor(PTNodeVisitor):
         for child in children:
             content.update(child['data'])
 
-        return {'data': {'clause_reading': content}}
+        return {'data': content}
 
     def visit_clause_updating(self, node: Node, children: List) -> object:
         content = {}
         for child in children:
             content.update(child['data'])
 
-        return {'data': {'clause_updating': content}}
+        return {'data': content}
 
     def visit_updating_part(self, node: Node, children: List) -> object:
         return {'data': children[0]['data']}
@@ -152,7 +152,6 @@ class KnowledgeVisitor(PTNodeVisitor):
     def visit_selector(self, node: Node, children: List) -> object:
         return {'data': {key: value for child in children for key, value in child['data'].items()}}
 
-    # ------------------------------------------------------------------------------------------------------------------
     def visit_settable(self, node: Node, children: List) -> object:
         return {'data': children[0]['data']}
 

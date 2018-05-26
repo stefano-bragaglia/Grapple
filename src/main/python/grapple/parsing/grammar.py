@@ -121,7 +121,6 @@ def selector():
     return entity, field
 
 
-# ----------------------------------------------------------------------------------------------------------------------
 def settable():
     return [descriptor, replace_map, assign_map, assign_value]
 
