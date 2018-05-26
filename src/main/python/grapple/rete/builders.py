@@ -3,7 +3,7 @@ from typing import Set
 
 from arpeggio import ParserPython, visit_parse_tree
 
-from grapple.parsing.descriptors import Rule, RuleBase
+from grapple.parsing.old_descriptors import Rule, RuleBase
 from grapple.parsing.grammar import comment, cypher
 from grapple.parsing.visitor import KnowledgeVisitor
 

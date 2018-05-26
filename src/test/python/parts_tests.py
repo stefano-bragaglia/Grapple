@@ -4,7 +4,7 @@ from arpeggio import NoMatch, ParserPython, visit_parse_tree
 from assertpy import assert_that
 
 from grapple.parsing.grammar import create_part, delete_part, match_part, remove_part, return_part, rule_part, set_part, \
-    updating_part
+    update_part
 from grapple.parsing.visitor import KnowledgeVisitor
 
 
@@ -12,11 +12,11 @@ class TestParsing(TestCase):
     def test_updating_part_0(self):
         assert_that(self.process) \
             .raises(NoMatch) \
-            .when_called_with(updating_part, '~other~') \
+            .when_called_with(update_part, '~other~') \
             .starts_with("Expected key_create or key_remove or key_set or is_detach or key_delete at position")
 
     def test_updating_part_1(self):
-        assert_that(self.process(updating_part, 'CREATE $pp = ($p:current{key: "value"})')) \
+        assert_that(self.process(update_part, 'CREATE $pp = ($p:current{key: "value"})')) \
             .contains_only('data') \
             .contains_entry({
             'data': {
@@ -40,9 +40,9 @@ class TestParsing(TestCase):
         })
 
     def test_updating_part_2(self):
-        assert_that(self.process(updating_part, 'CREATE ($p:current{key: "value"})'
-                                                '<-[$p:current{key: "value"}]->'
-                                                '($p:current{key: "value"})')) \
+        assert_that(self.process(update_part, 'CREATE ($p:current{key: "value"})'
+                                              '<-[$p:current{key: "value"}]->'
+                                              '($p:current{key: "value"})')) \
             .contains_only('data') \
             .contains_entry({
             'data': {
@@ -84,10 +84,10 @@ class TestParsing(TestCase):
         })
 
     def test_updating_part_3(self):
-        assert_that(self.process(updating_part, 'CREATE $pp = ($p:current{key: "value"}), '
-                                                '($p:current{key: "value"})'
-                                                '<-[$p:current{key: "value"}]->'
-                                                '($p:current{key: "value"})')) \
+        assert_that(self.process(update_part, 'CREATE $pp = ($p:current{key: "value"}), '
+                                              '($p:current{key: "value"})'
+                                              '<-[$p:current{key: "value"}]->'
+                                              '($p:current{key: "value"})')) \
             .contains_only('data') \
             .contains_entry({
             'data': {
@@ -141,7 +141,7 @@ class TestParsing(TestCase):
         })
 
     def test_updating_part_4(self):
-        assert_that(self.process(updating_part, 'REMOVE $node :label, $rel."key"')) \
+        assert_that(self.process(update_part, 'REMOVE $node :label, $rel."key"')) \
             .contains_only('data') \
             .contains_entry({
             'data': {
@@ -161,8 +161,8 @@ class TestParsing(TestCase):
         })
 
     def test_updating_part_5(self):
-        assert_that(self.process(updating_part, 'SET $node :label, $rel += {key: "value", num: -.123}, '
-                                                '$rel = {key: "value", num: -.123}, $node."num" = -.123')) \
+        assert_that(self.process(update_part, 'SET $node :label, $rel += {key: "value", num: -.123}, '
+                                              '$rel = {key: "value", num: -.123}, $node."num" = -.123')) \
             .contains_only('data') \
             .contains_entry({
             'data': {
@@ -200,7 +200,7 @@ class TestParsing(TestCase):
         })
 
     def test_updating_part_6(self):
-        assert_that(self.process(updating_part, 'DETACH DELETE $rel, $node')) \
+        assert_that(self.process(update_part, 'DETACH DELETE $rel, $node')) \
             .contains_only('data') \
             .contains_entry({
             'data': {
@@ -392,16 +392,14 @@ class TestParsing(TestCase):
             .contains_entry({
             'data': {
                 'match_part': {
-                    'items': [
+                    'patterns': [
                         {
-                            'pattern': {
-                                'entity': '$pp',
-                                'node': {
-                                    'entity': '$p',
-                                    'labels': ['current'],
-                                    'properties': {
-                                        'key': 'value'
-                                    }
+                            'entity': '$pp',
+                            'node': {
+                                'entity': '$p',
+                                'labels': ['current'],
+                                'properties': {
+                                    'key': 'value'
                                 }
                             }
                         }
@@ -419,36 +417,34 @@ class TestParsing(TestCase):
             'data': {
                 'match_part': {
                     'optional': True,
-                    'items': [
+                    'patterns': [
                         {
-                            'pattern': {
-                                'node': {
-                                    'entity': '$p',
-                                    'labels': ['current'],
-                                    'properties': {
-                                        'key': 'value'
-                                    }
-                                },
-                                'chain': [
-                                    {
-                                        'relation': {
-                                            'direction': 'any',
-                                            'entity': '$p',
-                                            'types': ['current'],
-                                            'properties': {
-                                                'key': 'value'
-                                            }
-                                        },
-                                        'node': {
-                                            'entity': '$p',
-                                            'labels': ['current'],
-                                            'properties': {
-                                                'key': 'value'
-                                            }
+                            'node': {
+                                'entity': '$p',
+                                'labels': ['current'],
+                                'properties': {
+                                    'key': 'value'
+                                }
+                            },
+                            'chain': [
+                                {
+                                    'relation': {
+                                        'direction': 'any',
+                                        'entity': '$p',
+                                        'types': ['current'],
+                                        'properties': {
+                                            'key': 'value'
+                                        }
+                                    },
+                                    'node': {
+                                        'entity': '$p',
+                                        'labels': ['current'],
+                                        'properties': {
+                                            'key': 'value'
                                         }
                                     }
-                                ]
-                            }
+                                }
+                            ]
                         }
                     ]
                 }
@@ -465,48 +461,44 @@ class TestParsing(TestCase):
             'data': {
                 'match_part': {
                     'optional': True,
-                    'items': [
+                    'patterns': [
                         {
-                            'pattern': {
-                                'entity': '$pp',
-                                'node': {
-                                    'entity': '$p',
-                                    'labels': ['current'],
-                                    'properties': {
-                                        'key': 'value'
-                                    }
+                            'entity': '$pp',
+                            'node': {
+                                'entity': '$p',
+                                'labels': ['current'],
+                                'properties': {
+                                    'key': 'value'
                                 }
                             }
                         },
                         {
-                            'pattern': {
-                                'node': {
-                                    'entity': '$p',
-                                    'labels': ['current'],
-                                    'properties': {
-                                        'key': 'value'
-                                    }
-                                },
-                                'chain': [
-                                    {
-                                        'relation': {
-                                            'direction': 'any',
-                                            'entity': '$p',
-                                            'types': ['current'],
-                                            'properties': {
-                                                'key': 'value'
-                                            }
-                                        },
-                                        'node': {
-                                            'entity': '$p',
-                                            'labels': ['current'],
-                                            'properties': {
-                                                'key': 'value'
-                                            }
+                            'node': {
+                                'entity': '$p',
+                                'labels': ['current'],
+                                'properties': {
+                                    'key': 'value'
+                                }
+                            },
+                            'chain': [
+                                {
+                                    'relation': {
+                                        'direction': 'any',
+                                        'entity': '$p',
+                                        'types': ['current'],
+                                        'properties': {
+                                            'key': 'value'
+                                        }
+                                    },
+                                    'node': {
+                                        'entity': '$p',
+                                        'labels': ['current'],
+                                        'properties': {
+                                            'key': 'value'
                                         }
                                     }
-                                ]
-                            }
+                                }
+                            ]
                         }
                     ]
                 }

@@ -4,7 +4,7 @@ from unittest import TestCase
 from arpeggio import ParserPython, visit_parse_tree
 from assertpy import assert_that
 
-from grapple.parsing.descriptors import RuleBase
+from grapple.parsing.old_descriptors import RuleBase
 from grapple.parsing.grammar import comment, cypher
 from grapple.parsing.visitor import KnowledgeVisitor
 

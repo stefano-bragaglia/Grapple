@@ -924,30 +924,28 @@ class TestParsing(TestCase):
                     'salience': 5
                 },
                 'match_part': {
-                    'items': [
+                    'patterns': [
                         {
-                            'pattern': {
-                                'node': {
-                                    'entity': '$m',
-                                    'labels': ['main']
-                                },
-                                'chain': [
-                                    {
-                                        'relation': {
-                                            'direction': 'outgoing',
-                                            'entity': '$l',
-                                            'types': ['links']
-                                        },
-                                        'node': {
-                                            'entity': '$a',
-                                            'properties': {
-                                                'key': 'value',
-                                                'num': -0.123
-                                            }
+                            'node': {
+                                'entity': '$m',
+                                'labels': ['main']
+                            },
+                            'chain': [
+                                {
+                                    'relation': {
+                                        'direction': 'outgoing',
+                                        'entity': '$l',
+                                        'types': ['links']
+                                    },
+                                    'node': {
+                                        'entity': '$a',
+                                        'properties': {
+                                            'key': 'value',
+                                            'num': -0.123
                                         }
                                     }
-                                ]
-                            }
+                                }
+                            ]
                         }
                     ]
                 },
@@ -990,48 +988,44 @@ class TestParsing(TestCase):
                     'salience': 5
                 },
                 'match_part': {
-                    'items': [
+                    'patterns': [
                         {
-                            'pattern': {
-                                'node': {
-                                    'entity': '$m',
-                                    'labels': ['main']},
-                                'chain': [
-                                    {
-                                        'relation': {
-                                            'direction': 'outgoing',
-                                            'entity': '$l',
-                                            'types': ['links']},
-                                        'node': {
-                                            'entity': '$a',
-                                            'properties': {
-                                                'key': 'value',
-                                                'num': -0.123
-                                            }
+                            'node': {
+                                'entity': '$m',
+                                'labels': ['main']},
+                            'chain': [
+                                {
+                                    'relation': {
+                                        'direction': 'outgoing',
+                                        'entity': '$l',
+                                        'types': ['links']},
+                                    'node': {
+                                        'entity': '$a',
+                                        'properties': {
+                                            'key': 'value',
+                                            'num': -0.123
                                         }
                                     }
-                                ]
-                            }
+                                }
+                            ]
                         }
                     ]
                 },
                 'create_part': {
-                    'items': [
+                    'patterns': [
                         {
-                            'pattern': {
-                                'node': {
-                                    'entity': '$a'},
-                                'chain': [
-                                    {
-                                        'relation': {
-                                            'direction': 'outgoing',
-                                            'types': ['back']},
-                                        'node': {
-                                            'entity': '$m'
-                                        }
+                            'node': {
+                                'entity': '$a'},
+                            'chain': [
+                                {
+                                    'relation': {
+                                        'direction': 'outgoing',
+                                        'types': ['back']},
+                                    'node': {
+                                        'entity': '$m'
                                     }
-                                ]
-                            }
+                                }
+                            ]
                         }
                     ]
                 },
@@ -1174,52 +1168,48 @@ class TestParsing(TestCase):
                     'salience': 5
                 },
                 'match_part': {
-                    'items': [
+                    'patterns': [
                         {
-                            'pattern': {
-                                'node': {
-                                    'entity': '$m',
-                                    'labels': ['main']
-                                },
-                                'chain': [
-                                    {
-                                        'relation': {
-                                            'direction': 'outgoing',
-                                            'entity': '$l',
-                                            'types': ['links']
-                                        },
-                                        'node': {
-                                            'entity': '$a',
-                                            'properties': {
-                                                'key': 'value',
-                                                'num': -0.123
-                                            }
+                            'node': {
+                                'entity': '$m',
+                                'labels': ['main']
+                            },
+                            'chain': [
+                                {
+                                    'relation': {
+                                        'direction': 'outgoing',
+                                        'entity': '$l',
+                                        'types': ['links']
+                                    },
+                                    'node': {
+                                        'entity': '$a',
+                                        'properties': {
+                                            'key': 'value',
+                                            'num': -0.123
                                         }
                                     }
-                                ]
-                            }
+                                }
+                            ]
                         }
                     ]
                 },
                 'create_part': {
-                    'items': [
+                    'patterns': [
                         {
-                            'pattern': {
-                                'node': {
-                                    'entity': '$a'
-                                },
-                                'chain': [
-                                    {
-                                        'relation': {
-                                            'direction': 'outgoing',
-                                            'types': ['back']
-                                        },
-                                        'node': {
-                                            'entity': '$m'
-                                        }
+                            'node': {
+                                'entity': '$a'
+                            },
+                            'chain': [
+                                {
+                                    'relation': {
+                                        'direction': 'outgoing',
+                                        'types': ['back']
+                                    },
+                                    'node': {
+                                        'entity': '$m'
                                     }
-                                ]
-                            }
+                                }
+                            ]
                         }
                     ]
                 },

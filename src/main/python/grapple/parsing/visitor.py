@@ -28,46 +28,55 @@ class KnowledgeVisitor(PTNodeVisitor):
 
         return {'data': content}
 
-    def visit_clause_updating(self, node: Node, children: List) -> object:
+    def visit_clause_update(self, node: Node, children: List) -> object:
         content = {}
         for child in children:
             content.update(child['data'])
 
         return {'data': content}
 
-    def visit_updating_part(self, node: Node, children: List) -> object:
+    def visit_match_parts(self, node: Node, children: List) -> object:
+        return {'data': {'match_part': [child['data']['match_part'] for child in children]}}
+
+    def visit_update_parts(self, node: Node, children: List) -> object:
+        return {'data': {'update_part': [child['data']['update_part'] for child in children]}}
+
+    def visit_update_part(self, node: Node, children: List) -> object:
         return {'data': children[0]['data']}
 
     def visit_rule_part(self, node: Node, children: List) -> object:
-        content = {}
+        content = {'salience': 0}
         for child in children:
             content.update(child['data'])
 
         return {'data': {'rule_part': content}}
 
     def visit_create_part(self, node: Node, children: List) -> object:
-        return {'data': {'create_part': {'items': [child['data'] for child in children[1:]]}}}
+        content = {'patterns': [child['data']['pattern'] for child in children[1:]]}
+
+        return {'data': {'create_part': content}}
 
     def visit_delete_part(self, node: Node, children: List) -> object:
+        content = {'detach': False}
         if children[0] == {'data': 'DELETE'}:
-            content = {'items': [child['data'] for child in children[1:]]}
+            content['entities'] = [child['data']['entity'] for child in children[1:]]
         else:
-            content = children[0]['data']
-            content['items'] = [child['data'] for child in children[2:]]
+            content.update(children[0]['data'])
+            content['entities'] = [child['data']['entity'] for child in children[2:]]
 
         return {'data': {'delete_part': content}}
 
     def visit_match_part(self, node: Node, children: List) -> object:
         if children[0] == {'data': 'MATCH'}:
-            content = {'items': [child['data'] for child in children[1:]]}
+            content = {'patterns': [child['data']['pattern'] for child in children[1:]]}
         else:
             content = children[0]['data']
-            content['items'] = [child['data'] for child in children[2:]]
+            content['patterns'] = [child['data']['pattern'] for child in children[2:]]
 
         return {'data': {'match_part': content}}
 
     def visit_remove_part(self, node: Node, children: List) -> object:
-        return {'data': {'remove_part': {'items': [child['data'] for child in children[1:]]}}}
+        return {'data': {'remove_part': {'patterns': [child['data'] for child in children[1:]]}}}
 
     def visit_set_part(self, node: Node, children: List) -> object:
         return {'data': {'set_part': {'items': [child['data'] for child in children[1:]]}}}

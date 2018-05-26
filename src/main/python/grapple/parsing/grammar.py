@@ -28,14 +28,22 @@ def clause():
 
 
 def clause_reading():
-    return rule_part, ZeroOrMore(match_part), return_part
+    return rule_part, Optional(match_parts), return_part
 
 
 def clause_updating():
-    return rule_part, ZeroOrMore(match_part), OneOrMore(updating_part), Optional(return_part)
+    return rule_part, Optional(match_parts), update_parts, Optional(return_part)
 
 
-def updating_part():
+def match_parts():
+    return OneOrMore(match_part)
+
+
+def update_parts():
+    return OneOrMore(update_part)
+
+
+def update_part():
     return [create_part, remove_part, set_part, delete_part]
 
 
