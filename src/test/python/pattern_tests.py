@@ -8,7 +8,7 @@ from grapple.parsing.grammar import chain, details, dir_back, dir_both, dir_next
 from grapple.parsing.visitor import KnowledgeVisitor
 
 
-class TestParsing(TestCase):
+class TestPatternParsing(TestCase):
     def test_pattern_0(self):
         assert_that(self.process) \
             .raises(NoMatch) \

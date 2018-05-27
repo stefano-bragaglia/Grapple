@@ -3,11 +3,11 @@ from unittest import TestCase
 from arpeggio import NoMatch, ParserPython, visit_parse_tree
 from assertpy import assert_that
 
-from grapple.parsing.grammar import clause, clause_reading, clause_updating, clauses, cypher
+from grapple.parsing.grammar import clause, clause_read, clause_update, clauses, cypher
 from grapple.parsing.visitor import KnowledgeVisitor
 
 
-class TestParsing(TestCase):
+class TestClauseParsing(TestCase):
     def test_cypher_0(self):
         assert_that(self.process) \
             .raises(NoMatch) \
@@ -31,13 +31,13 @@ class TestParsing(TestCase):
             'data': [
                 {
                     'rule_part': {
-                        'description': 'Description',
-                        'salience': 5
+                        'salience': 5,
+                        'description': 'Description'
                     },
-                    'match_part': {
-                        'items': [
-                            {
-                                'pattern': {
+                    'match_part': [
+                        {
+                            'patterns': [
+                                {
                                     'node': {
                                         'entity': '$m',
                                         'labels': ['main']
@@ -59,9 +59,9 @@ class TestParsing(TestCase):
                                         }
                                     ]
                                 }
-                            }
-                        ]
-                    },
+                            ]
+                        }
+                    ],
                     'return_part': {
                         'items': [
                             {
@@ -81,8 +81,7 @@ class TestParsing(TestCase):
                     }
                 }
             ]
-        }
-        )
+        })
 
     def test_cypher_3(self):
         assert_that(self.process(cypher, 'RULE "Description" SALIENCE 5 '
@@ -106,13 +105,13 @@ class TestParsing(TestCase):
             'data': [
                 {
                     'rule_part': {
-                        'description': 'Description',
-                        'salience': 5
+                        'salience': 5,
+                        'description': 'Description'
                     },
-                    'match_part': {
-                        'items': [
-                            {
-                                'pattern': {
+                    'match_part': [
+                        {
+                            'patterns': [
+                                {
                                     'node': {
                                         'entity': '$m',
                                         'labels': ['main']
@@ -134,9 +133,9 @@ class TestParsing(TestCase):
                                         }
                                     ]
                                 }
-                            }
-                        ]
-                    },
+                            ]
+                        }
+                    ],
                     'return_part': {
                         'items': [
                             {
@@ -157,13 +156,13 @@ class TestParsing(TestCase):
                 },
                 {
                     'rule_part': {
-                        'description': 'Description',
-                        'salience': 5
+                        'salience': 5,
+                        'description': 'Description'
                     },
-                    'match_part': {
-                        'items': [
-                            {
-                                'pattern': {
+                    'match_part': [
+                        {
+                            'patterns': [
+                                {
                                     'node': {
                                         'entity': '$m',
                                         'labels': ['main']
@@ -185,57 +184,66 @@ class TestParsing(TestCase):
                                         }
                                     ]
                                 }
-                            }
-                        ]
-                    },
-                    'create_part': {
-                        'items': [
-                            {
-                                'pattern': {
-                                    'node': {
-                                        'entity': '$a'
-                                    },
-                                    'chain': [
-                                        {
-                                            'relation': {
-                                                'direction': 'outgoing',
-                                                'types': ['back']
-                                            },
-                                            'node': {
-                                                'entity': '$m'
+                            ]
+                        }
+                    ],
+                    'update_part': [
+                        {
+                            'create_part': {
+                                'patterns': [
+                                    {
+                                        'node': {
+                                            'entity': '$a'
+                                        },
+                                        'chain': [
+                                            {
+                                                'relation': {
+                                                    'direction': 'outgoing',
+                                                    'types': ['back']
+                                                },
+                                                'node': {
+                                                    'entity': '$m'
+                                                }
                                             }
+                                        ]
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            'remove_part': {
+                                'items': [
+                                    {
+                                        'entity': '$a',
+                                        'field': 'num'
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            'set_part': {
+                                'items': [
+                                    {
+                                        'operator': '=',
+                                        'entity': '$a',
+                                        'properties': {
+                                            'key': 5
                                         }
-                                    ]
-                                }
+                                    }
+                                ]
                             }
-                        ]
-                    },
-                    'remove_part': {
-                        'items': [
-                            {
-                                'entity': '$a',
-                                'field': 'num'
+                        },
+                        {
+                            'delete_part': {
+                                'detach': False,
+                                'items': [
+                                    {
+                                        'entity': '$l'
+                                    }
+                                ]
                             }
-                        ]
-                    },
-                    'set_part': {
-                        'items': [
-                            {
-                                'function': 'replace',
-                                'entity': '$a',
-                                'properties': {
-                                    'key': 5
-                                }
-                            }
-                        ]
-                    },
-                    'delete_part': {
-                        'items': [
-                            {
-                                'entity': '$l'
-                            }
-                        ]
-                    },
+                        }
+                    ],
                     'return_part': {
                         'items': [
                             {
@@ -279,13 +287,13 @@ class TestParsing(TestCase):
             'data': [
                 {
                     'rule_part': {
-                        'description': 'Description',
-                        'salience': 5
+                        'salience': 5,
+                        'description': 'Description'
                     },
-                    'match_part': {
-                        'items': [
-                            {
-                                'pattern': {
+                    'match_part': [
+                        {
+                            'patterns': [
+                                {
                                     'node': {
                                         'entity': '$m',
                                         'labels': ['main']
@@ -307,9 +315,9 @@ class TestParsing(TestCase):
                                         }
                                     ]
                                 }
-                            }
-                        ]
-                    },
+                            ]
+                        }
+                    ],
                     'return_part': {
                         'items': [
                             {
@@ -330,13 +338,13 @@ class TestParsing(TestCase):
                 },
                 {
                     'rule_part': {
-                        'description': 'Description',
-                        'salience': 5
+                        'salience': 5,
+                        'description': 'Description'
                     },
-                    'match_part': {
-                        'items': [
-                            {
-                                'pattern': {
+                    'match_part': [
+                        {
+                            'patterns': [
+                                {
                                     'node': {
                                         'entity': '$m',
                                         'labels': ['main']
@@ -358,57 +366,66 @@ class TestParsing(TestCase):
                                         }
                                     ]
                                 }
-                            }
-                        ]
-                    },
-                    'create_part': {
-                        'items': [
-                            {
-                                'pattern': {
-                                    'node': {
-                                        'entity': '$a'
-                                    },
-                                    'chain': [
-                                        {
-                                            'relation': {
-                                                'direction': 'outgoing',
-                                                'types': ['back']
-                                            },
-                                            'node': {
-                                                'entity': '$m'
+                            ]
+                        }
+                    ],
+                    'update_part': [
+                        {
+                            'create_part': {
+                                'patterns': [
+                                    {
+                                        'node': {
+                                            'entity': '$a'
+                                        },
+                                        'chain': [
+                                            {
+                                                'relation': {
+                                                    'direction': 'outgoing',
+                                                    'types': ['back']
+                                                },
+                                                'node': {
+                                                    'entity': '$m'
+                                                }
                                             }
+                                        ]
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            'remove_part': {
+                                'items': [
+                                    {
+                                        'entity': '$a',
+                                        'field': 'num'
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            'set_part': {
+                                'items': [
+                                    {
+                                        'operator': '=',
+                                        'entity': '$a',
+                                        'properties': {
+                                            'key': 5
                                         }
-                                    ]
-                                }
+                                    }
+                                ]
                             }
-                        ]
-                    },
-                    'remove_part': {
-                        'items': [
-                            {
-                                'entity': '$a',
-                                'field': 'num'
+                        },
+                        {
+                            'delete_part': {
+                                'detach': False,
+                                'items': [
+                                    {
+                                        'entity': '$l'
+                                    }
+                                ]
                             }
-                        ]
-                    },
-                    'set_part': {
-                        'items': [
-                            {
-                                'function': 'replace',
-                                'entity': '$a',
-                                'properties': {
-                                    'key': 5
-                                }
-                            }
-                        ]
-                    },
-                    'delete_part': {
-                        'items': [
-                            {
-                                'entity': '$l'
-                            }
-                        ]
-                    },
+                        }
+                    ],
                     'return_part': {
                         'items': [
                             {
@@ -448,13 +465,13 @@ class TestParsing(TestCase):
             'data': [
                 {
                     'rule_part': {
-                        'description': 'Description',
-                        'salience': 5
+                        'salience': 5,
+                        'description': 'Description'
                     },
-                    'match_part': {
-                        'items': [
-                            {
-                                'pattern': {
+                    'match_part': [
+                        {
+                            'patterns': [
+                                {
                                     'node': {
                                         'entity': '$m',
                                         'labels': ['main']
@@ -476,9 +493,9 @@ class TestParsing(TestCase):
                                         }
                                     ]
                                 }
-                            }
-                        ]
-                    },
+                            ]
+                        }
+                    ],
                     'return_part': {
                         'items': [
                             {
@@ -497,8 +514,8 @@ class TestParsing(TestCase):
                         'limit': 3
                     }
                 }
-            ]
-        })
+            ]}
+        )
 
     def test_clauses_2(self):
         assert_that(self.process(clauses, 'RULE "Description" SALIENCE 5 '
@@ -522,13 +539,13 @@ class TestParsing(TestCase):
             'data': [
                 {
                     'rule_part': {
-                        'description': 'Description',
-                        'salience': 5
+                        'salience': 5,
+                        'description': 'Description'
                     },
-                    'match_part': {
-                        'items': [
-                            {
-                                'pattern': {
+                    'match_part': [
+                        {
+                            'patterns': [
+                                {
                                     'node': {
                                         'entity': '$m',
                                         'labels': ['main']
@@ -550,9 +567,9 @@ class TestParsing(TestCase):
                                         }
                                     ]
                                 }
-                            }
-                        ]
-                    },
+                            ]
+                        }
+                    ],
                     'return_part': {
                         'items': [
                             {
@@ -573,13 +590,13 @@ class TestParsing(TestCase):
                 },
                 {
                     'rule_part': {
-                        'description': 'Description',
-                        'salience': 5
+                        'salience': 5,
+                        'description': 'Description'
                     },
-                    'match_part': {
-                        'items': [
-                            {
-                                'pattern': {
+                    'match_part': [
+                        {
+                            'patterns': [
+                                {
                                     'node': {
                                         'entity': '$m',
                                         'labels': ['main']
@@ -601,57 +618,66 @@ class TestParsing(TestCase):
                                         }
                                     ]
                                 }
-                            }
-                        ]
-                    },
-                    'create_part': {
-                        'items': [
-                            {
-                                'pattern': {
-                                    'node': {
-                                        'entity': '$a'
-                                    },
-                                    'chain': [
-                                        {
-                                            'relation': {
-                                                'direction': 'outgoing',
-                                                'types': ['back']
-                                            },
-                                            'node': {
-                                                'entity': '$m'
+                            ]
+                        }
+                    ],
+                    'update_part': [
+                        {
+                            'create_part': {
+                                'patterns': [
+                                    {
+                                        'node': {
+                                            'entity': '$a'
+                                        },
+                                        'chain': [
+                                            {
+                                                'relation': {
+                                                    'direction': 'outgoing',
+                                                    'types': ['back']
+                                                },
+                                                'node': {
+                                                    'entity': '$m'
+                                                }
                                             }
+                                        ]
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            'remove_part': {
+                                'items': [
+                                    {
+                                        'entity': '$a',
+                                        'field': 'num'
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            'set_part': {
+                                'items': [
+                                    {
+                                        'operator': '=',
+                                        'entity': '$a',
+                                        'properties': {
+                                            'key': 5
                                         }
-                                    ]
-                                }
+                                    }
+                                ]
                             }
-                        ]
-                    },
-                    'remove_part': {
-                        'items': [
-                            {
-                                'entity': '$a',
-                                'field': 'num'
+                        },
+                        {
+                            'delete_part': {
+                                'detach': False,
+                                'items': [
+                                    {
+                                        'entity': '$l'
+                                    }
+                                ]
                             }
-                        ]
-                    },
-                    'set_part': {
-                        'items': [
-                            {
-                                'function': 'replace',
-                                'entity': '$a',
-                                'properties': {
-                                    'key': 5
-                                }
-                            }
-                        ]
-                    },
-                    'delete_part': {
-                        'items': [
-                            {
-                                'entity': '$l'
-                            }
-                        ]
-                    },
+                        }
+                    ],
                     'return_part': {
                         'items': [
                             {
@@ -701,13 +727,13 @@ class TestParsing(TestCase):
             'data': [
                 {
                     'rule_part': {
-                        'description': 'Description',
-                        'salience': 5
+                        'salience': 5,
+                        'description': 'Description'
                     },
-                    'match_part': {
-                        'items': [
-                            {
-                                'pattern': {
+                    'match_part': [
+                        {
+                            'patterns': [
+                                {
                                     'node': {
                                         'entity': '$m',
                                         'labels': ['main']
@@ -729,9 +755,9 @@ class TestParsing(TestCase):
                                         }
                                     ]
                                 }
-                            }
-                        ]
-                    },
+                            ]
+                        }
+                    ],
                     'return_part': {
                         'items': [
                             {
@@ -752,13 +778,13 @@ class TestParsing(TestCase):
                 },
                 {
                     'rule_part': {
-                        'description': 'Description',
-                        'salience': 5
+                        'salience': 5,
+                        'description': 'Description'
                     },
-                    'match_part': {
-                        'items': [
-                            {
-                                'pattern': {
+                    'match_part': [
+                        {
+                            'patterns': [
+                                {
                                     'node': {
                                         'entity': '$m',
                                         'labels': ['main']
@@ -780,9 +806,9 @@ class TestParsing(TestCase):
                                         }
                                     ]
                                 }
-                            }
-                        ]
-                    },
+                            ]
+                        }
+                    ],
                     'return_part': {
                         'items': [
                             {
@@ -803,13 +829,13 @@ class TestParsing(TestCase):
                 },
                 {
                     'rule_part': {
-                        'description': 'Description',
-                        'salience': 5
+                        'salience': 5,
+                        'description': 'Description'
                     },
-                    'match_part': {
-                        'items': [
-                            {
-                                'pattern': {
+                    'match_part': [
+                        {
+                            'patterns': [
+                                {
                                     'node': {
                                         'entity': '$m',
                                         'labels': ['main']
@@ -831,57 +857,66 @@ class TestParsing(TestCase):
                                         }
                                     ]
                                 }
-                            }
-                        ]
-                    },
-                    'create_part': {
-                        'items': [
-                            {
-                                'pattern': {
-                                    'node': {
-                                        'entity': '$a'
-                                    },
-                                    'chain': [
-                                        {
-                                            'relation': {
-                                                'direction': 'outgoing',
-                                                'types': ['back']
-                                            },
-                                            'node': {
-                                                'entity': '$m'
+                            ]
+                        }
+                    ],
+                    'update_part': [
+                        {
+                            'create_part': {
+                                'patterns': [
+                                    {
+                                        'node': {
+                                            'entity': '$a'
+                                        },
+                                        'chain': [
+                                            {
+                                                'relation': {
+                                                    'direction': 'outgoing',
+                                                    'types': ['back']
+                                                },
+                                                'node': {
+                                                    'entity': '$m'
+                                                }
                                             }
+                                        ]
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            'remove_part': {
+                                'items': [
+                                    {
+                                        'entity': '$a',
+                                        'field': 'num'
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            'set_part': {
+                                'items': [
+                                    {
+                                        'operator': '=',
+                                        'entity': '$a',
+                                        'properties': {
+                                            'key': 5
                                         }
-                                    ]
-                                }
+                                    }
+                                ]
                             }
-                        ]
-                    },
-                    'remove_part': {
-                        'items': [
-                            {
-                                'entity': '$a',
-                                'field': 'num'
+                        },
+                        {
+                            'delete_part': {
+                                'detach': False,
+                                'items': [
+                                    {
+                                        'entity': '$l'
+                                    }
+                                ]
                             }
-                        ]
-                    },
-                    'set_part': {
-                        'items': [
-                            {
-                                'function': 'replace',
-                                'entity': '$a',
-                                'properties': {
-                                    'key': 5
-                                }
-                            }
-                        ]
-                    },
-                    'delete_part': {
-                        'items': [
-                            {
-                                'entity': '$l'
-                            }
-                        ]
-                    },
+                        }
+                    ],
                     'return_part': {
                         'items': [
                             {
@@ -921,34 +956,36 @@ class TestParsing(TestCase):
             'data': {
                 'rule_part': {
                     'description': 'Description',
-                    'salience': 5
+                    'salience': 5,
                 },
-                'match_part': {
-                    'patterns': [
-                        {
-                            'node': {
-                                'entity': '$m',
-                                'labels': ['main']
-                            },
-                            'chain': [
-                                {
-                                    'relation': {
-                                        'direction': 'outgoing',
-                                        'entity': '$l',
-                                        'types': ['links']
-                                    },
-                                    'node': {
-                                        'entity': '$a',
-                                        'properties': {
-                                            'key': 'value',
-                                            'num': -0.123
+                'match_part': [
+                    {
+                        'patterns': [
+                            {
+                                'node': {
+                                    'entity': '$m',
+                                    'labels': ['main']
+                                },
+                                'chain': [
+                                    {
+                                        'relation': {
+                                            'direction': 'outgoing',
+                                            'entity': '$l',
+                                            'types': ['links']
+                                        },
+                                        'node': {
+                                            'entity': '$a',
+                                            'properties': {
+                                                'key': 'value',
+                                                'num': -0.123
+                                            }
                                         }
                                     }
-                                }
-                            ]
-                        }
-                    ]
-                },
+                                ]
+                            }
+                        ]
+                    }
+                ],
                 'return_part': {
                     'items': [
                         {
@@ -984,77 +1021,94 @@ class TestParsing(TestCase):
             .contains_entry({
             'data': {
                 'rule_part': {
-                    'description': 'Description',
-                    'salience': 5
+                    'salience': 5,
+                    'description': 'Description'
                 },
-                'match_part': {
-                    'patterns': [
-                        {
-                            'node': {
-                                'entity': '$m',
-                                'labels': ['main']},
-                            'chain': [
-                                {
-                                    'relation': {
-                                        'direction': 'outgoing',
-                                        'entity': '$l',
-                                        'types': ['links']},
-                                    'node': {
-                                        'entity': '$a',
-                                        'properties': {
-                                            'key': 'value',
-                                            'num': -0.123
+                'match_part': [
+                    {
+                        'patterns': [
+                            {
+                                'node': {
+                                    'entity': '$m',
+                                    'labels': ['main']
+                                },
+                                'chain': [
+                                    {
+                                        'relation': {
+                                            'direction': 'outgoing',
+                                            'entity': '$l',
+                                            'types': ['links']
+                                        },
+                                        'node': {
+                                            'entity': '$a',
+                                            'properties': {
+                                                'key': 'value',
+                                                'num': -0.123
+                                            }
                                         }
                                     }
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                'update_part': [
+                    {
+                        'create_part': {
+                            'patterns': [
+                                {
+                                    'node': {
+                                        'entity': '$a'
+                                    },
+                                    'chain': [
+                                        {
+                                            'relation': {
+                                                'direction': 'outgoing',
+                                                'types': ['back']
+                                            },
+                                            'node': {
+                                                'entity': '$m'
+                                            }
+                                        }
+                                    ]
                                 }
                             ]
                         }
-                    ]
-                },
-                'create_part': {
-                    'patterns': [
-                        {
-                            'node': {
-                                'entity': '$a'},
-                            'chain': [
+                    },
+                    {
+                        'remove_part': {
+                            'items': [
                                 {
-                                    'relation': {
-                                        'direction': 'outgoing',
-                                        'types': ['back']},
-                                    'node': {
-                                        'entity': '$m'
+                                    'entity': '$a',
+                                    'field': 'num'
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        'set_part': {
+                            'items': [
+                                {
+                                    'operator': '=',
+                                    'entity': '$a',
+                                    'properties': {
+                                        'key': 5
                                     }
                                 }
                             ]
                         }
-                    ]
-                },
-                'remove_part': {
-                    'items': [
-                        {
-                            'entity': '$a',
-                            'field': 'num'
+                    },
+                    {
+                        'delete_part': {
+                            'detach': False,
+                            'items': [
+                                {
+                                    'entity': '$l'
+                                }
+                            ]
                         }
-                    ]
-                },
-                'set_part': {
-                    'items': [
-                        {
-                            'function': 'replace',
-                            'entity': '$a',
-                            'properties': {
-                                'key': 5
-                            }
-                        }
-                    ]
-                },
-                'delete_part': {
-                    'items': [
-                        {
-                            'entity': '$l'
-                        }
-                    ]
-                },
+                    }
+                ],
                 'return_part': {
                     'items': [
                         {
@@ -1078,27 +1132,27 @@ class TestParsing(TestCase):
     def test_clause_reading_0(self):
         assert_that(self.process) \
             .raises(NoMatch) \
-            .when_called_with(clause_reading, '~other~') \
+            .when_called_with(clause_read, '~other~') \
             .starts_with("Expected key_rule at position")
 
     def test_clause_reading_99(self):
-        assert_that(self.process(clause_reading, 'RULE "Description" SALIENCE 5 '
-                                                 'MATCH ($m:main)-[$l:links]->($a {key: "value", num: -0.123}) '
-                                                 'RETURN $m.text AS name '
-                                                 'ORDER BY name DESC '
-                                                 'SKIP 5'
-                                                 'LIMIT 3')) \
+        assert_that(self.process(clause_read, 'RULE "Description" SALIENCE 5 '
+                                              'MATCH ($m:main)-[$l:links]->($a {key: "value", num: -0.123}) '
+                                              'RETURN $m.text AS name '
+                                              'ORDER BY name DESC '
+                                              'SKIP 5'
+                                              'LIMIT 3')) \
             .contains_only('data') \
             .contains_entry({
             'data': {
                 'rule_part': {
-                    'description': 'Description',
-                    'salience': 5
+                    'salience': 5,
+                    'description': 'Description'
                 },
-                'match_part': {
-                    'items': [
-                        {
-                            'pattern': {
+                'match_part': [
+                    {
+                        'patterns': [
+                            {
                                 'node': {
                                     'entity': '$m',
                                     'labels': ['main']
@@ -1120,9 +1174,9 @@ class TestParsing(TestCase):
                                     }
                                 ]
                             }
-                        }
-                    ]
-                },
+                        ]
+                    }
+                ],
                 'return_part': {
                     'items': [
                         {
@@ -1146,99 +1200,112 @@ class TestParsing(TestCase):
     def test_clause_updating_0(self):
         assert_that(self.process) \
             .raises(NoMatch) \
-            .when_called_with(clause_updating, '~other~') \
+            .when_called_with(clause_update, '~other~') \
             .starts_with("Expected key_rule at position")
 
     def test_clause_updating_99(self):
-        assert_that(self.process(clause_updating, 'RULE "Description" SALIENCE 5 '
-                                                  'MATCH ($m:main)-[$l:links]->($a {key: "value", num: -0.123}) '
-                                                  'CREATE ($a)-[:back]->($m) '
-                                                  'REMOVE $a.num '
-                                                  'SET $a += {key: 5} '
-                                                  'DELETE $l '
-                                                  'RETURN $m.text AS name '
-                                                  'ORDER BY name DESC '
-                                                  'SKIP 5'
-                                                  'LIMIT 3')) \
+        assert_that(self.process(clause_update, 'RULE "Description" SALIENCE 5 '
+                                                'MATCH ($m:main)-[$l:links]->($a {key: "value", num: -0.123}) '
+                                                'CREATE ($a)-[:back]->($m) '
+                                                'REMOVE $a.num '
+                                                'SET $a += {key: 5} '
+                                                'DELETE $l '
+                                                'RETURN $m.text AS name '
+                                                'ORDER BY name DESC '
+                                                'SKIP 5'
+                                                'LIMIT 3')) \
             .contains_only('data') \
             .contains_entry({
             'data': {
                 'rule_part': {
-                    'description': 'Description',
-                    'salience': 5
+                    'salience': 5,
+                    'description': 'Description'
                 },
-                'match_part': {
-                    'patterns': [
-                        {
-                            'node': {
-                                'entity': '$m',
-                                'labels': ['main']
-                            },
-                            'chain': [
-                                {
-                                    'relation': {
-                                        'direction': 'outgoing',
-                                        'entity': '$l',
-                                        'types': ['links']
-                                    },
-                                    'node': {
-                                        'entity': '$a',
-                                        'properties': {
-                                            'key': 'value',
-                                            'num': -0.123
+                'match_part': [
+                    {
+                        'patterns': [
+                            {
+                                'node': {
+                                    'entity': '$m',
+                                    'labels': ['main']
+                                },
+                                'chain': [
+                                    {
+                                        'relation': {
+                                            'direction': 'outgoing',
+                                            'entity': '$l',
+                                            'types': ['links']
+                                        },
+                                        'node': {
+                                            'entity': '$a',
+                                            'properties': {
+                                                'key': 'value',
+                                                'num': -0.123
+                                            }
                                         }
                                     }
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                'update_part': [
+                    {
+                        'create_part': {
+                            'patterns': [
+                                {
+                                    'node': {
+                                        'entity': '$a'
+                                    },
+                                    'chain': [
+                                        {
+                                            'relation': {
+                                                'direction': 'outgoing',
+                                                'types': ['back']
+                                            },
+                                            'node': {
+                                                'entity': '$m'
+                                            }
+                                        }
+                                    ]
                                 }
                             ]
                         }
-                    ]
-                },
-                'create_part': {
-                    'patterns': [
-                        {
-                            'node': {
-                                'entity': '$a'
-                            },
-                            'chain': [
+                    },
+                    {
+                        'remove_part': {
+                            'items': [
                                 {
-                                    'relation': {
-                                        'direction': 'outgoing',
-                                        'types': ['back']
-                                    },
-                                    'node': {
-                                        'entity': '$m'
+                                    'entity': '$a',
+                                    'field': 'num'
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        'set_part': {
+                            'items': [
+                                {
+                                    'operator': '=',
+                                    'entity': '$a',
+                                    'properties': {
+                                        'key': 5
                                     }
                                 }
                             ]
                         }
-                    ]
-                },
-                'remove_part': {
-                    'items': [
-                        {
-                            'entity': '$a',
-                            'field': 'num'
+                    },
+                    {
+                        'delete_part': {
+                            'detach': False,
+                            'items': [
+                                {
+                                    'entity': '$l'
+                                }
+                            ]
                         }
-                    ]
-                },
-                'set_part': {
-                    'items': [
-                        {
-                            'function': 'replace',
-                            'entity': '$a',
-                            'properties': {
-                                'key': 5
-                            }
-                        }
-                    ]
-                },
-                'delete_part': {
-                    'items': [
-                        {
-                            'entity': '$l'
-                        }
-                    ]
-                },
+                    }
+                ],
                 'return_part': {
                     'items': [
                         {

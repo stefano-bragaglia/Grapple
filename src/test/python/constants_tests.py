@@ -9,7 +9,7 @@ from grapple.parsing.grammar import func_coalesce, func_head, func_id, func_keys
 from grapple.parsing.visitor import KnowledgeVisitor
 
 
-class self(TestCase):
+class TestConstantParsing(TestCase):
     def test_identifier_0(self):
         assert_that(self.process) \
             .raises(NoMatch) \

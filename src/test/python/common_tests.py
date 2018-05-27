@@ -9,7 +9,7 @@ from grapple.parsing.grammar import asc, desc, description, entity, field, flag,
 from grapple.parsing.visitor import KnowledgeVisitor
 
 
-class TestParsing(TestCase):
+class TestCommonParsing(TestCase):
     def test_asc_0(self):
         assert_that(self.process) \
             .raises(NoMatch) \

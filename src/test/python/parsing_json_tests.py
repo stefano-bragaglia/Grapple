@@ -8,9 +8,9 @@ from grapple.parsing.grammar import json_array, json_elements, json_false, json_
 from grapple.parsing.visitor import KnowledgeVisitor
 
 
-class TestGrammarVisitor(TestCase):
+class TestJsonParsing(TestCase):
     def test_json_object_0(self):
-        assert_that(TestGrammarVisitor.process) \
+        assert_that(self.process) \
             .raises(NoMatch) \
             .when_called_with(json_object, '~other~') \
             .starts_with("Expected '{' at position")
@@ -28,13 +28,13 @@ class TestGrammarVisitor(TestCase):
                                       'k5': True, 'k6': False, 'k7': None, 'k8': '$v'}})
 
     def test_json_members_0(self):
-        assert_that(TestGrammarVisitor.process) \
+        assert_that(self.process) \
             .raises(NoMatch) \
             .when_called_with(json_members, '~other~') \
             .starts_with("Expected ''' or '\"' or identifier at position")
 
     def test_json_members_1(self):
-        assert_that(TestGrammarVisitor.process) \
+        assert_that(self.process) \
             .raises(NoMatch) \
             .when_called_with(json_members, '{}') \
             .starts_with("Expected ''' or '\"' or identifier at position")
@@ -47,19 +47,19 @@ class TestGrammarVisitor(TestCase):
                                       'k5': True, 'k6': False, 'k7': None, 'k8': '$v'}})
 
     def test_json_member_0(self):
-        assert_that(TestGrammarVisitor.process) \
+        assert_that(self.process) \
             .raises(NoMatch) \
             .when_called_with(json_member, '~other~') \
             .starts_with("Expected ''' or '\"' or identifier at position")
 
     def test_json_member_1(self):
-        assert_that(TestGrammarVisitor.process) \
+        assert_that(self.process) \
             .raises(NoMatch) \
             .when_called_with(json_member, '5: null') \
             .starts_with("Expected ''' or '\"' or identifier at position")
 
     def test_json_member_2(self):
-        assert_that(TestGrammarVisitor.process) \
+        assert_that(self.process) \
             .raises(NoMatch) \
             .when_called_with(json_member, '"key" $var') \
             .starts_with("Expected ':' at position")
@@ -215,33 +215,33 @@ class TestGrammarVisitor(TestCase):
             .contains_entry({'data': {'key': '$v'}})
 
     def test_json_value_00(self):
-        assert_that(TestGrammarVisitor.process) \
+        assert_that(self.process) \
             .raises(NoMatch) \
             .when_called_with(json_value, '~other~') \
             .starts_with("Expected ''' or '\"' or json_real or json_integer or '{' or '[' or json_true or json_false "
                          "or json_null or variable at position")
 
     def test_json_value_01(self):
-        assert_that(TestGrammarVisitor.process) \
+        assert_that(self.process) \
             .raises(NoMatch) \
             .when_called_with(json_value, '"string') \
             .starts_with("Expected '\"' at position")
 
     def test_json_value_02(self):
-        assert_that(TestGrammarVisitor.process) \
+        assert_that(self.process) \
             .raises(NoMatch) \
             .when_called_with(json_value, "'string") \
             .starts_with("Expected ''' at position")
 
     def test_json_value_03(self):
-        assert_that(TestGrammarVisitor.process) \
+        assert_that(self.process) \
             .raises(NoMatch) \
             .when_called_with(json_value, "string'") \
             .starts_with("Expected ''' or '\"' or json_real or json_integer or '{' or '[' or json_true or json_false "
                          "or json_null or variable at position")
 
     def test_json_value_04(self):
-        assert_that(TestGrammarVisitor.process) \
+        assert_that(self.process) \
             .raises(NoMatch) \
             .when_called_with(json_value, 'string"') \
             .starts_with("Expected ''' or '\"' or json_real or json_integer or '{' or '[' or json_true or json_false "
@@ -415,13 +415,13 @@ class TestGrammarVisitor(TestCase):
             .contains_entry({'data': None})
 
     def test_json_key_1(self):
-        assert_that(TestGrammarVisitor.process) \
+        assert_that(self.process) \
             .raises(NoMatch) \
             .when_called_with(json_key, '"key') \
             .starts_with("Expected '\"' at position")
 
     def test_json_key_2(self):
-        assert_that(TestGrammarVisitor.process) \
+        assert_that(self.process) \
             .raises(NoMatch) \
             .when_called_with(json_key, "'key") \
             .starts_with("Expected ''' at position")
@@ -432,7 +432,7 @@ class TestGrammarVisitor(TestCase):
             .contains_entry({'data': ''})
 
     def test_json_key_0(self):
-        assert_that(TestGrammarVisitor.process) \
+        assert_that(self.process) \
             .raises(NoMatch) \
             .when_called_with(json_key, '~other~') \
             .starts_with("Expected ''' or '\"' or identifier at position")
@@ -468,31 +468,31 @@ class TestGrammarVisitor(TestCase):
             .contains_entry({'data': 'key'})
 
     def test_json_string_0(self):
-        assert_that(TestGrammarVisitor.process) \
+        assert_that(self.process) \
             .raises(NoMatch) \
             .when_called_with(json_string, '~other~') \
             .starts_with("Expected ''' or '\"' at position")
 
     def test_json_string_1(self):
-        assert_that(TestGrammarVisitor.process) \
+        assert_that(self.process) \
             .raises(NoMatch) \
             .when_called_with(json_string, '"string') \
             .starts_with("Expected '\"' at position")
 
     def test_json_string_2(self):
-        assert_that(TestGrammarVisitor.process) \
+        assert_that(self.process) \
             .raises(NoMatch) \
             .when_called_with(json_string, "'string") \
             .starts_with("Expected ''' at position")
 
     def test_json_string_3(self):
-        assert_that(TestGrammarVisitor.process) \
+        assert_that(self.process) \
             .raises(NoMatch) \
             .when_called_with(json_string, "string'") \
             .starts_with("Expected ''' or '\"' at position")
 
     def test_json_string_4(self):
-        assert_that(TestGrammarVisitor.process) \
+        assert_that(self.process) \
             .raises(NoMatch) \
             .when_called_with(json_string, 'string"') \
             .starts_with("Expected ''' or '\"' at position")
@@ -518,7 +518,7 @@ class TestGrammarVisitor(TestCase):
             .contains_entry({'data': 'string'})
 
     def test_json_integer_0(self):
-        assert_that(TestGrammarVisitor.process) \
+        assert_that(self.process) \
             .raises(NoMatch) \
             .when_called_with(json_integer, '~other~') \
             .starts_with('Expected json_integer at position')
@@ -539,7 +539,7 @@ class TestGrammarVisitor(TestCase):
             .contains_entry({'data': -5})
 
     def test_json_real_0(self):
-        assert_that(TestGrammarVisitor.process) \
+        assert_that(self.process) \
             .raises(NoMatch) \
             .when_called_with(json_real, '~other~') \
             .starts_with('Expected json_real at position')
@@ -555,7 +555,7 @@ class TestGrammarVisitor(TestCase):
             .contains_entry({'data': 1.0E-2})
 
     def test_json_real_3(self):
-        assert_that(TestGrammarVisitor.process) \
+        assert_that(self.process) \
             .raises(NoMatch) \
             .when_called_with(json_real, '-5.') \
             .starts_with('Expected json_real at position')
@@ -566,13 +566,13 @@ class TestGrammarVisitor(TestCase):
             .contains_entry({'data': -5.0})
 
     def test_json_real_5(self):
-        assert_that(TestGrammarVisitor.process) \
+        assert_that(self.process) \
             .raises(NoMatch) \
             .when_called_with(json_real, '5') \
             .starts_with("Expected json_real at position")
 
     def test_json_array_0(self):
-        assert_that(TestGrammarVisitor.process) \
+        assert_that(self.process) \
             .raises(NoMatch) \
             .when_called_with(json_array, '~other~') \
             .starts_with("Expected '[' at position")
@@ -633,14 +633,14 @@ class TestGrammarVisitor(TestCase):
             .contains_entry({'data': ["string", -5, 0.123, {}, [], True, False, None, '$1Ab_']})
 
     def test_json_elements_0(self):
-        assert_that(TestGrammarVisitor.process) \
+        assert_that(self.process) \
             .raises(NoMatch) \
             .when_called_with(json_elements, '~other~') \
             .starts_with("Expected ''' or '\"' or json_real or json_integer or '{' or '[' or json_true or json_false "
                          "or json_null or variable at position")
 
     def test_json_elements_1(self):
-        assert_that(TestGrammarVisitor.process) \
+        assert_that(self.process) \
             .raises(NoMatch) \
             .when_called_with(json_elements, '') \
             .starts_with("Expected ''' or '\"' or json_real or json_integer or '{' or '[' or json_true or json_false "
@@ -697,7 +697,7 @@ class TestGrammarVisitor(TestCase):
             .contains_entry({'data': ["string", -5, 0.123, {}, [], True, False, None, '$1Ab_']})
 
     def test_json_true_0(self):
-        assert_that(TestGrammarVisitor.process) \
+        assert_that(self.process) \
             .raises(NoMatch) \
             .when_called_with(json_true, '~other~') \
             .starts_with('Expected json_true at position')
@@ -718,7 +718,7 @@ class TestGrammarVisitor(TestCase):
             .contains_entry({'data': True})
 
     def test_json_false_0(self):
-        assert_that(TestGrammarVisitor.process) \
+        assert_that(self.process) \
             .raises(NoMatch) \
             .when_called_with(json_false, '~other~') \
             .starts_with('Expected json_false at position')
@@ -739,7 +739,7 @@ class TestGrammarVisitor(TestCase):
             .contains_entry({'data': False})
 
     def test_json_null_0(self):
-        assert_that(TestGrammarVisitor.process) \
+        assert_that(self.process) \
             .raises(NoMatch) \
             .when_called_with(json_null, '~other~') \
             .starts_with('Expected json_null at position')

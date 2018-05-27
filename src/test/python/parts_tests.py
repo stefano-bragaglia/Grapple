@@ -8,7 +8,7 @@ from grapple.parsing.grammar import create_part, delete_part, match_part, remove
 from grapple.parsing.visitor import KnowledgeVisitor
 
 
-class TestParsing(TestCase):
+class TestPartsParsing(TestCase):
     def test_updating_part_0(self):
         assert_that(self.process) \
             .raises(NoMatch) \
@@ -21,16 +21,14 @@ class TestParsing(TestCase):
             .contains_entry({
             'data': {
                 'create_part': {
-                    'items': [
+                    'patterns': [
                         {
-                            'pattern': {
-                                'entity': '$pp',
-                                'node': {
-                                    'entity': '$p',
-                                    'labels': ['current'],
-                                    'properties': {
-                                        'key': 'value'
-                                    }
+                            'entity': '$pp',
+                            'node': {
+                                'entity': '$p',
+                                'labels': ['current'],
+                                'properties': {
+                                    'key': 'value'
                                 }
                             }
                         }
@@ -47,36 +45,34 @@ class TestParsing(TestCase):
             .contains_entry({
             'data': {
                 'create_part': {
-                    'items': [
+                    'patterns': [
                         {
-                            'pattern': {
-                                'node': {
-                                    'entity': '$p',
-                                    'labels': ['current'],
-                                    'properties': {
-                                        'key': 'value'
-                                    }
-                                },
-                                'chain': [
-                                    {
-                                        'relation': {
-                                            'direction': 'any',
-                                            'entity': '$p',
-                                            'types': ['current'],
-                                            'properties': {
-                                                'key': 'value'
-                                            }
-                                        },
-                                        'node': {
-                                            'entity': '$p',
-                                            'labels': ['current'],
-                                            'properties': {
-                                                'key': 'value'
-                                            }
+                            'node': {
+                                'entity': '$p',
+                                'labels': ['current'],
+                                'properties': {
+                                    'key': 'value'
+                                }
+                            },
+                            'chain': [
+                                {
+                                    'relation': {
+                                        'direction': 'any',
+                                        'entity': '$p',
+                                        'types': ['current'],
+                                        'properties': {
+                                            'key': 'value'
+                                        }
+                                    },
+                                    'node': {
+                                        'entity': '$p',
+                                        'labels': ['current'],
+                                        'properties': {
+                                            'key': 'value'
                                         }
                                     }
-                                ]
-                            }
+                                }
+                            ]
                         }
                     ]
                 }
@@ -92,48 +88,46 @@ class TestParsing(TestCase):
             .contains_entry({
             'data': {
                 'create_part': {
-                    'items': [
+                    'patterns': [
                         {
-                            'pattern': {
-                                'entity': '$pp',
-                                'node': {
-                                    'entity': '$p',
-                                    'labels': ['current'],
-                                    'properties': {
-                                        'key': 'value'
-                                    }
+
+                            'entity': '$pp',
+                            'node': {
+                                'entity': '$p',
+                                'labels': ['current'],
+                                'properties': {
+                                    'key': 'value'
                                 }
+
                             }
                         },
                         {
-                            'pattern': {
-                                'node': {
-                                    'entity': '$p',
-                                    'labels': ['current'],
-                                    'properties': {
-                                        'key': 'value'
-                                    }
-                                },
-                                'chain': [
-                                    {
-                                        'relation': {
-                                            'direction': 'any',
-                                            'entity': '$p',
-                                            'types': ['current'],
-                                            'properties': {
-                                                'key': 'value'
-                                            }
-                                        },
-                                        'node': {
-                                            'entity': '$p',
-                                            'labels': ['current'],
-                                            'properties': {
-                                                'key': 'value'
-                                            }
+                            'node': {
+                                'entity': '$p',
+                                'labels': ['current'],
+                                'properties': {
+                                    'key': 'value'
+                                }
+                            },
+                            'chain': [
+                                {
+                                    'relation': {
+                                        'direction': 'any',
+                                        'entity': '$p',
+                                        'types': ['current'],
+                                        'properties': {
+                                            'key': 'value'
+                                        }
+                                    },
+                                    'node': {
+                                        'entity': '$p',
+                                        'labels': ['current'],
+                                        'properties': {
+                                            'key': 'value'
                                         }
                                     }
-                                ]
-                            }
+                                }
+                            ]
                         }
                     ]
                 }
@@ -173,7 +167,7 @@ class TestParsing(TestCase):
                             'flags': ['label']
                         },
                         {
-                            'function': 'replace',
+                            'operator': '=',
                             'entity': '$rel',
                             'properties': {
                                 'key': 'value',
@@ -181,7 +175,7 @@ class TestParsing(TestCase):
                             }
                         },
                         {
-                            'function': 'assign',
+                            'operator': '+=',
                             'entity': '$rel',
                             'properties': {
                                 'key': 'value',
@@ -189,7 +183,7 @@ class TestParsing(TestCase):
                             }
                         },
                         {
-                            'function': 'assign',
+                            'operator': '=',
                             'entity': '$node',
                             'field': 'num',
                             'value': -0.123
@@ -242,16 +236,14 @@ class TestParsing(TestCase):
             .contains_entry({
             'data': {
                 'create_part': {
-                    'items': [
+                    'patterns': [
                         {
-                            'pattern': {
-                                'entity': '$pp',
-                                'node': {
-                                    'entity': '$p',
-                                    'labels': ['current'],
-                                    'properties': {
-                                        'key': 'value'
-                                    }
+                            'entity': '$pp',
+                            'node': {
+                                'entity': '$p',
+                                'labels': ['current'],
+                                'properties': {
+                                    'key': 'value'
                                 }
                             }
                         }
@@ -268,36 +260,34 @@ class TestParsing(TestCase):
             .contains_entry({
             'data': {
                 'create_part': {
-                    'items': [
+                    'patterns': [
                         {
-                            'pattern': {
-                                'node': {
-                                    'entity': '$p',
-                                    'labels': ['current'],
-                                    'properties': {
-                                        'key': 'value'
-                                    }
-                                },
-                                'chain': [
-                                    {
-                                        'relation': {
-                                            'direction': 'any',
-                                            'entity': '$p',
-                                            'types': ['current'],
-                                            'properties': {
-                                                'key': 'value'
-                                            }
-                                        },
-                                        'node': {
-                                            'entity': '$p',
-                                            'labels': ['current'],
-                                            'properties': {
-                                                'key': 'value'
-                                            }
+                            'node': {
+                                'entity': '$p',
+                                'labels': ['current'],
+                                'properties': {
+                                    'key': 'value'
+                                }
+                            },
+                            'chain': [
+                                {
+                                    'relation': {
+                                        'direction': 'any',
+                                        'entity': '$p',
+                                        'types': ['current'],
+                                        'properties': {
+                                            'key': 'value'
+                                        }
+                                    },
+                                    'node': {
+                                        'entity': '$p',
+                                        'labels': ['current'],
+                                        'properties': {
+                                            'key': 'value'
                                         }
                                     }
-                                ]
-                            }
+                                }
+                            ]
                         }
                     ]
                 }
@@ -313,48 +303,44 @@ class TestParsing(TestCase):
             .contains_entry({
             'data': {
                 'create_part': {
-                    'items': [
+                    'patterns': [
                         {
-                            'pattern': {
-                                'entity': '$pp',
-                                'node': {
-                                    'entity': '$p',
-                                    'labels': ['current'],
-                                    'properties': {
-                                        'key': 'value'
-                                    }
+                            'entity': '$pp',
+                            'node': {
+                                'entity': '$p',
+                                'labels': ['current'],
+                                'properties': {
+                                    'key': 'value'
                                 }
                             }
                         },
                         {
-                            'pattern': {
-                                'node': {
-                                    'entity': '$p',
-                                    'labels': ['current'],
-                                    'properties': {
-                                        'key': 'value'
-                                    }
-                                },
-                                'chain': [
-                                    {
-                                        'relation': {
-                                            'direction': 'any',
-                                            'entity': '$p',
-                                            'types': ['current'],
-                                            'properties': {
-                                                'key': 'value'
-                                            }
-                                        },
-                                        'node': {
-                                            'entity': '$p',
-                                            'labels': ['current'],
-                                            'properties': {
-                                                'key': 'value'
-                                            }
+                            'node': {
+                                'entity': '$p',
+                                'labels': ['current'],
+                                'properties': {
+                                    'key': 'value'
+                                }
+                            },
+                            'chain': [
+                                {
+                                    'relation': {
+                                        'direction': 'any',
+                                        'entity': '$p',
+                                        'types': ['current'],
+                                        'properties': {
+                                            'key': 'value'
+                                        }
+                                    },
+                                    'node': {
+                                        'entity': '$p',
+                                        'labels': ['current'],
+                                        'properties': {
+                                            'key': 'value'
                                         }
                                     }
-                                ]
-                            }
+                                }
+                            ]
                         }
                     ]
                 }
@@ -538,7 +524,7 @@ class TestParsing(TestCase):
                             'flags': ['label']
                         },
                         {
-                            'function': 'replace',
+                            'operator': '=',
                             'entity': '$rel',
                             'properties': {
                                 'key': 'value',
@@ -546,7 +532,7 @@ class TestParsing(TestCase):
                             }
                         },
                         {
-                            'function': 'assign',
+                            'operator': '+=',
                             'entity': '$rel',
                             'properties': {
                                 'key': 'value',
@@ -554,7 +540,7 @@ class TestParsing(TestCase):
                             }
                         },
                         {
-                            'function': 'assign',
+                            'operator': '=',
                             'entity': '$node',
                             'field': 'num',
                             'value': -0.123

@@ -9,7 +9,7 @@ from grapple.parsing.grammar import first, item, item_all, item_coalesce, item_h
 from grapple.parsing.visitor import KnowledgeVisitor
 
 
-class TestParsing(TestCase):
+class TestItemsParsing(TestCase):
     def test_items_00(self):
         assert_that(self.process(items, '*, coalesce($ent."key", -.123) AS name, keys($ent) AS name, '
                                         'properties($ent) AS name, id($ent) AS name, labels($ent) AS name, '

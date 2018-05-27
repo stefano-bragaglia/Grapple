@@ -24,14 +24,14 @@ def clauses():
 
 
 def clause():
-    return [clause_reading, clause_updating]
+    return [clause_read, clause_update]
 
 
-def clause_reading():
+def clause_read():
     return rule_part, Optional(match_parts), return_part
 
 
-def clause_updating():
+def clause_update():
     return rule_part, Optional(match_parts), update_parts, Optional(return_part)
 
 
@@ -65,6 +65,10 @@ def match_part():
 
 def remove_part():
     return key_remove, removable, ZeroOrMore(',', removable)
+
+
+def removable():
+    return [descriptor, selector]
 
 
 def set_part():
@@ -121,10 +125,6 @@ def details():
 
 
 # ----------------------------------------------------------------------------------------------------------------------
-def removable():
-    return [descriptor, selector]
-
-
 def selector():
     return entity, field
 

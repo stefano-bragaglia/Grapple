@@ -3,12 +3,12 @@ from unittest import TestCase
 from arpeggio import NoMatch, ParserPython, visit_parse_tree
 from assertpy import assert_that
 
-from grapple.parsing.grammar import assign_map, assign_value, descriptor, replace_map, settable, sortable, selector, \
-    removable
+from grapple.parsing.grammar import assign_map, assign_value, descriptor, removable, replace_map, selector, settable, \
+    sortable
 from grapple.parsing.visitor import KnowledgeVisitor
 
 
-class TestParsing(TestCase):
+class TestSortableParsing(TestCase):
     def test_removable_0(self):
         assert_that(self.process(removable, '$ent :flag1:flag2')) \
             .contains_only('data') \
@@ -53,7 +53,6 @@ class TestParsing(TestCase):
             .contains_only('data') \
             .contains_entry({'data': {'entity': '$ent', 'field': 'key'}})
 
-
     def test_settable_0(self):
         assert_that(self.process(settable, '$ent :flag1:flag2')) \
             .contains_only('data') \
@@ -62,25 +61,41 @@ class TestParsing(TestCase):
     def test_settable_1(self):
         assert_that(self.process(settable, '$ent += {value: -.123, string: "str"}')) \
             .contains_only('data') \
-            .contains_entry({'data': {
-            'function': 'replace',
-            'entity': '$ent',
-            'properties': {'value': -0.123, 'string': 'str'},
-        }})
+            .contains_entry({
+            'data': {
+                'operator': '=',
+                'entity': '$ent',
+                'properties': {
+                    'value': -0.123,
+                    'string': 'str'
+                }
+            }
+        })
 
     def test_settable_2(self):
         assert_that(self.process(settable, '$ent = {value: -.123, string: "str"}')) \
             .contains_only('data') \
-            .contains_entry({'data': {
-            'function': 'assign',
-            'entity': '$ent',
-            'properties': {'value': -0.123, 'string': 'str'},
-        }})
+            .contains_entry({
+            'data': {
+                'operator': '+=',
+                'entity': '$ent',
+                'properties': {
+                    'value': -0.123,
+                    'string': 'str'},
+            }
+        })
 
     def test_settable_3(self):
         assert_that(self.process(settable, '$ent."key" = -.123')) \
             .contains_only('data') \
-            .contains_entry({'data': {'function': 'assign', 'entity': '$ent', 'field': 'key', 'value': -0.123}})
+            .contains_entry({
+            'data': {
+                'operator': '=',
+                'entity': '$ent',
+                'field': 'key',
+                'value': -0.123
+            }
+        })
 
     def test_descriptor_0(self):
         assert_that(self.process) \
@@ -134,25 +149,35 @@ class TestParsing(TestCase):
     def test_replace_map_0(self):
         assert_that(self.process(replace_map, '$ent += {value: -.123, string: "str"}')) \
             .contains_only('data') \
-            .contains_entry({'data': {
-            'function': 'replace',
-            'entity': '$ent',
-            'properties': {'value': -0.123, 'string': 'str'},
-        }})
+            .contains_entry({
+            'data': {
+                'operator': '=',
+                'entity': '$ent',
+                'properties': {'value': -0.123, 'string': 'str'},
+            }
+        })
 
     def test_assign_map_0(self):
         assert_that(self.process(assign_map, '$ent = {value: -.123, string: "str"}')) \
             .contains_only('data') \
-            .contains_entry({'data': {
-            'function': 'assign',
-            'entity': '$ent',
-            'properties': {'value': -0.123, 'string': 'str'},
-        }})
+            .contains_entry({
+            'data': {
+                'operator': '+=',
+                'entity': '$ent',
+                'properties': {'value': -0.123, 'string': 'str'},
+            }
+        })
 
     def test_assign_value_0(self):
         assert_that(self.process(assign_value, '$ent."key" = -.123')) \
             .contains_only('data') \
-            .contains_entry({'data': {'function': 'assign', 'entity': '$ent', 'field': 'key', 'value': -0.123}})
+            .contains_entry({
+            'data': {
+                'operator': '=',
+                'entity': '$ent',
+                'field': 'key',
+                'value': -0.123}
+        })
 
     def test_sortable_000(self):
         assert_that(self.process) \

@@ -21,7 +21,7 @@ class KnowledgeVisitor(PTNodeVisitor):
     def visit_clause(self, node: Node, children: List) -> object:
         return {'data': children[0]['data']}
 
-    def visit_clause_reading(self, node: Node, children: List) -> object:
+    def visit_clause_read(self, node: Node, children: List) -> object:
         content = {}
         for child in children:
             content.update(child['data'])
@@ -39,7 +39,7 @@ class KnowledgeVisitor(PTNodeVisitor):
         return {'data': {'match_part': [child['data']['match_part'] for child in children]}}
 
     def visit_update_parts(self, node: Node, children: List) -> object:
-        return {'data': {'update_part': [child['data']['update_part'] for child in children]}}
+        return {'data': {'update_part': [child['data'] for child in children]}}
 
     def visit_update_part(self, node: Node, children: List) -> object:
         return {'data': children[0]['data']}
@@ -59,10 +59,10 @@ class KnowledgeVisitor(PTNodeVisitor):
     def visit_delete_part(self, node: Node, children: List) -> object:
         content = {'detach': False}
         if children[0] == {'data': 'DELETE'}:
-            content['entities'] = [child['data']['entity'] for child in children[1:]]
+            content['items'] = [child['data'] for child in children[1:]]
         else:
             content.update(children[0]['data'])
-            content['entities'] = [child['data']['entity'] for child in children[2:]]
+            content['items'] = [child['data'] for child in children[2:]]
 
         return {'data': {'delete_part': content}}
 
@@ -76,7 +76,7 @@ class KnowledgeVisitor(PTNodeVisitor):
         return {'data': {'match_part': content}}
 
     def visit_remove_part(self, node: Node, children: List) -> object:
-        return {'data': {'remove_part': {'patterns': [child['data'] for child in children[1:]]}}}
+        return {'data': {'remove_part': {'items': [child['data'] for child in children[1:]]}}}
 
     def visit_set_part(self, node: Node, children: List) -> object:
         return {'data': {'set_part': {'items': [child['data'] for child in children[1:]]}}}
@@ -174,21 +174,21 @@ class KnowledgeVisitor(PTNodeVisitor):
         return {'data': content}
 
     def visit_replace_map(self, node: Node, children: List) -> object:
-        content = {'function': 'replace'}
+        content = {'operator': '='}
         for child in children:
             content.update(child['data'])
 
         return {'data': content}
 
     def visit_assign_map(self, node: Node, children: List) -> object:
-        content = {'function': 'assign'}
+        content = {'operator': '+='}
         for child in children:
             content.update(child['data'])
 
         return {'data': content}
 
     def visit_assign_value(self, node: Node, children: List) -> object:
-        content = {'function': 'assign'}
+        content = {'operator': '='}
         for child in children:
             content.update(child['data'])
 
