@@ -13,9 +13,9 @@ class RulePart(object):
         if not self.description:
             content = 'RULE'
         else:
-            content = 'RULE "%s"' % json.dumps(self.description)
+            content = 'RULE ' + json.dumps(self.description)
         if self.salience > 0:
-            content += '\nSALIENCE %d' % self.salience
+            content += '\nSALIENCE ' + repr(self.salience)
 
         return content
 
@@ -27,7 +27,7 @@ class Node(object):
         self.properties = properties if properties else {}
 
     def __repr__(self) -> str:
-        types = ''.join(':%s' % repr(item) for item in self.labels)
+        types = ''.join(':%s' % item for item in self.labels)
         properties = json.dumps(self.properties) if self.properties else ''
         content = ' '.join(part for part in [self.parameter, types, properties] if part)
 
@@ -50,7 +50,7 @@ class Relation(object):
         self.properties = properties if properties else {}
 
     def __repr__(self) -> str:
-        types = ''.join(':%s' % repr(item) for item in self.types)
+        types = ''.join(':%s' % item for item in self.types)
         properties = json.dumps(self.properties) if self.properties else ''
         content = ' '.join(part for part in [self.parameter, types, properties] if part)
 
@@ -198,6 +198,96 @@ class DeletePart(object):
             return 'DELETE ' + ', '.join(repr(item) for item in self.entities)
 
 
+class Returnable(object):
+    def __init__(
+            self,
+            function: str = None,
+            entity: str = None,
+            field: str = None,
+            value: 'Value' = None,
+            synonym: str = None,
+    ):
+        self.function = function
+        self.entity = entity
+        self.field = field
+        self.value = value
+        self.synonym = synonym
+
+    def __repr__(self) -> str:
+        if self.entity:
+            if self.field:
+                selector = self.entity + '.' + self.field
+            else:
+                selector = self.entity
+        else:
+            selector = None
+        data = json.dumps(self.value)
+        if self.function is None:
+            content = selector if selector else data
+        elif self.function == '*':
+            return '*'
+        elif self.function == 'coalesce' and self.value:
+            content = '%s(%s, %s)' % (self.function, selector, data)
+        else:
+            content = '%s(%s)' % (self.function, selector)
+        if self.synonym:
+            content += ' AS ' + self.synonym
+
+        return content
+
+
+class Sortable(object):
+    def __init__(self, ascending: bool = True, parameter: str = None, property: str = None, name: str = None):
+        self.ascending = ascending
+        self.parameter = parameter
+        self.property = property
+        self.name = name
+
+    def __repr__(self) -> str:
+        if self.parameter:
+            if self.property:
+                content = self.parameter + '.' + self.property
+            else:
+                content = self.parameter
+        else:
+            content = self.name
+        if not self.ascending:
+            content += ' DESC'
+
+        return content
+
+
+class ReturnPart(object):
+    def __init__(
+            self,
+            distinct: bool = False,
+            items: List[Dict[str, object]] = None,
+            order_by: List[Dict[str, object]] = None,
+            skip: int = 0,
+            limit: int = 0,
+    ):
+        self.distinct = distinct
+        self.items = [Returnable(**data) for data in items] if items else []
+        self.order_by = [Sortable(**data) for data in order_by] if order_by else []
+        self.skip = skip
+        self.limit = limit
+
+    def __repr__(self) -> str:
+        content = 'RETURN'
+        if self.distinct:
+            content += ' DISTINCT'
+        if self.items:
+            content += ' ' + ',\n\t'.join(repr(item) for item in self.items)
+        if self.order_by:
+            content += '\nORDER BY ' + ',\n\t'.join(repr(sort) for sort in self.order_by)
+        if self.skip is not None and self.skip > 0:
+            content += '\nSKIP ' + repr(self.skip)
+        if self.limit is not None and self.limit > 0:
+            content += '\nLIMIT ' + repr(self.limit)
+
+        return content
+
+
 class Clause(object):
     def __init__(
             self,
@@ -209,24 +299,31 @@ class Clause(object):
         self.rule_part = RulePart(**rule_part)
         self.match_part = [MatchPart(**data) for data in match_part] if match_part else []
         self.update_part = []
-        for data in update_part:
-            if data.get('create_part', False):
-                self.update_part.append(CreatePart(**data['create_part']))
-            if data.get('remove_part', False):
-                self.update_part.append(RemovePart(**data['remove_part']))
-            if data.get('set_part', False):
-                self.update_part.append(SetPart(**data['set_part']))
-            if data.get('delete_part', False):
-                self.update_part.append(DeletePart(**data['delete_part']))
+        if update_part:
+            for data in update_part:
+                if data.get('create_part', False):
+                    self.update_part.append(CreatePart(**data['create_part']))
+                if data.get('remove_part', False):
+                    self.update_part.append(RemovePart(**data['remove_part']))
+                if data.get('set_part', False):
+                    self.update_part.append(SetPart(**data['set_part']))
+                if data.get('delete_part', False):
+                    self.update_part.append(DeletePart(**data['delete_part']))
         self.return_part = ReturnPart(**return_part) if return_part else None
 
     def __repr__(self) -> str:
-        # TODO to be completed
-        return '\n'.join(
-            repr(self.rule_part),
-            '\n'.join(repr(part) for part in self.match_part),
-            '\n'.join(repr(part) for part in self.match_part),
-        )
+        content = repr(self.rule_part)
+        if self.match_part:
+            for part in self.match_part:
+                content += '\n' + repr(part)
+        if self.update_part:
+            for part in self.update_part:
+                content += '\n' + repr(part)
+        if self.return_part:
+            content += '\n' + repr(self.return_part)
+        content += ';'
+
+        return content
 
 
 class RuleBase(object):
