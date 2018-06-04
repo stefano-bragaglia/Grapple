@@ -1,10 +1,10 @@
 from typing import List
 
 from grapple.tentative_engine.agenda import Agenda
-from grapple.tentative_engine.condition import IsNode, HasLabel, HasProperty, IsRelation, HasType, Condition, AreEqual
-from grapple.tentative_engine.descriptors import BaseDesc, RuleDesc, PathDesc, NodeDesc, RecordDesc, ReturnDesc, RelationDesc, \
-    Direction
-from grapple.tentative_engine.rete import Root, Alpha, Beta, Leaf
+from grapple.tentative_engine.condition import AreEqual, Condition, HasLabel, HasProperty, HasType, IsNode, IsRelation
+from grapple.tentative_engine.descriptors import BaseDesc, Direction, NodeDesc, PathDesc, RecordDesc, RelationDesc, \
+    ReturnDesc, RuleDesc
+from grapple.tentative_engine.rete import Alpha, Beta, Leaf, Root
 
 
 def node_conditions(node: NodeDesc) -> List[Condition]:

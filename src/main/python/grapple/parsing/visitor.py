@@ -476,9 +476,6 @@ class KnowledgeVisitor(PTNodeVisitor):
     def visit_key_create(self, node: Node, children: List) -> object:
         return {'data': 'CREATE'}
 
-    def visit_key_skip(self, node: Node, children: List) -> object:
-        return {'data': 'SKIP'}
-
     def visit_key_delete(self, node: Node, children: List) -> object:
         return {'data': 'DELETE'}
 

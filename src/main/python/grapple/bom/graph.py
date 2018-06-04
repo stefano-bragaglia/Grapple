@@ -9,6 +9,7 @@ class Graph(object):
     def __init__(self):
         self._pool = []
         self._nodes = {}
+        self._sessions = set()
         self._relations = {}
 
     @property
@@ -18,6 +19,15 @@ class Graph(object):
     @property
     def relations(self) -> List['Relation']:
         return list(self._relations.values())
+
+    def register(self, session: 'Session'):
+        if not session:
+            raise ValueError('Session is invalid')
+
+        self._sessions.add(session)
+
+    def unregister(self, session: 'Session'):
+        self._sessions.discard(session)
 
     def create_node(self) -> 'Node':
         ident = self.next_ident()

@@ -3,35 +3,76 @@ from typing import Set
 
 from arpeggio import ParserPython, visit_parse_tree
 
-from grapple.parsing.old_descriptors import Rule, RuleBase
+from grapple.parsing.descriptors import RuleBase
 from grapple.parsing.grammar import comment, cypher
+from grapple.parsing.rete import Agenda, Alfa, IsNone, Leaf, Return, Root
 from grapple.parsing.visitor import KnowledgeVisitor
 
 
 class Session(object):
+    def __init__(self, clauses: Set['Clause'], graph: 'Graph'):
+        self.agenda = Agenda()
+        self._graph = graph
+        self._root = Root()
 
-    def insert(self):
-        pass
+        if clauses:
+            table = {}
+            for clause in clauses:
+                if not clause.match_part:
+                    node = table.setdefault(None, Alfa(IsNone()).link(self._root))
+                else:
+                    continue
+                # create_part
+                # delete_part
+                # remove_part
+                # set_part
+                for item in clause.return_part.items:
+                    table.setdefault(item, Leaf(self.agenda, Return(item)).link(node))
+
+    def close(self):
+        self._graph.unregister(self)
+        self._graph = None
+
+    def insert(self, something):
+        if not something:
+            raise ValueError('This something is invalid')
+
+        self._root.insert(something)
 
     def fire_all(self):
+        if not self._graph:
+            raise ValueError('This session is closed')
+
+        self._root.insert(None)
+        while not self.agenda.is_empty():
+            activation = self.agenda.pop()
+            activation.execute()
 
 
-class Base(object):
-    def __init__(self, rules: Set[Rule]):
-        pass
+class KnowledgeBase(object):
+    def __init__(self, clauses: Set['Clause']):
+        if not clauses:
+            raise ValueError('No clause given')
+
+        self.clauses = clauses
 
     def get_session(self, graph: 'Graph') -> Session:
-        return None
+        if not self.clauses:
+            raise ValueError('This knowledge base is empty')
+
+        session = Session(self.clauses, graph)
+        graph.register(session)
+
+        return session
 
 
 class Builder(object):
-
     def __init__(self):
-        self._rules = set()
+        self.clauses = set()
 
     def load_from_base(self, base: 'RuleBase') -> 'Builder':
-        for rule in base:
-            self._rules.add(rule)
+        for rule in base.clauses:
+            self.clauses.add(rule)
 
         return self
 
@@ -39,7 +80,7 @@ class Builder(object):
         parser = ParserPython(cypher, comment_def=comment)
         parsed = parser.parse(content)
         visited = visit_parse_tree(parsed, KnowledgeVisitor())
-        base = RuleBase(visited['value'])
+        base = RuleBase(visited['data'])
         self.load_from_base(base)
 
         return self
@@ -52,5 +93,5 @@ class Builder(object):
 
         return self
 
-    def build(self) -> Base:
-        return Base(self._rules)
+    def build(self) -> KnowledgeBase:
+        return KnowledgeBase(self.clauses)
