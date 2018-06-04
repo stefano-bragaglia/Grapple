@@ -102,11 +102,38 @@ class Return(Action):
             print(content)
 
 
-class Payload(object):
-    def __init__(self):
-        self.table = {}
+class Path(object):
+    def __init__(self, node: 'Node'):
+        self.start = node
+        self.tail = []
 
-    def save(self, key: str, value: Union['Entity', 'Value']):  # Or Path?
+    def append(self, relation: 'Relation', node: 'Node'):
+        self.tail.append((relation, node))
+
+    def clone(self) -> 'Path':
+        result = Path(self.start)
+        for relation, node in self.tail:
+            result.append(relation, node)
+
+        return result
+
+
+class Payload(object):
+    @staticmethod
+    def create(node: 'Node') -> 'Payload':
+        return Payload(Path(node), {})
+
+    def __init__(self, path: Path, table: dict):
+        self.path = path
+        self.table = table
+
+    def clone(self) -> 'Payload':
+        return Payload(self.path.clone(), dict(self.table))
+
+    def append(self, relation: 'Relation', node: 'Node'):
+        self.path.append(relation, node)
+
+    def tag(self, key: str, value: Union['Entity', 'Value']):  # Or Path?
         self.table.setdefault(key, value)
 
 
