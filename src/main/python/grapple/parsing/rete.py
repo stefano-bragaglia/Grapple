@@ -1,5 +1,7 @@
 from typing import Optional, Union
 
+from grapple.bom.relation import Relation
+
 
 class Condition(object):
     @classmethod
@@ -126,12 +128,25 @@ class Payload(object):
     def __init__(self, path: Path, table: dict):
         self.path = path
         self.table = table
+        self.current = path.start
+        for relation, node in path.tail:
+            self.current = node
 
     def clone(self) -> 'Payload':
         return Payload(self.path.clone(), dict(self.table))
 
-    def append(self, relation: 'Relation', node: 'Node'):
-        self.path.append(relation, node)
+    def append(self, entity: 'Entity'):
+        if type(entity) is Relation:
+            self.current = entity
+        elif type(entity) is Node:
+            if type(self.current) is not Relation:
+                raise ValueError('This entity is invalid')
+            self.path.append(self.current, entity)
+            self.current = entity
+        else:
+            raise ValueError('This entity is invalid')
+
+        # self.path.append(relation, node)
 
     def tag(self, key: str, value: Union['Entity', 'Value']):  # Or Path?
         self.table.setdefault(key, value)
