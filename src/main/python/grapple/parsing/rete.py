@@ -15,6 +15,14 @@ class Tautology(Condition):
         return True
 
 
+class HasLabel(Condition):
+    def __init__(self, label: str):
+        self.label = label
+
+    def is_met_by(self, something) -> bool:
+        pass
+
+
 class IsNone(Condition):
     @classmethod
     def is_met_by(cls, something) -> bool:
@@ -157,7 +165,7 @@ class Node(object):
         self.condition = Tautology()
         self.memory = set()
 
-    def insert(self, something):
+    def insert(self, entity: 'Entity', payload: Payload):
         raise NotImplementedError
 
 
@@ -166,12 +174,12 @@ class Parent(Node):
         super().__init__()
         self.children = set()
 
-    def insert(self, something):
-        if something:
-            self.memory.add(something)
+    def insert(self, entity: 'Entity', payload: Payload):
+        if entity:
+            self.memory.add(entity)
 
         for child in self.children:
-            child.insert(something)
+            child.insert(entity, payload)
 
     def register(self, node: Node):
         if not node:
@@ -181,7 +189,7 @@ class Parent(Node):
 
 
 class Child(Node):
-    def insert(self, something):
+    def insert(self, entity: 'Entity', Payload: Payload):
         raise NotImplementedError
 
     def link(self, parent: Parent) -> 'Child':
@@ -209,9 +217,9 @@ class Leaf(Child):
         self.agenda = agenda
         self.action = action
 
-    def insert(self, something):
-        if something:
-            self.memory.add(something)
+    def insert(self, entity: 'Entity', payload: Payload):
+        if entity:
+            self.memory.add(entity)
 
-        activation = self.action.activate_with(something)
+        activation = self.action.activate_with(entity)
         self.agenda.add(activation)

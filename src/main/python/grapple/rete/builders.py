@@ -5,7 +5,7 @@ from arpeggio import ParserPython, visit_parse_tree
 
 from grapple.parsing.descriptors import RuleBase
 from grapple.parsing.grammar import comment, cypher
-from grapple.parsing.rete import Agenda, Alfa, IsNone, Leaf, Return, Root
+from grapple.parsing.rete import Agenda, Alfa, IsNone, Leaf, Payload, Return, Root
 from grapple.parsing.visitor import KnowledgeVisitor
 
 
@@ -33,17 +33,17 @@ class Session(object):
         self._graph.unregister(self)
         self._graph = None
 
-    def insert(self, something):
-        if not something:
-            raise ValueError('This something is invalid')
+    def insert(self, entity: 'Entity'):
+        if not entity:
+            raise ValueError('This entity is invalid')
 
-        self._root.insert(something)
+        self._root.insert(entity, Payload.create(entity))
 
     def fire_all(self):
         if not self._graph:
             raise ValueError('This session is closed')
 
-        self._root.insert(None)
+        self._root.insert(None, None)
         while not self.agenda.is_empty():
             activation = self.agenda.pop()
             activation.execute()
@@ -57,6 +57,9 @@ class KnowledgeBase(object):
         self.clauses = clauses
 
     def get_session(self, graph: 'Graph') -> Session:
+        if not graph:
+            raise ValueError('This graph is invalid')
+
         if not self.clauses:
             raise ValueError('This knowledge base is empty')
 

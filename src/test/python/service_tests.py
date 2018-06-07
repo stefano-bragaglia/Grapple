@@ -8,21 +8,28 @@ from grapple.rete.builders import Builder
 
 class TestService(TestCase):
 
-    def test_load_from_str_0(self):
+    def test_build_0(self):
         builder = Builder().load_from_str('')
         assert_that(builder.build) \
             .raises(ValueError) \
             .when_called_with() \
             .is_equal_to('No clause given')
 
-    def test_session_insert_0(self):
+    def test_get_session_0(self):
+        kb = Builder().load_from_str('RULE RETURN True').build()
+        assert_that(kb.get_session) \
+            .raises(ValueError) \
+            .when_called_with(None) \
+            .is_equal_to('This graph is invalid')
+
+    def test_insert_0(self):
         graph = Graph()
         kb = Builder().load_from_str('RULE RETURN True').build()
         session = kb.get_session(graph)
         assert_that(session.insert) \
             .raises(ValueError) \
             .when_called_with(None) \
-            .is_equal_to('This something is invalid')
+            .is_equal_to('This entity is invalid')
 
     def test_return_value_0(self):
         graph = Graph()
