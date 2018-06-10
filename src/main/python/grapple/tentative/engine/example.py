@@ -1,4 +1,4 @@
-from grapple.bom.graph import Graph
+from grapple.graph import Graph
 
 if __name__ == '__main__':
     g = Graph()

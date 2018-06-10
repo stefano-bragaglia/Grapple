@@ -3,9 +3,9 @@ from unittest import TestCase
 from arpeggio import NoMatch, ParserPython, visit_parse_tree
 from assertpy import assert_that
 
-from grapple.parsing.grammar import assign_map, assign_value, descriptor, removable, replace_map, selector, settable, \
+from grapple.grammar import assign_map, assign_value, descriptor, removable, replace_map, selector, settable, \
     sortable
-from grapple.parsing.visitor import KnowledgeVisitor
+from grapple.visitor import KnowledgeVisitor
 
 
 class TestSortableParsing(TestCase):

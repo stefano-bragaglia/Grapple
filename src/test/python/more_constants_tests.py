@@ -1,15 +1,12 @@
-import random
-import sys
 from unittest import TestCase
 
 from arpeggio import ParserPython, visit_parse_tree
 from assertpy import assert_that
 
-from grapple.parsing.grammar import func_coalesce, func_head, func_id, func_keys, func_labels, func_length, func_nodes, \
-    func_properties, func_relations, func_tail, func_types, json_false, json_integer, json_null, json_real, json_true, \
-    key_as, key_asc, key_ascending, key_by, key_create, key_delete, key_desc, key_descending, key_detach, key_distinct, \
+from grapple.grammar import func_coalesce, func_head, func_id, func_keys, func_labels, func_length, func_nodes, \
+    func_properties, func_relations, func_tail, func_types, key_as, key_asc, key_ascending, key_by, key_create, key_delete, key_desc, key_descending, key_detach, key_distinct, \
     key_limit, key_match, key_optional, key_order, key_remove, key_return, key_rule, key_salience, key_set, key_skip
-from grapple.parsing.visitor import KnowledgeVisitor
+from grapple.visitor import KnowledgeVisitor
 
 
 class TestParsing(TestCase):

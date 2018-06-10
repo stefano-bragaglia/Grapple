@@ -3,10 +3,10 @@ from unittest import TestCase
 from arpeggio import NoMatch, ParserPython, SemanticError, visit_parse_tree
 from assertpy import assert_that
 
-from grapple.parsing.grammar import asc, desc, description, entity, field, flag, identifier, is_detach, \
+from grapple.grammar import asc, desc, description, entity, field, flag, identifier, is_detach, \
     is_distinct, is_optional, labels, limit, name, parameter, properties, salience, skip, synonym, types, \
     value, variable
-from grapple.parsing.visitor import KnowledgeVisitor
+from grapple.visitor import KnowledgeVisitor
 
 
 class TestCommonParsing(TestCase):

@@ -1,13 +1,7 @@
-from enum import Enum
-
 from valid_model import Object
 from valid_model.descriptors import Dict, EmbeddedObject, Integer, List, String
 
-
-class Direction(Enum):
-    INCOMING = 1,
-    OUTGOING = 2,
-    ANY = 0
+from grapple.visitor import Direction
 
 
 class RelationDesc(Object):

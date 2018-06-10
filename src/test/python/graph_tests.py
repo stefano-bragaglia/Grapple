@@ -2,7 +2,7 @@ from unittest import TestCase
 
 from assertpy import assert_that
 
-from grapple.bom.graph import Graph
+from grapple.graph import Graph
 
 
 class TestGraph(TestCase):

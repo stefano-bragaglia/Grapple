@@ -1,8 +1,8 @@
 from arpeggio import PTNodeVisitor, ParserPython, visit_parse_tree
 
-from grapple.parsing.temp.grammar import comment
-from grapple.parsing.temp.grammar import knowledge
-from grapple.parsing.temp.support2 import Direction
+from grapple.tentative.parsing.grammar import comment
+from grapple.tentative.parsing.grammar import knowledge
+from grapple.tentative.parsing.support2 import Direction
 
 
 # noinspection PyMethodMayBeStatic

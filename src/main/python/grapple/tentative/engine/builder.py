@@ -2,8 +2,8 @@ from typing import List, Dict
 
 from arpeggio import visit_parse_tree
 
-from grapple.parsing.temp.grammar import parser
-from grapple.parsing.temp.visitors import GrammarVisitor
+from grapple.tentative.parsing.grammar import parser
+from grapple.tentative.parsing.visitors import GrammarVisitor
 
 
 class Builder(object):

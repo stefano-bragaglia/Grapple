@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from grapple.tentative_engine.activation import Activation
+from grapple.tentative.engine import Activation
 
 
 class Root(object):

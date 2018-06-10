@@ -2,8 +2,8 @@ from unittest import TestCase
 
 from assertpy import assert_that
 
-from grapple.bom.graph import Graph
-from grapple.rete.builders import Builder
+from grapple.graph import Graph
+from grapple.builders import Builder
 
 
 class TestService(TestCase):
@@ -38,3 +38,13 @@ class TestService(TestCase):
         session.fire_all()
         session.close()
         assert_that(session).is_not_none()
+        assert_that(session._graph).is_none()
+
+    def test_create_labels_0(self):
+        graph = Graph()
+        kb = Builder().load_from_str("RULE CREATE ($n:main:person{name: 'Stefano'}) RETURN labels($n) AS classes").build()
+        session = kb.get_session(graph)
+        session.fire_all()
+        session.close()
+        assert_that(session).is_not_none()
+

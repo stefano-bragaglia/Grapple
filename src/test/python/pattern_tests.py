@@ -3,9 +3,9 @@ from unittest import TestCase
 from arpeggio import NoMatch, ParserPython, visit_parse_tree
 from assertpy import assert_that
 
-from grapple.parsing.grammar import chain, details, dir_back, dir_both, dir_next, dir_none, node, pattern, relation, \
+from grapple.grammar import chain, details, dir_back, dir_both, dir_next, dir_none, node, pattern, relation, \
     start, step
-from grapple.parsing.visitor import KnowledgeVisitor
+from grapple.visitor import KnowledgeVisitor
 
 
 class TestPatternParsing(TestCase):

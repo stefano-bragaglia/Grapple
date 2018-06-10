@@ -1,17 +1,57 @@
-from typing import Optional, Union
+from typing import Optional
 
-from grapple.bom.relation import Relation
+from grapple.tentative.engine.descriptors import Direction
+
+
+class Path(object):
+    def __init__(self, node: 'Node'):
+        self.start = node
+        self.chain = []
+
+    def append(self, relation: 'Relation', node: 'Node'):
+        self.chain.append((relation, node))
+
+
+class Payload(object):
+    def __init__(self, node: 'Node'):
+        self._current = node
+        self._path = Path(node)
+        self.pattern = [self._path]
+
+    @property
+    def current(self) -> 'Entity':
+        return self._current
+
+    def append(self, entity: 'Entity'):
+        if type(self._current) is Node:
+            if type(entity) is Node:
+                # noinspection PyTypeChecker
+                self._path = Path(entity)
+
+        else:
+            if type(entity) is 'Relation':
+                raise ValueError('This entity is invalid')
+
+        self._current = entity
 
 
 class Condition(object):
+    @property
+    def signature(self) -> str:
+        raise NotImplementedError
+
     @classmethod
-    def is_met_by(cls, something) -> bool:
+    def is_met_by(cls, payload: 'Payload') -> bool:
         raise NotImplementedError
 
 
 class Tautology(Condition):
+    @property
+    def signature(self) -> str:
+        return 'TRUE'
+
     @classmethod
-    def is_met_by(cls, something) -> bool:
+    def is_met_by(cls, payload: 'Payload') -> bool:
         return True
 
 
@@ -19,11 +59,20 @@ class HasLabel(Condition):
     def __init__(self, label: str):
         self.label = label
 
-    def is_met_by(self, something) -> bool:
+    @property
+    def signature(self) -> str:
+        return 'has_label(%s)' % self.label
+
+    def is_met_by(self, payload: 'Payload') -> bool:
+        type(payload.current) is Node
         pass
 
 
 class IsNone(Condition):
+    @property
+    def signature(self) -> str:
+        return 'is_none()'
+
     @classmethod
     def is_met_by(cls, something) -> bool:
         return bool(something is None)
@@ -112,52 +161,42 @@ class Return(Action):
             print(content)
 
 
-class Path(object):
-    def __init__(self, node: 'Node'):
-        self.start = node
-        self.tail = []
+class Create(Action):
+    def __init__(self, graph: 'Graph', pattern: 'Pattern'):
+        self.graph = graph
+        self.pattern = pattern
 
-    def append(self, relation: 'Relation', node: 'Node'):
-        self.tail.append((relation, node))
+    def execute(self, something):
+        node = self._create_node(self.graph, self.pattern.node)
+        for step in self.pattern.chain:
+            temp = self._create_node(self.graph, step.node)
+            if step.relation.direction == Direction.INCOMING:
+                self._create_relation(temp, node, step.relation)
+            else:
+                self._create_relation(node, temp, step.relation)
+                node = temp
 
-    def clone(self) -> 'Path':
-        result = Path(self.start)
-        for relation, node in self.tail:
-            result.append(relation, node)
+    @staticmethod
+    def _create_node(graph, node):
+        result = graph.create_node()
+        for label in node.labels:
+            result.add_labels(label)
+        for key in node.properties:
+            value = node.properties[key]
+            result.set_property(key, value)
 
         return result
 
-
-class Payload(object):
     @staticmethod
-    def create(node: 'Node') -> 'Payload':
-        return Payload(Path(node), {})
+    def _create_relation(tail, head, relation):
+        result = tail.create_relation_to(head)
+        for type_ in relation.types:
+            result.add_types(type_)
+        for key in relation.properties:
+            value = relation.properties[key]
+            result.set_property(key, value)
 
-    def __init__(self, path: Path, table: dict):
-        self.path = path
-        self.table = table
-        self.current = path.start
-        for relation, node in path.tail:
-            self.current = node
-
-    def clone(self) -> 'Payload':
-        return Payload(self.path.clone(), dict(self.table))
-
-    def append(self, entity: 'Entity'):
-        if type(entity) is Relation:
-            self.current = entity
-        elif type(entity) is Node:
-            if type(self.current) is not Relation:
-                raise ValueError('This entity is invalid')
-            self.path.append(self.current, entity)
-            self.current = entity
-        else:
-            raise ValueError('This entity is invalid')
-
-        # self.path.append(relation, node)
-
-    def tag(self, key: str, value: Union['Entity', 'Value']):  # Or Path?
-        self.table.setdefault(key, value)
+        return result
 
 
 class Node(object):
@@ -165,7 +204,7 @@ class Node(object):
         self.condition = Tautology()
         self.memory = set()
 
-    def insert(self, entity: 'Entity', payload: Payload):
+    def insert(self, entity: 'Entity', payload: Payload, sender: 'Parent' = None):
         raise NotImplementedError
 
 
@@ -174,7 +213,7 @@ class Parent(Node):
         super().__init__()
         self.children = set()
 
-    def insert(self, entity: 'Entity', payload: Payload):
+    def insert(self, entity: 'Entity', payload: Payload, sender: 'Parent' = None):
         if entity:
             self.memory.add(entity)
 
@@ -189,7 +228,7 @@ class Parent(Node):
 
 
 class Child(Node):
-    def insert(self, entity: 'Entity', Payload: Payload):
+    def insert(self, entity: 'Entity', payload: Payload, sender: 'Parent' = None):
         raise NotImplementedError
 
     def link(self, parent: Parent) -> 'Child':
@@ -211,13 +250,18 @@ class Alfa(Parent, Child):
         self._condition = condition
 
 
+class Beta(Node):
+    def __init__(self):
+        super().__init__()
+
+
 class Leaf(Child):
     def __init__(self, agenda: Agenda, action: Action):
         super().__init__()
         self.agenda = agenda
         self.action = action
 
-    def insert(self, entity: 'Entity', payload: Payload):
+    def insert(self, entity: 'Entity', payload: Payload, sender: 'Parent' = None):
         if entity:
             self.memory.add(entity)
 

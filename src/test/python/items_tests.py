@@ -3,10 +3,10 @@ from unittest import TestCase
 from arpeggio import NoMatch, ParserPython, visit_parse_tree
 from assertpy import assert_that
 
-from grapple.parsing.grammar import first, item, item_all, item_coalesce, item_head, item_id, item_keys, item_labels, \
+from grapple.grammar import first, item, item_all, item_coalesce, item_head, item_id, item_keys, item_labels, \
     item_length, item_nodes, item_properties, item_relations, item_selector, item_tail, item_types, item_value, items, \
     order_by
-from grapple.parsing.visitor import KnowledgeVisitor
+from grapple.tentative.visitor import KnowledgeVisitor
 
 
 class TestItemsParsing(TestCase):

@@ -1,7 +1,7 @@
 import json
 from typing import Dict, List
 
-from grapple.tentative_engine.descriptors import Direction
+from grapple.tentative.engine.descriptors import Direction
 
 
 class RulePart(object):
@@ -202,6 +202,7 @@ class Returnable(object):
     def __init__(
             self,
             function: str = None,
+            parameter: str = None,
             entity: str = None,
             field: str = None,
             value: 'Value' = None,
@@ -209,6 +210,7 @@ class Returnable(object):
     ):
         self.function = function
         self.entity = entity
+        self.parameter = parameter
         self.field = field
         self.value = value
         self.synonym = synonym

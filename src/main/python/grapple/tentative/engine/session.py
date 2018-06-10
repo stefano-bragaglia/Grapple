@@ -1,6 +1,6 @@
 from typing import Optional, List
 
-from grapple.tentative_engine.agenda import Agenda
+from grapple.tentative.engine.agenda import Agenda
 
 
 class Session(object):

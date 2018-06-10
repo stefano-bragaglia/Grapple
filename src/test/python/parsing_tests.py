@@ -4,9 +4,9 @@ from unittest import TestCase
 from arpeggio import ParserPython, visit_parse_tree
 from assertpy import assert_that
 
-from grapple.parsing.grammar import comment, cypher
-from grapple.parsing.descriptors import RuleBase
-from grapple.parsing.visitor import KnowledgeVisitor
+from grapple.grammar import comment, cypher
+from grapple.descriptors import RuleBase
+from grapple.visitor import KnowledgeVisitor
 
 
 class TestParsing(TestCase):

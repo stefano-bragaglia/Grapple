@@ -1,8 +1,15 @@
+from enum import Enum
 from typing import List, Union
 
 from arpeggio import NonTerminal, PTNodeVisitor, SemanticError, Terminal
 
 Node = Union[Terminal, NonTerminal]
+
+
+class Direction(Enum):
+    INCOMING = 1,
+    OUTGOING = 2,
+    ANY = 0
 
 
 # noinspection PyMethodMayBeStatic

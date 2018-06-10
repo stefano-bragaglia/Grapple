@@ -3,10 +3,10 @@ from typing import Set
 
 from arpeggio import ParserPython, visit_parse_tree
 
-from grapple.parsing.descriptors import RuleBase
-from grapple.parsing.grammar import comment, cypher
-from grapple.parsing.rete import Agenda, Alfa, IsNone, Leaf, Payload, Return, Root
-from grapple.parsing.visitor import KnowledgeVisitor
+from grapple.descriptors import RuleBase, CreatePart
+from grapple.grammar import comment, cypher
+from grapple.rete import Agenda, Alfa, Create, IsNone, Leaf, Payload, Return, Root
+from grapple.visitor import KnowledgeVisitor
 
 
 class Session(object):
@@ -18,14 +18,24 @@ class Session(object):
         if clauses:
             table = {}
             for clause in clauses:
+                # match_part
                 if not clause.match_part:
                     node = table.setdefault(None, Alfa(IsNone()).link(self._root))
                 else:
                     continue
-                # create_part
-                # delete_part
-                # remove_part
-                # set_part
+                # update_part
+                for part in clause.update_part:
+                    # create_part
+                    if type(part) is CreatePart:
+
+
+
+                        for pattern in part.patterns:
+                            table.setdefault(pattern, Leaf(self.agenda, Create(self._graph, pattern)).link(node))
+                    # delete_part
+                    # remove_part
+                    # set_part
+                # return_part
                 for item in clause.return_part.items:
                     table.setdefault(item, Leaf(self.agenda, Return(item)).link(node))
 

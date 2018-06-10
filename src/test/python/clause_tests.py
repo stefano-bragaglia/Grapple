@@ -3,8 +3,8 @@ from unittest import TestCase
 from arpeggio import NoMatch, ParserPython, visit_parse_tree
 from assertpy import assert_that
 
-from grapple.parsing.grammar import clause, clause_read, clause_update, clauses, cypher
-from grapple.parsing.visitor import KnowledgeVisitor
+from grapple.grammar import clause, clause_read, clause_update, clauses, cypher
+from grapple.visitor import KnowledgeVisitor
 
 
 class TestClauseParsing(TestCase):

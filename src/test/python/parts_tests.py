@@ -3,9 +3,9 @@ from unittest import TestCase
 from arpeggio import NoMatch, ParserPython, visit_parse_tree
 from assertpy import assert_that
 
-from grapple.parsing.grammar import create_part, delete_part, match_part, remove_part, return_part, rule_part, set_part, \
+from grapple.grammar import create_part, delete_part, match_part, remove_part, return_part, rule_part, set_part, \
     update_part
-from grapple.parsing.visitor import KnowledgeVisitor
+from grapple.visitor import KnowledgeVisitor
 
 
 class TestPartsParsing(TestCase):
