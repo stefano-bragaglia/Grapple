@@ -1,6 +1,7 @@
+import json
 from typing import Optional
 
-from grapple.graph import Node
+from grapple.graph import Node, Relation
 from grapple.tentative.engine.descriptors import Direction
 
 
@@ -56,18 +57,6 @@ class Tautology(Condition):
         return True
 
 
-class HasLabel(Condition):
-    def __init__(self, label: str):
-        self.label = label
-
-    @property
-    def signature(self) -> str:
-        return 'has_label(%s)' % self.label
-
-    def is_met_by(self, payload: 'Payload' = None, other: 'Payload' = None) -> bool:
-        return payload and type(payload.current) is Node and self.label in payload.current.labels
-
-
 class IsNone(Condition):
     @property
     def signature(self) -> str:
@@ -76,6 +65,82 @@ class IsNone(Condition):
     @classmethod
     def is_met_by(cls, payload: 'Payload' = None, other: 'Payload' = None) -> bool:
         return bool(payload is None)
+
+
+class IsNode(Condition):
+    @property
+    def signature(self) -> str:
+        return '()'
+
+    def is_met_by(self, payload: Payload = None, other: Payload = None) -> bool:
+        return payload and type(payload.current) is Node
+
+
+class HasLabel(Condition):
+    def __init__(self, label: str):
+        self.label = label
+
+    @property
+    def signature(self) -> str:
+        return '(:%s)' % self.label
+
+    def is_met_by(self, payload: 'Payload' = None, other: 'Payload' = None) -> bool:
+        return payload and type(payload.current) is Node and self.label in payload.current.labels
+
+
+class IsRelation(Condition):
+    @property
+    def signature(self) -> str:
+        return '[]'
+
+    def is_met_by(self, payload: Payload = None, other: Payload = None) -> bool:
+        return payload and type(payload.current) is Relation
+
+
+class HasType(Condition):
+    def __init__(self, type_: str):
+        self.type_ = type_
+
+    @property
+    def signature(self) -> str:
+        return '[:%s]' % self.type_
+
+    def is_met_by(self, payload: 'Payload' = None, other: 'Payload' = None) -> bool:
+        return payload and type(payload.current) is Relation and self.type_ in payload.current.types
+
+
+class HasKey(Condition):
+    def __init__(self, key: str):
+        self.key = key
+
+    @property
+    def signature(self) -> str:
+        return '{%s}' % self.key
+
+    def is_met_by(self, payload: 'Payload' = None, other: 'Payload' = None) -> bool:
+        return payload and payload.current.has_property(self.key)
+
+
+class HasProperty(Condition):
+    def __init__(self, key: str, value: 'Value'):
+        self.key = key
+        self.value = value
+
+    @property
+    def signature(self) -> str:
+        return '{%s: %s}' % (self.key, json.dumps(self.value))
+
+    def is_met_by(self, payload: 'Payload' = None, other: 'Payload' = None) -> bool:
+        return payload and payload.current.get_property(self.key) == self.value
+
+
+class AreEqual(Condition):
+    @property
+    def signature(self) -> str:
+        return '=='
+
+    def is_met_by(self, payload: 'Payload' = None, other: 'Payload' = None) -> bool:
+        return payload and other and payload.current == other.current
 
 
 class Agenda(object):
