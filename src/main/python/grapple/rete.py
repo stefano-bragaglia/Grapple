@@ -1,5 +1,6 @@
 from typing import Optional
 
+from grapple.graph import Node
 from grapple.tentative.engine.descriptors import Direction
 
 
@@ -41,7 +42,7 @@ class Condition(object):
         raise NotImplementedError
 
     @classmethod
-    def is_met_by(cls, payload: 'Payload') -> bool:
+    def is_met_by(cls, payload: 'Payload' = None, other: 'Payload' = None) -> bool:
         raise NotImplementedError
 
 
@@ -51,7 +52,7 @@ class Tautology(Condition):
         return 'TRUE'
 
     @classmethod
-    def is_met_by(cls, payload: 'Payload') -> bool:
+    def is_met_by(cls, payload: 'Payload' = None, other: 'Payload' = None) -> bool:
         return True
 
 
@@ -63,9 +64,8 @@ class HasLabel(Condition):
     def signature(self) -> str:
         return 'has_label(%s)' % self.label
 
-    def is_met_by(self, payload: 'Payload') -> bool:
-        type(payload.current) is Node
-        pass
+    def is_met_by(self, payload: 'Payload' = None, other: 'Payload' = None) -> bool:
+        return payload and type(payload.current) is Node and self.label in payload.current.labels
 
 
 class IsNone(Condition):
@@ -74,8 +74,8 @@ class IsNone(Condition):
         return 'is_none()'
 
     @classmethod
-    def is_met_by(cls, something) -> bool:
-        return bool(something is None)
+    def is_met_by(cls, payload: 'Payload' = None, other: 'Payload' = None) -> bool:
+        return bool(payload is None)
 
 
 class Agenda(object):
@@ -199,71 +199,87 @@ class Create(Action):
         return result
 
 
-class Node(object):
+class Root(object):
     def __init__(self):
-        self.condition = Tautology()
+        self.children = set()
         self.memory = set()
 
-    def insert(self, entity: 'Entity', payload: Payload, sender: 'Parent' = None):
-        raise NotImplementedError
-
-
-class Parent(Node):
-    def __init__(self):
-        super().__init__()
-        self.children = set()
-
-    def insert(self, entity: 'Entity', payload: Payload, sender: 'Parent' = None):
-        if entity:
-            self.memory.add(entity)
+    def notify(self, payload: 'Payload' = None, sender: 'Parent' = None):
+        if payload:
+            self.memory.add(payload.current)
 
         for child in self.children:
-            child.insert(entity, payload)
-
-    def register(self, node: Node):
-        if not node:
-            raise ValueError('This node is invalid')
-
-        self.children.add(node)
+            child.notify(payload, self)
 
 
-class Child(Node):
-    def insert(self, entity: 'Entity', payload: Payload, sender: 'Parent' = None):
-        raise NotImplementedError
+class Alfa(object):
+    def __init__(self, condition: Condition, parent: 'Node'):
+        self.children = set()
+        self.condition = condition
+        self.memory = set()
+        self.parent = parent
 
-    def link(self, parent: Parent) -> 'Child':
-        parent.register(self)
-        return self
+        parent.children.add(self)
 
+    def notify(self, payload: 'Payload', sender: 'Parent' = None):
+        if self.condition and self.condition.is_met_by(payload):
+            self.memory.add(payload)
 
-class Root(Parent):
-    def __init__(self):
-        super().__init__()
-
-
-class Alfa(Parent, Child):
-    def __init__(self, condition: Condition):
-        super().__init__()
-        if not condition:
-            raise ValueError('This condition is invalid')
-
-        self._condition = condition
+            for child in self.children:
+                child.notify(payload, self)
 
 
-class Beta(Node):
-    def __init__(self):
-        super().__init__()
+class Beta(object):
+    def __init__(self, condition: Condition, parent_sx: 'Node', parent_dx: 'Node'):
+        self.children = set()
+        self.condition = condition
+        self.memory = set()
+        self.parent_sx = parent_sx
+        self.parent_dx = parent_dx
+
+        parent_sx.children.add(self)
+        parent_dx.children.add(self)
+
+    def notify(self, payload: 'Payload', sender: 'Parent' = None):
+        if sender == self.parent_sx:
+            for other in self.parent_dx.memory:
+                if self.condition and self.condition.is_met_by(payload, other):
+                    if other not in payload:
+                        temp = payload + other
+                    else:
+                        temp = payload
+                    self.memory.add(temp)
+
+                    for child in self.children:
+                        child.notify(temp, self)
+
+        elif sender == self.parent_dx:
+            for other in self.parent_sx.memory:
+                if self.condition and self.condition.is_met_by(other, payload):
+                    if payload not in other:
+                        temp = other + payload
+                    else:
+                        temp = other
+                    self.memory.add(temp)
+
+                    for child in self.children:
+                        child.notify(temp, self)
+
+        else:
+            raise ValueError('Unexpected sender: <%s>' % sender)
 
 
-class Leaf(Child):
-    def __init__(self, agenda: Agenda, action: Action):
-        super().__init__()
-        self.agenda = agenda
+class Leaf(object):
+    def __init__(self, action: Action, agenda: Agenda, parent: 'Node'):
         self.action = action
+        self.agenda = agenda
+        self.memory = set()
+        self.parent = parent
 
-    def insert(self, entity: 'Entity', payload: Payload, sender: 'Parent' = None):
-        if entity:
-            self.memory.add(entity)
+        parent.children.add(self)
 
-        activation = self.action.activate_with(entity)
+    def notify(self, payload: 'Payload', source: 'Parent' = None):
+        self.memory.add(payload)
+
+        activation = self.action.activate_with(payload)
         self.agenda.add(activation)

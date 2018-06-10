@@ -5,7 +5,7 @@ from arpeggio import ParserPython, visit_parse_tree
 
 from grapple.descriptors import RuleBase, CreatePart
 from grapple.grammar import comment, cypher
-from grapple.rete import Agenda, Alfa, Create, IsNone, Leaf, Payload, Return, Root
+from grapple.rete import Agenda, Alfa, Create, IsNone, Leaf, Payload, Return, Root, HasLabel
 from grapple.visitor import KnowledgeVisitor
 
 
@@ -20,24 +20,30 @@ class Session(object):
             for clause in clauses:
                 # match_part
                 if not clause.match_part:
-                    node = table.setdefault(None, Alfa(IsNone()).link(self._root))
+                    condition = IsNone()
+                    if condition.signature not in table:
+                        table[condition.signature] = Alfa(condition, self._root)
+                    node = table[condition.signature]
                 else:
                     continue
                 # update_part
                 for part in clause.update_part:
                     # create_part
+                    node = self._root
                     if type(part) is CreatePart:
-
-
-
+                        # for label in part.node.labels:
+                        #     condition = HasLabel(label)
+                        #     if condition.signature not in table:
+                        #         table[condition.signature] = Alfa(condition).link(node)
+                        #     # Still neda a Beta
                         for pattern in part.patterns:
-                            table.setdefault(pattern, Leaf(self.agenda, Create(self._graph, pattern)).link(node))
+                            table.setdefault(pattern, Leaf(Create(self._graph, pattern), self.agenda, node))
                     # delete_part
                     # remove_part
                     # set_part
                 # return_part
                 for item in clause.return_part.items:
-                    table.setdefault(item, Leaf(self.agenda, Return(item)).link(node))
+                    table.setdefault(item, Leaf(Return(item), self.agenda, node))
 
     def close(self):
         self._graph.unregister(self)
@@ -47,13 +53,13 @@ class Session(object):
         if not entity:
             raise ValueError('This entity is invalid')
 
-        self._root.insert(entity, Payload.create(entity))
+        self._root.notify(Payload.create(entity), None)
 
     def fire_all(self):
         if not self._graph:
             raise ValueError('This session is closed')
 
-        self._root.insert(None, None)
+        self._root.notify(None, None)
         while not self.agenda.is_empty():
             activation = self.agenda.pop()
             activation.execute()
