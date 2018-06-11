@@ -5,8 +5,9 @@ from arpeggio import ParserPython, visit_parse_tree
 
 from grapple.descriptors import RuleBase, CreatePart
 from grapple.grammar import comment, cypher
-from grapple.rete import Agenda, Alfa, Create, IsNone, Leaf, Payload, Return, Root, HasLabel
-from grapple.visitor import KnowledgeVisitor
+from grapple.rete import Agenda, Alfa, Create, IsNone, Leaf, Payload, Return, Root, HasLabel, Beta, AreEqual, \
+    HasProperty, HasHead, HasTail
+from grapple.visitor import KnowledgeVisitor, Direction
 
 
 class Session(object):
@@ -29,21 +30,41 @@ class Session(object):
                 # update_part
                 for part in clause.update_part:
                     # create_part
-                    node = self._root
                     if type(part) is CreatePart:
-                        # for label in part.node.labels:
-                        #     condition = HasLabel(label)
-                        #     if condition.signature not in table:
-                        #         table[condition.signature] = Alfa(condition).link(node)
-                        #     # Still neda a Beta
                         for pattern in part.patterns:
-                            table.setdefault(pattern, Leaf(Create(self._graph, pattern), self.agenda, node))
+                            previous = None
+                            for condition in pattern.node.get_conditions():
+                                current = table.setdefault(condition.signature, Alfa(condition, self._root))
+                                previous = Beta(AreEqual(), previous, node) if previous else current
+
+                            for step in pattern.chain:
+                                relation = None
+                                for condition in step.relation.get_conditions():
+                                    current = table.setdefault(condition.signature, Alfa(condition, self._root))
+                                    relation = Beta(AreEqual(), relation, node) if relation else current
+                                if step.relation.direction == Direction.INCOMING:
+                                    previous = Beta(HasHead(), previous, relation)
+                                else:
+                                    previous = Beta(HasTail(), previous, relation)
+
+                                node = None
+                                for condition in step.node.get_conditions():
+                                    current = table.setdefault(condition.signature, Alfa(condition, self._root))
+                                    node = Beta(AreEqual(), node, node) if node else current
+                                if step.relation.direction == Direction.INCOMING:
+                                    previous = Beta(HasTail(), previous, node)
+                                else:
+                                    previous = Beta(HasHead(), previous, node)
+                            for item in clause.return_part.items:
+                                table.setdefault(repr(item), Leaf(Return(item), self.agenda, node))
+
+                            table.setdefault(repr(pattern), Leaf(Create(self._graph, pattern), self.agenda, node))
                     # delete_part
                     # remove_part
                     # set_part
                 # return_part
                 for item in clause.return_part.items:
-                    table.setdefault(item, Leaf(Return(item), self.agenda, node))
+                    table.setdefault(repr(item), Leaf(Return(item), self.agenda, node))
 
     def close(self):
         self._graph.unregister(self)

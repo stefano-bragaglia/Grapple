@@ -18,6 +18,7 @@ class Payload(object):
     def __init__(self, node: 'Node'):
         self._current = node
         self._path = Path(node)
+        self._table = {}
         self.pattern = [self._path]
 
     @property
@@ -35,6 +36,9 @@ class Payload(object):
                 raise ValueError('This entity is invalid')
 
         self._current = entity
+
+    def get(self, param: str) -> Optional['Entity']:
+        return self._table.get(param)
 
 
 class Condition(object):
@@ -143,6 +147,32 @@ class AreEqual(Condition):
         return payload and other and payload.current == other.current
 
 
+class HasTail(Condition):
+    @property
+    def signature(self) -> str:
+        return '()-->'
+
+    @classmethod
+    def is_met_by(cls, payload: 'Payload' = None, other: 'Payload' = None) -> bool:
+        if not payload or not other or type(payload.current) is not Relation or type(other.current) is not Node:
+            return False
+
+        return payload.current.tail == other.current
+
+
+class HasHead(Condition):
+    @property
+    def signature(self) -> str:
+        return '-->()'
+
+    @classmethod
+    def is_met_by(cls, payload: 'Payload' = None, other: 'Payload' = None) -> bool:
+        if not payload or not other or type(payload.current) is not Relation or type(other.current) is not Node:
+            return False
+
+        return payload.current.head == other.current
+
+
 class Agenda(object):
     def __init__(self):
         self._index = {}
@@ -175,10 +205,10 @@ class Activation(object):
 
 
 class Action(object):
-    def activate_with(self, something) -> Activation:
-        return Activation(something, self)
+    def activate_with(self, payload: Payload) -> Activation:
+        return Activation(payload, self)
 
-    def execute(self, something):
+    def execute(self, payload: Payload):
         raise NotImplementedError
 
 
@@ -186,7 +216,7 @@ class Return(Action):
     def __init__(self, item: 'Returnable'):
         self.item = item
 
-    def execute(self, something):
+    def execute(self, payload: Payload):
         content = None
         if self.item.function == '*':
             pass
@@ -199,7 +229,11 @@ class Return(Action):
         elif self.item.function == 'keys':
             pass
         elif self.item.function == 'labels':
-            pass
+            entity = payload.get(self.item.parameter)
+            if entity and type(entity) is Node:
+                content = '[%s]' % ', '.join(entity.labels)
+            else:
+                content = None
         elif self.item.function == 'length':
             pass
         elif self.item.function == 'nodes':
@@ -269,7 +303,7 @@ class Root(object):
         self.children = set()
         self.memory = set()
 
-    def notify(self, payload: 'Payload' = None, sender: 'Parent' = None):
+    def notify(self, payload: 'Payload' = None, sender=None):
         if payload:
             self.memory.add(payload.current)
 
@@ -278,7 +312,7 @@ class Root(object):
 
 
 class Alfa(object):
-    def __init__(self, condition: Condition, parent: 'Node'):
+    def __init__(self, condition: Condition, parent):
         self.children = set()
         self.condition = condition
         self.memory = set()
@@ -286,7 +320,7 @@ class Alfa(object):
 
         parent.children.add(self)
 
-    def notify(self, payload: 'Payload', sender: 'Parent' = None):
+    def notify(self, payload: 'Payload', sender=None):
         if self.condition and self.condition.is_met_by(payload):
             self.memory.add(payload)
 
@@ -295,7 +329,7 @@ class Alfa(object):
 
 
 class Beta(object):
-    def __init__(self, condition: Condition, parent_sx: 'Node', parent_dx: 'Node'):
+    def __init__(self, condition: Condition, parent_sx, parent_dx):
         self.children = set()
         self.condition = condition
         self.memory = set()
@@ -305,7 +339,7 @@ class Beta(object):
         parent_sx.children.add(self)
         parent_dx.children.add(self)
 
-    def notify(self, payload: 'Payload', sender: 'Parent' = None):
+    def notify(self, payload: 'Payload', sender=None):
         if sender == self.parent_sx:
             for other in self.parent_dx.memory:
                 if self.condition and self.condition.is_met_by(payload, other):
@@ -335,7 +369,7 @@ class Beta(object):
 
 
 class Leaf(object):
-    def __init__(self, action: Action, agenda: Agenda, parent: 'Node'):
+    def __init__(self, action: Action, agenda: Agenda, parent):
         self.action = action
         self.agenda = agenda
         self.memory = set()
@@ -343,7 +377,7 @@ class Leaf(object):
 
         parent.children.add(self)
 
-    def notify(self, payload: 'Payload', source: 'Parent' = None):
+    def notify(self, payload: 'Payload', source=None):
         self.memory.add(payload)
 
         activation = self.action.activate_with(payload)

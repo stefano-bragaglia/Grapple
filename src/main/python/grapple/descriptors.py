@@ -1,6 +1,7 @@
 import json
-from typing import Dict, List
+from typing import Dict, List, Set
 
+from grapple.rete import HasLabel, HasProperty, HasType
 from grapple.tentative.engine.descriptors import Direction
 
 
@@ -36,6 +37,15 @@ class Node(object):
     def __getitem__(self, index: int) -> str:
         return self.labels[index]
 
+    def get_conditions(self) -> Set['Condition']:
+        conditions = set()
+        for label in self.labels:
+            conditions.add(HasLabel(label))
+        for key, value in self.properties.items():
+            conditions.add(HasProperty(key, value))
+
+        return conditions
+
 
 class Relation(object):
     def __init__(self, direction: str, entity: str = None, types: List[str] = None, properties: Dict = None):
@@ -63,6 +73,15 @@ class Relation(object):
 
     def __getitem__(self, index: int) -> str:
         return self.types[index]
+
+    def get_conditions(self) -> Set['Condition']:
+        conditions = set()
+        for type_ in self.types:
+            conditions.add(HasType(type_))
+        for key, value in self.properties.items():
+            conditions.add(HasProperty(key, value))
+
+        return conditions
 
 
 class Step(object):
