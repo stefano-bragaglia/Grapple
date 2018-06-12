@@ -37,6 +37,9 @@ class Node(object):
     def __getitem__(self, index: int) -> str:
         return self.labels[index]
 
+    def has_conditions(self) -> bool:
+        return bool(self.labels) or bool(self.properties)
+
     def get_conditions(self) -> Set['Condition']:
         conditions = set()
         for label in self.labels:
@@ -73,6 +76,9 @@ class Relation(object):
 
     def __getitem__(self, index: int) -> str:
         return self.types[index]
+
+    def has_conditions(self) -> bool:
+        return bool(self.types) or bool(self.properties)
 
     def get_conditions(self) -> Set['Condition']:
         conditions = set()

@@ -1,13 +1,13 @@
 import os
-from typing import Set
+from typing import Dict, Set
 
 from arpeggio import ParserPython, visit_parse_tree
 
-from grapple.descriptors import RuleBase, CreatePart
+from grapple.descriptors import CreatePart, RuleBase
 from grapple.grammar import comment, cypher
-from grapple.rete import Agenda, Alfa, Create, IsNone, Leaf, Payload, Return, Root, HasLabel, Beta, AreEqual, \
-    HasProperty, HasHead, HasTail
-from grapple.visitor import KnowledgeVisitor, Direction
+from grapple.rete import Agenda, Alfa, AreEqual, Beta, Create, HasHead, HasTail, IsNode, IsNone, Leaf, Payload, Return, \
+    Root, IsRelation
+from grapple.visitor import Direction, KnowledgeVisitor
 
 
 class Session(object):
@@ -15,17 +15,18 @@ class Session(object):
         self.agenda = Agenda()
         self._graph = graph
         self._root = Root()
+        self._table = {}
 
         if clauses:
-            table = {}
             for clause in clauses:
                 # match_part
+                matched = None
                 if not clause.match_part:
                     condition = IsNone()
-                    if condition.signature not in table:
-                        table[condition.signature] = Alfa(condition, self._root)
-                    node = table[condition.signature]
+                    matched = table.setdefault(condition.signature, Alfa(condition, self._root))
                 else:
+                    for pattern in clause.match_part.patterns:
+
                     continue
                 # update_part
                 for part in clause.update_part:
@@ -56,15 +57,52 @@ class Session(object):
                                 else:
                                     previous = Beta(HasHead(), previous, node)
                             for item in clause.return_part.items:
-                                table.setdefault(repr(item), Leaf(Return(item), self.agenda, node))
+                                table.setdefault(repr(item), Leaf(Return(item), self.agenda, previous))
 
-                            table.setdefault(repr(pattern), Leaf(Create(self._graph, pattern), self.agenda, node))
+                            table.setdefault(repr(pattern), Leaf(Create(self._graph, pattern), self.agenda, previous))
                     # delete_part
                     # remove_part
                     # set_part
                 # return_part
                 for item in clause.return_part.items:
                     table.setdefault(repr(item), Leaf(Return(item), self.agenda, node))
+
+    def _build_pattern(self, pattern: 'Pattern'):
+        if not pattern.node.has_conditions():
+            node = self._build_node(IsNode())
+        else:
+            node = None
+            for condition in pattern.node.get_conditions():
+                node = self._build_node(condition, node)
+
+        for step in pattern.chain:
+            if step.relation.has_conditions():
+                relation = self._build_node(IsRelation())
+            else:
+                relation = None
+                for condition in step.relation.get_conditions():
+                    relation = self._build_node(condition, relation)
+
+            if step.relation.direction == Direction.INCOMING:
+                current = Beta(HasHead(), node, relation)
+            else:
+                current = Beta(HasTail(), node, relation)
+
+            if step.node.has_conditions():
+                node = self._build_node(IsNode())
+            else:
+                node = None
+                for condition in step.node.get_conditions():
+                    node = self._build_node(condition, node)
+
+            if step.relation.direction == Direction.INCOMING:
+                previous = Beta(HasTail(), relation, node)
+            else:
+                previous = Beta(HasHead(), relation, node)
+
+    def _build_node(self, condition: 'Condition', current=None) -> object:
+        node = self._table.setdefault(condition.signature, Alfa(condition, self._root))
+        return Beta(AreEqual(), current, node) if current else node
 
     def close(self):
         self._graph.unregister(self)

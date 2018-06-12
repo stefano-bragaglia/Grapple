@@ -265,7 +265,7 @@ class Create(Action):
         self.graph = graph
         self.pattern = pattern
 
-    def execute(self, something):
+    def execute(self, payload: Payload):
         node = self._create_node(self.graph, self.pattern.node)
         for step in self.pattern.chain:
             temp = self._create_node(self.graph, step.node)
